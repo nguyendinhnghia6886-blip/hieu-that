@@ -1,0 +1,5 @@
+node_modules
+.git
+.sites-runtime
+qa-output
+package-lock.json

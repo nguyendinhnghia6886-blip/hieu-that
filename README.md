@@ -1,3 +1,78 @@
 # Hiểu Thật
 
-Website hỗ trợ học Toán 10 với bài học dạng slide, luyện tập, giao bài và chatbot Bạn Hiểu.
+Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.2.2 tổ chức lại mã nguồn thành các file theo chức năng.
+
+## Chạy trên máy
+
+Cài Node.js 22 trở lên, mở terminal trong thư mục dự án:
+
+```sh
+npm ci
+npm start
+```
+
+Mở **http://127.0.0.1:4174/**. Website dùng ES modules, cần chạy qua máy chủ thay vì mở `index.html` trực tiếp. Chỉ chạy website thì không cần các thư viện phát triển; `npm ci` cài chúng để kiểm tra và định dạng mã.
+
+## Chức năng hiện có
+
+- 3 bài học, 15 slide, đường tròn lượng giác tương tác, trình chiếu và điều khiển bàn phím.
+- Luyện tập, xác minh, vận dụng, lưu căn cứ và tiến độ trên trình duyệt.
+- Giáo viên soạn câu trắc nghiệm/tự luận, nhập văn bản, OCR ảnh và duyệt câu hỏi trước khi giao.
+- Giao bài từ câu đã duyệt, chia sẻ bằng liên kết, lưu nháp bài làm và nhận xét trên thiết bị.
+- Hồ sơ học sinh/giáo viên trải nghiệm; mã giáo viên được nhập lúc đầu hoặc bổ sung sau.
+- Chatbot nổi Bạn Hiểu giữ hội thoại khi chuyển trang, có gợi ý soạn sẵn và tùy chọn gọi Ollama cục bộ.
+- Xuất/nhập dữ liệu JSON; giao diện máy tính và điện thoại.
+
+## Ollama
+
+Ollama và `qwen2.5:3b` đã được cài và thử phản hồi thật trên máy phát triển ngày 24/10/2026. Máy khác cần tự cài Ollama và tải model:
+
+```sh
+ollama pull qwen2.5:3b
+```
+
+Mở Bạn Hiểu → **Kết nối Ollama** → **Kiểm tra model trên máy** → chọn model. Lựa chọn AI được bật cho phiên trang hiện tại; sau khi tải lại cần chọn lại. Xem [hướng dẫn Ollama](dist/OLLAMA.md).
+
+Máy chủ website chỉ lắng nghe `127.0.0.1:4174`, gọi Ollama tại `127.0.0.1:11434`. Model có thể trả lời sai Toán; cần kiểm tra lời giải. Chat trong bài và OCR vẫn dùng luồng hỗ trợ có sẵn. Model Ollama không nằm trong kho mã nguồn.
+
+## Cấu trúc mã nguồn
+
+```text
+dist/
+  app.js                 Khởi tạo, trạng thái, điều hướng và sự kiện chính
+  workspace.js           Điều khiển soạn bài, giao bài, hồ sơ, OCR và bản nháp
+  learning.js            Điểm nhập chung cho nội dung và đánh giá
+  content/               Bài học, câu hỏi, câu xác minh, vận dụng, nhãn
+  learning/evidence.js   Quy tắc chọn câu xác minh và tổng hợp căn cứ
+  views/                 HTML theo màn hình học sinh, luyện tập, giáo viên, soạn bài
+  ui/                    Biểu tượng, escape HTML, ngày tháng, hình minh họa
+  styles/                CSS nền, điều hướng, bài học, luyện tập, responsive
+  styles.css             Nạp CSS theo đúng thứ tự hiển thị
+  authoring.js           Kiểm tra đề, tách câu và mã hóa bài chia sẻ
+  companion*.js/.css     Chatbot Bạn Hiểu và gợi ý cục bộ
+  ollama-client.js       Giao diện chọn model và gửi chat
+server.mjs               Máy chủ nội bộ phục vụ website
+ollama-server.mjs        Adapter API Ollama, kiểm tra origin và giới hạn yêu cầu
+verify*.mjs              Bộ kiểm thử chức năng, dữ liệu và trạng thái
+scripts/check.mjs        Kiểm tra cú pháp tất cả các file JavaScript
+.github/workflows/      Kiểm tra tự động khi push hoặc tạo pull request
+```
+
+Xem [hướng dẫn sửa mã](docs/CAU-TRUC-MA.md) để tìm đúng file khi thêm tính năng.
+
+## Kiểm tra và định dạng
+
+```sh
+npm run check
+npm run lint
+npm test
+npm run format
+```
+
+`?qa=1` trên `127.0.0.1` sử dụng vùng lưu trữ kiểm thử riêng. Thư mục `dist` chứa mã nguồn website có thể sửa trực tiếp; không có bước build.
+
+## Dữ liệu và triển khai
+
+Dữ liệu học tập được giữ trong `localStorage`; không nằm trong Git. Hồ sơ là trải nghiệm cục bộ, chưa có xác thực Google/Facebook/OTP, phân quyền thực hoặc đồng bộ lớp học nhiều thiết bị. OCR dùng Tesseract.js và cần mạng để tải lần đầu. Font có phương án dự phòng.
+
+Triển khai riêng `dist/` chỉ có website tĩnh và gợi ý có sẵn. Ollama cần máy chủ Node đang chạy cùng model; tải mã lên GitHub không tự triển khai AI lên website công khai. Xem [hướng dẫn kết nối dịch vụ](dist/HUONG-DAN-KET-NOI.md).

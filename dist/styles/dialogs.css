@@ -1,0 +1,100 @@
+/* Dialogs and feedback */
+.modal-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #173e2c55;
+  backdrop-filter: blur(4px);
+  animation: page-in 0.18s ease;
+}
+.modal {
+  width: 100%;
+  max-width: 490px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid #e4eddf;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 20px 80px #163d2b1a;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 23px 26px 18px;
+  border-bottom: 1px solid #edf2e7;
+}
+.modal-header h2 {
+  font-size: 21px;
+}
+.modal-body {
+  padding: 24px 26px;
+  color: #829773;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.modal-body p + p {
+  margin-top: 12px;
+}
+.modal-body .field:last-child {
+  margin-bottom: 0;
+}
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 26px;
+  border-top: 1px solid #edf2e7;
+}
+.toast {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: 27px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 13px 21px;
+  border: 1px solid #51775a;
+  border-radius: 11px;
+  background: #244e37;
+  color: #edf8e9;
+  box-shadow: 0 6px 25px #183e2922;
+  font-size: 12px;
+  text-align: center;
+  animation: toast-in 0.22s ease both;
+}
+.toast svg {
+  width: 17px;
+  height: 17px;
+  color: #b5d5a2;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "hieu-that",
+  "version": "2.2.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test verify.mjs verify-workspace.mjs verify-workspace-state.mjs verify-companion.mjs verify-companion-state.mjs verify-ollama.mjs verify-views.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10"
+  }
+}

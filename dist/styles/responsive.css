@@ -1,0 +1,990 @@
+/* Responsive layouts */
+@media (min-width: 1600px) {
+  .page-content {
+    padding-top: 42px;
+  }
+  .hero-card {
+    min-height: 310px;
+    padding: 34px;
+  }
+  .hero-copy h2 {
+    font-size: 35px;
+  }
+  .hero-copy > p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 1250px) {
+  .page-content {
+    padding: 29px 28px 22px;
+  }
+  .topbar {
+    padding: 0 28px;
+  }
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1.85fr) 255px;
+    gap: 18px;
+  }
+  .hero-card {
+    padding: 26px;
+  }
+  .hero-copy {
+    width: 67%;
+  }
+  .hero-visual {
+    right: -8px;
+    width: 41%;
+  }
+  .hero-copy h2 {
+    font-size: 28px;
+  }
+  .hero-bottom > span {
+    display: none;
+  }
+  .dashboard-bottom {
+    gap: 20px;
+  }
+  .lesson-row {
+    padding: 15px 13px;
+    gap: 11px;
+  }
+  .lesson-progress {
+    width: 65px;
+  }
+  .stat-item {
+    padding: 0 19px;
+    gap: 11px;
+  }
+  .insight-card {
+    padding: 22px;
+  }
+  .practice-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 18px;
+  }
+  .practice-card {
+    padding: 24px;
+  }
+  .slide-content {
+    padding: 34px 28px;
+    gap: 20px;
+  }
+  .slide-workspace {
+    grid-template-columns: 185px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .course-body {
+    padding: 18px;
+  }
+  .course-footer {
+    padding: 15px 18px;
+  }
+}
+@media (max-width: 1100px) {
+  :root {
+    --sidebar-width: 210px;
+  }
+  .sidebar {
+    padding: 29px 16px 19px;
+  }
+  .sidebar-brand {
+    margin-left: 6px;
+    gap: 8px;
+  }
+  .brand-name {
+    font-size: 21px;
+  }
+  .brand-mark,
+  .brand-mark svg {
+    width: 32px;
+  }
+  .brand-sub {
+    font-size: 7px;
+  }
+  .nav-item {
+    gap: 10px;
+    font-size: 11px;
+  }
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1fr) 237px;
+    gap: 16px;
+  }
+  .hero-copy h2 {
+    font-size: 25px;
+  }
+  .hero-copy {
+    width: 74%;
+  }
+  .hero-visual {
+    width: 39%;
+    right: -14px;
+    opacity: 0.9;
+  }
+  .hero-meta {
+    gap: 7px;
+    font-size: 8px;
+  }
+  .goal-card {
+    padding: 22px 18px 17px;
+  }
+  .goal-ring {
+    width: 138px;
+    height: 138px;
+  }
+  .goal-ring svg {
+    width: 138px;
+    height: 138px;
+  }
+  .week-dots {
+    gap: 8px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: minmax(0, 1.55fr) minmax(220px, 1fr);
+  }
+  .lesson-progress {
+    display: none;
+  }
+  .insight-quote {
+    font-size: 18px;
+  }
+  .stats-strip {
+    padding: 20px 0;
+  }
+  .stat-icon {
+    width: 33px;
+    height: 35px;
+  }
+  .stat-item {
+    padding: 0 14px;
+    gap: 10px;
+  }
+  .stat-value {
+    font-size: 21px;
+  }
+  .stat-label {
+    font-size: 9px;
+  }
+  .lesson-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .slide-content {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 29px;
+  }
+  .slide-visual {
+    min-height: 180px;
+    padding: 15px;
+  }
+  .slide-visual > svg {
+    max-height: 210px;
+  }
+  .practice-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .support-content {
+    padding: 21px 24px;
+  }
+  .metric-grid {
+    gap: 14px;
+  }
+  .metric-card {
+    padding: 21px;
+  }
+  .progress-layout {
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr);
+    gap: 16px;
+  }
+  .progress-layout > .card {
+    padding: 21px;
+  }
+  .teacher-grid,
+  .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .class-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 850px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 20px 0 60px #143f2820;
+    width: 244px;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .app-main {
+    margin-left: 0;
+  }
+  .mobile-menu {
+    display: inline-flex;
+    margin-left: -7px;
+  }
+  .topbar {
+    height: 70px;
+    gap: 13px;
+  }
+  .breadcrumb {
+    margin-right: auto;
+  }
+  .top-actions {
+    gap: 12px;
+  }
+  .page-content {
+    padding-top: 27px;
+  }
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1.8fr) 240px;
+  }
+  .hero-copy {
+    width: 68%;
+  }
+  .hero-copy h2 {
+    font-size: 26px;
+  }
+  .hero-visual {
+    width: 43%;
+    right: -5px;
+  }
+  .hero-card {
+    min-height: 280px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: minmax(0, 1.7fr) minmax(230px, 1fr);
+  }
+  .lesson-row {
+    gap: 12px;
+  }
+  .stat-item {
+    padding: 0 20px;
+  }
+  .presentation-mode .slide-content {
+    padding: 36px;
+  }
+  .presentation-mode .slide-text h2 {
+    font-size: 35px;
+  }
+  .presentation-mode .slide-visual {
+    min-height: 220px;
+  }
+}
+@media (max-width: 680px) {
+  h1 {
+    font-size: 27px;
+  }
+  .page-content {
+    padding: 25px 22px 22px;
+  }
+  .topbar {
+    padding: 0 22px;
+  }
+  .welcome-row time,
+  .welcome-row .date,
+  .welcome-row .date-label {
+    display: none;
+  }
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1fr) 215px;
+    gap: 13px;
+  }
+  .hero-card {
+    padding: 23px;
+  }
+  .hero-copy {
+    width: 100%;
+  }
+  .hero-copy h2 {
+    font-size: 27px;
+  }
+  .hero-copy > p {
+    max-width: 210px;
+    font-size: 10px;
+  }
+  .hero-visual {
+    display: none;
+  }
+  .hero-kicker {
+    font-size: 7px;
+    margin-bottom: 14px;
+  }
+  .hero-meta {
+    font-size: 8px;
+    gap: 6px;
+  }
+  .goal-card {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .goal-ring {
+    width: 132px;
+    height: 132px;
+  }
+  .goal-ring svg {
+    width: 132px;
+    height: 132px;
+  }
+  .week-dots {
+    gap: 7px;
+  }
+  .week-dots i,
+  .week-dots .day-dot {
+    width: 18px;
+    height: 18px;
+  }
+  .stats-strip {
+    padding: 18px 0;
+  }
+  .stat-item {
+    gap: 8px;
+    padding: 0 13px;
+  }
+  .stat-icon {
+    width: 31px;
+    height: 32px;
+  }
+  .stat-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .stat-value {
+    font-size: 20px;
+  }
+  .stat-value small {
+    font-size: 8px;
+  }
+  .stat-label {
+    font-size: 8px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 25px;
+  }
+  .lesson-progress {
+    display: block;
+    width: 94px;
+  }
+  .insight-card {
+    padding: 25px;
+  }
+  .insight-card .insight-quote {
+    max-width: 420px;
+    font-size: 22px;
+  }
+  .insight-card > .eyebrow {
+    margin-bottom: 15px;
+  }
+  .insight-footer {
+    margin-top: 20px;
+  }
+  .slide-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .slide-outline {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding: 0 0 5px;
+  }
+  .slide-outline > .eyebrow {
+    display: none;
+  }
+  .slide-step {
+    flex-shrink: 0;
+    width: auto;
+    min-height: 40px;
+    padding: 8px 11px;
+    white-space: nowrap;
+    margin-bottom: 0;
+    font-size: 10px;
+  }
+  .slide-step > span:first-child {
+    width: 20px;
+    height: 20px;
+  }
+  .progress-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .metric-card {
+    padding: 18px;
+  }
+  .metric-value {
+    font-size: 30px;
+  }
+  .metric-card p {
+    font-size: 10px;
+  }
+  .steps-bar {
+    gap: 18px;
+  }
+}
+@media (max-width: 600px) {
+  body {
+    font-size: 12px;
+  }
+  h1 {
+    font-size: 26px;
+    letter-spacing: -0.7px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  .page-content {
+    padding: 24px 18px 20px;
+  }
+  .topbar {
+    height: 66px;
+    padding: 0 18px;
+    gap: 9px;
+  }
+  .breadcrumb {
+    font-size: 10px;
+    gap: 7px;
+  }
+  .breadcrumb > span:first-child,
+  .breadcrumb > svg:first-of-type {
+    display: none;
+  }
+  .top-actions {
+    gap: 7px;
+  }
+  .role-switch {
+    padding: 3px;
+  }
+  .role-switch button {
+    padding: 5px 8px;
+    font-size: 8px;
+  }
+  .top-actions > .icon-button {
+    width: 28px;
+    height: 30px;
+    padding: 5px;
+  }
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+  .welcome-row {
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+  .welcome-row p {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .welcome-row .eyebrow {
+    font-size: 8px;
+  }
+  .welcome-row .button {
+    min-height: 35px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+  .welcome-row .button svg {
+    width: 14px;
+    height: 14px;
+  }
+  .section-heading {
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+  .section-heading p {
+    font-size: 10px;
+  }
+  .text-link {
+    font-size: 10px;
+  }
+  .dashboard-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 17px;
+    margin-bottom: 18px;
+  }
+  .hero-card {
+    min-height: 275px;
+    padding: 26px;
+  }
+  .hero-copy {
+    width: 69%;
+  }
+  .hero-copy h2 {
+    font-size: 27px;
+  }
+  .hero-copy > p {
+    max-width: 220px;
+  }
+  .hero-meta {
+    font-size: 8px;
+    margin: 14px 0 18px;
+  }
+  .hero-visual {
+    display: flex;
+    width: 40%;
+    right: -5px;
+    opacity: 1;
+  }
+  .hero-kicker {
+    font-size: 7px;
+  }
+  .goal-card {
+    display: grid;
+    grid-template-columns: 124px minmax(0, 1fr);
+    column-gap: 18px;
+    padding: 17px 22px;
+  }
+  .goal-card .section-heading {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 4px;
+    align-self: end;
+  }
+  .goal-card .section-heading h3 {
+    font-size: 12px;
+  }
+  .goal-ring {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 122px;
+    height: 122px;
+    margin: 0;
+  }
+  .goal-ring svg {
+    width: 122px;
+    height: 122px;
+  }
+  .goal-ring strong {
+    font-size: 26px;
+  }
+  .goal-ring small {
+    font-size: 7px;
+  }
+  .goal-stats {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+    font-size: 9px;
+  }
+  .week-dots {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: space-between;
+    gap: 4px;
+    padding-top: 11px;
+    margin-top: 10px;
+  }
+  .week-dots i,
+  .week-dots .day-dot {
+    width: 17px;
+    height: 17px;
+  }
+  .week-dots > span,
+  .week-dots > div {
+    font-size: 7px;
+    gap: 4px;
+  }
+  .stats-strip {
+    margin-bottom: 27px;
+    padding: 17px 0;
+  }
+  .stat-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 0 17px;
+  }
+  .stat-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+  .stat-label {
+    font-size: 9px;
+  }
+  .stat-value {
+    font-size: 22px;
+  }
+  .stat-value small {
+    font-size: 9px;
+  }
+  .lesson-row {
+    padding: 15px 13px;
+    gap: 11px;
+  }
+  .lesson-icon {
+    width: 38px;
+    height: 44px;
+  }
+  .lesson-info h3 {
+    font-size: 11px;
+  }
+  .lesson-meta {
+    font-size: 8px;
+    gap: 4px;
+  }
+  .lesson-progress {
+    width: 60px;
+    font-size: 8px;
+  }
+  .lesson-row > .icon-button {
+    width: 24px;
+    height: 24px;
+    padding: 5px;
+  }
+  .footer-note {
+    padding-top: 25px;
+    font-size: 7px;
+  }
+  .subject-tabs,
+  .filter-row {
+    gap: 6px;
+    margin: 20px 0;
+  }
+  .tab-button {
+    font-size: 10px;
+    padding: 7px 12px;
+  }
+  .lesson-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 17px;
+  }
+  .course-cover {
+    min-height: 160px;
+  }
+  .course-body {
+    padding: 23px;
+  }
+  .course-footer {
+    padding: 16px 23px;
+  }
+  .lesson-topbar {
+    margin-bottom: 19px;
+    gap: 9px;
+  }
+  .lesson-topbar > div {
+    gap: 7px;
+  }
+  .lesson-topbar .button {
+    font-size: 9px;
+    padding: 8px 10px;
+    min-height: 34px;
+    gap: 6px;
+  }
+  .lesson-topbar .tag {
+    font-size: 8px;
+    padding: 4px 6px;
+  }
+  .slide-content {
+    padding: 27px 23px;
+    gap: 20px;
+  }
+  .slide-text h2 {
+    font-size: 28px;
+    margin-bottom: 17px;
+  }
+  .slide-text p {
+    font-size: 12px;
+  }
+  .slide-text ul,
+  .slide-text ol {
+    font-size: 11px;
+  }
+  .formula-block {
+    font-size: 23px;
+  }
+  .slide-visual {
+    min-height: 190px;
+  }
+  .slide-toolbar {
+    padding: 16px;
+    gap: 10px;
+  }
+  .slide-toolbar .button {
+    font-size: 10px;
+    min-height: 36px;
+    padding: 8px 11px;
+  }
+  .slide-toolbar > span {
+    display: none;
+  }
+  .slide-dots {
+    gap: 4px;
+  }
+  .slide-dots button,
+  .slide-dots span {
+    width: 5px;
+    height: 5px;
+  }
+  .slide-dots .active {
+    width: 15px;
+  }
+  .lesson-complete {
+    padding: 34px 23px;
+  }
+  .presentation-mode .page-content {
+    padding: 16px;
+  }
+  .presentation-mode .slide-content {
+    padding: 26px 23px;
+    gap: 22px;
+  }
+  .presentation-mode .slide-text h2 {
+    font-size: 30px;
+  }
+  .presentation-mode .slide-text p {
+    font-size: 14px;
+  }
+  .presentation-mode .slide-visual {
+    min-height: 200px;
+  }
+  .steps-bar {
+    justify-content: space-between;
+    gap: 8px;
+    padding: 16px 13px;
+    margin-bottom: 18px;
+  }
+  .steps-bar .step {
+    font-size: 9px;
+    gap: 6px;
+  }
+  .steps-bar .step > span:first-child {
+    width: 21px;
+    height: 21px;
+    font-size: 9px;
+  }
+  .steps-bar > svg {
+    width: 10px;
+    height: 10px;
+  }
+  .practice-card {
+    padding: 24px 20px;
+  }
+  .question-top {
+    margin-bottom: 21px;
+  }
+  .question-number {
+    font-size: 9px;
+  }
+  .question-prompt h2 {
+    font-size: 22px;
+  }
+  .question-prompt p {
+    font-size: 11px;
+  }
+  .answer-grid {
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .answer-option {
+    min-height: 61px;
+    gap: 9px;
+    padding: 12px;
+  }
+  .answer-letter {
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+  }
+  .answer-value {
+    font-size: 12px;
+  }
+  .reflection {
+    margin-top: 23px;
+    padding-top: 22px;
+  }
+  .reflection label {
+    font-size: 11px;
+  }
+  .reflection p {
+    font-size: 9px;
+  }
+  .practice-actions .button {
+    font-size: 10px;
+    padding: 10px 13px;
+  }
+  .practice-actions > span {
+    font-size: 9px;
+  }
+  .metric-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin: 21px 0;
+  }
+  .metric-card {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    column-gap: 16px;
+    align-items: center;
+    padding: 20px;
+  }
+  .metric-icon {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    margin: 0;
+    width: 42px;
+    height: 42px;
+  }
+  .metric-value {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    font-size: 29px;
+  }
+  .metric-value small {
+    font-size: 9px;
+  }
+  .metric-card p {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 11px;
+    margin: 0;
+  }
+  .metric-card > small {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 8px;
+    margin-top: 4px;
+  }
+  .evidence-heading {
+    gap: 8px;
+  }
+  .evidence-heading h3 {
+    font-size: 11px;
+  }
+  .evidence-heading .tag {
+    font-size: 8px;
+    padding: 4px 7px;
+  }
+  .evidence-detail {
+    font-size: 10px;
+  }
+  .review-card {
+    padding: 24px 21px;
+  }
+  .note-card {
+    padding: 23px;
+  }
+  .class-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-grid > .card {
+    padding: 25px 22px;
+  }
+  .modal-backdrop {
+    padding: 16px;
+  }
+  .modal {
+    max-height: calc(100vh - 32px);
+    border-radius: 16px;
+  }
+  .modal-header {
+    padding: 20px 21px 16px;
+  }
+  .modal-body {
+    padding: 21px;
+  }
+  .modal-footer {
+    padding: 16px 21px;
+  }
+  .toast {
+    bottom: 18px;
+    padding: 12px 17px;
+    width: max-content;
+    font-size: 11px;
+  }
+}
+@media (max-width: 380px) {
+  .top-actions {
+    gap: 4px;
+  }
+  .top-actions > .icon-button {
+    display: none;
+  }
+  .role-switch button {
+    padding: 5px 6px;
+  }
+  .hero-card {
+    padding: 24px;
+  }
+  .hero-copy {
+    width: 76%;
+  }
+  .hero-copy h2 {
+    font-size: 25px;
+  }
+  .hero-visual {
+    width: 37%;
+    right: -14px;
+  }
+  .goal-card {
+    padding: 17px;
+    grid-template-columns: 112px minmax(0, 1fr);
+    column-gap: 13px;
+  }
+  .goal-ring,
+  .goal-ring svg {
+    width: 112px;
+    height: 112px;
+  }
+  .week-dots i,
+  .week-dots .day-dot {
+    width: 15px;
+    height: 15px;
+  }
+  .stat-item {
+    padding: 0 12px;
+  }
+  .lesson-progress {
+    display: none;
+  }
+  .answer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .steps-bar {
+    gap: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .steps-bar .step {
+    font-size: 8px;
+    gap: 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+@media print {
+  .sidebar,
+  .topbar,
+  .footer-note,
+  .button,
+  .slide-outline,
+  .slide-toolbar,
+  .toast,
+  .modal-backdrop {
+    display: none !important;
+  }
+  .app-main {
+    margin: 0;
+  }
+  .page-content {
+    padding: 0;
+  }
+  body {
+    background: white;
+  }
+  .card,
+  .slide-stage {
+    break-inside: avoid;
+  }
+}

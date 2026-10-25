@@ -1,0 +1,9 @@
+/* Giữ nguyên thứ tự để bảo toàn giao diện và responsive. */
+@import url("./styles/base.css");
+@import url("./styles/navigation.css");
+@import url("./styles/dashboard.css");
+@import url("./styles/lessons.css");
+@import url("./styles/practice.css");
+@import url("./styles/progress.css");
+@import url("./styles/dialogs.css");
+@import url("./styles/responsive.css");
