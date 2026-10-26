@@ -186,7 +186,7 @@ function render() {
             `<button class="nav-item" data-action="nav" data-view="${id}" ${
               state.view === id ? 'aria-current="page"' : ""
             }>${icon(ic)}<span>${text}</span>${
-              id === "lessons" ? '<span class="nav-badge">3</span>' : ""
+              id === "lessons" ? `<span class="nav-badge">${lessons.length}</span>` : ""
             }</button>`,
         )
         .join("");
@@ -832,6 +832,10 @@ document.addEventListener("change", (e) => {
     state.filter = e.target.value;
     render();
   }
+  if (e.target.id === "chapter-filter") {
+    state.chapterFilter = e.target.value;
+    render();
+  }
   if (e.target.id === "import-json-file") {
     importData(e.target.files?.[0]);
     e.target.value = "";
@@ -892,6 +896,7 @@ online = createOnline({
   render,
   toast,
   questionBank,
+  lessons,
   localQuestions: () => data.customQuestions || [],
   localProgress: () => ({
     completedCount: data.completed.length,

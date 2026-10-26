@@ -18,13 +18,13 @@ const radians = (degrees) => (degrees * Math.PI) / 180;
 const byId = (id) => questionBank.find((question) => question.id === id);
 const choice = (id) => byId(id).options[byId(id).answer];
 
-test("all three lessons contain five complete, identifiable slides", () => {
-  assert.equal(lessons.length, 3);
+test("all lessons contain five complete, identifiable slides", () => {
+  assert.equal(lessons.length, 15);
   assert.equal(
     new Set(lessons.map((lesson) => lesson.id)).size,
     lessons.length,
   );
-  assert.equal(lessons.flatMap((lesson) => lesson.slides).length, 15);
+  assert.equal(lessons.flatMap((lesson) => lesson.slides).length, 75);
   for (const lesson of lessons) {
     assert.equal(lesson.slides.length, 5, lesson.id);
     for (const slide of lesson.slides) {
@@ -32,13 +32,28 @@ test("all three lessons contain five complete, identifiable slides", () => {
         assert.equal(typeof slide[key], "string", `${lesson.id}: ${key}`);
         assert.ok(slide[key].trim(), `${lesson.id}: empty ${key}`);
       }
-      assert.ok(["circle", "signs", "triangle"].includes(slide.visual));
+      assert.ok(
+        [
+          "circle",
+          "signs",
+          "triangle",
+          "venn",
+          "halfplane",
+          "vector",
+          "statistics",
+          "parabola",
+          "coordinate",
+          "combinatorics",
+          "probability",
+        ].includes(slide.visual),
+        slide.visual,
+      );
     }
   }
 });
 
 test("question bank and transfer exercise have unique ids, valid answers, hints and lesson references", () => {
-  assert.equal(questionBank.length, 12);
+  assert.equal(questionBank.length, 60);
   const allQuestions = [...questionBank, transferQuestion];
   assert.equal(
     new Set(allQuestions.map((question) => question.id)).size,
@@ -216,15 +231,16 @@ test("getProbe follows each supported error branch without assigning an unsuppor
     "transfer-1": ["sign", "identity", null, "identity"],
   };
   for (const question of [...questionBank, transferQuestion]) {
+    const exp = expected[question.id] || [null, null, null, null];
     question.options.forEach((option, index) => {
       assert.equal(
         getProbe(question, index),
-        expected[question.id][index],
+        exp[index],
         `${question.id}/${index}`,
       );
       assert.equal(
         getProbe(question, option),
-        expected[question.id][index],
+        exp[index],
         `${question.id}/${option}`,
       );
     });

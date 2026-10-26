@@ -40,7 +40,10 @@ test("student views render every slide with current angle after switching lesson
   const ctx = context(),
     views = createStudentViews(() => ctx);
   assert.match(views.home(), /Lộ trình học tập/);
-  assert.match(views.lessonView(), /15 slide/);
+  assert.match(
+    views.lessonView(),
+    new RegExp(`${lessons.flatMap((l) => l.slides).length} slide`),
+  );
   ctx.state.activeLesson = true;
   for (const lesson of lessons) {
     ctx.state.lesson = lesson.id;
@@ -48,7 +51,8 @@ test("student views render every slide with current angle after switching lesson
       ctx.state.slide = slide;
       const html = views.lessonView();
       assert.ok(html.includes(lesson.slides[slide].title));
-      if (lesson.id !== "cosine") assert.match(html, /góc 30 độ/);
+      if (["values", "signs"].includes(lesson.id))
+        assert.match(html, /góc 30 độ/);
     }
   }
 });

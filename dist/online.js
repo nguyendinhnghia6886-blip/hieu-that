@@ -99,10 +99,11 @@ export function createOnline({
   render,
   toast,
   questionBank = [],
+  lessons = [],
   localQuestions = () => [],
   localProgress = () => ({
     completedCount: 0,
-    totalLessons: 3,
+    totalLessons: lessons.length || 15,
     sessionCount: 0,
     supportedCount: 0,
   }),
@@ -1115,7 +1116,9 @@ export function createOnline({
               ? questionBank.map((q) => ({
                   ...q,
                   type: "choice",
-                  topic: "Toán 10",
+                  topic:
+                    lessons.find((l) => l.id === q.lessonId)?.shortTitle ||
+                    "Toán 10",
                   hint: q.hints?.[0] || "",
                   status: "draft",
                 }))
@@ -1188,7 +1191,7 @@ export function createOnline({
     ).length;
     return [
       ["overview", "grid", "Tổng quan", ""],
-      ["lessons", "book", "Bài học", "3"],
+      ["lessons", "book", "Bài học", String(lessons.length || 15)],
       ["practice", "pen", "Luyện tập", ""],
       [
         "assigned",

@@ -4,17 +4,15 @@ import {
   button,
   pageHeading,
   dateLabel,
-  todayLabel,
-  todayIndex,
 } from "../ui/helpers.js";
-import { triangleVisual, interactiveCircle } from "../ui/visuals.js";
+import { triangleVisual, interactiveCircle, visual } from "../ui/visuals.js";
 import { esc } from "../ui/dom.js";
-import { letters, skillLabels } from "../content/labels.js";
+import { letters } from "../content/labels.js";
+
 export function createPracticeViews(readContext) {
   function practiceView() {
     const {
       state,
-      data,
       practice,
       workspace,
       lessonFor,
@@ -22,8 +20,28 @@ export function createPracticeViews(readContext) {
       activeQuestion,
     } = readContext();
 
-    if (!practice)
-      return `${pageHeading("LUYỆN TẬP CÓ CĂN CỨ", "Bắt đầu từ điều bạn đang học.", "Làm bài → Xác minh khi cần → Vận dụng → Xem căn cứ.")}<div class="lesson-grid">${lessons.map((l, i) => `<article class="card practice-picker"><div class="lesson-icon tone-${i}">${icon(lessonIcon(l.id))}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 5 phút</span><span>2–3 câu hỏi</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
+    if (!practice) {
+      const chapters = [
+        { id: "all", name: "Tất cả các chương" },
+        { id: "chuong-1", name: "Chương I: Mệnh đề & Tập hợp" },
+        { id: "chuong-2", name: "Chương II: BPT bậc nhất hai ẩn" },
+        { id: "chuong-3", name: "Chương III: Hệ thức lượng tam giác" },
+        { id: "chuong-4", name: "Chương IV: Vectơ" },
+        { id: "chuong-5", name: "Chương V: Thống kê mô tả" },
+        { id: "chuong-6", name: "Chương VI: Hàm số & Tam thức bậc hai" },
+        { id: "chuong-7", name: "Chương VII: Tọa độ Oxy" },
+        { id: "chuong-8", name: "Chương VIII: Đại số tổ hợp" },
+        { id: "chuong-9", name: "Chương IX: Xác suất cổ điển" },
+      ];
+      const selectedChapter = state.chapterFilter || "all";
+      const displayLessons =
+        selectedChapter === "all"
+          ? lessons
+          : lessons.filter((l) => l.chapterId === selectedChapter);
+
+      return `${pageHeading("LUYỆN TẬP CÓ CĂN CỨ", "Bắt đầu từ điều bạn đang học.", "Làm bài → Xác minh khi cần → Vận dụng → Xem căn cứ.")}<div class="filter-row"><span class="tag green">Toán 10 KNTT</span><label for="chapter-filter" class="screen-reader-only">Lọc theo chương</label><select id="chapter-filter" class="filter-select"><option value="all">Tất cả các chương (${lessons.length} chủ đề)</option>${chapters.slice(1).map((ch) => `<option value="${ch.id}" ${selectedChapter === ch.id ? "selected" : ""}>${esc(ch.name)}</option>`).join("")}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 5 phút</span><span>2–3 câu hỏi</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
+    }
+
     state.lesson = practice.lessonId;
     if (practice.phase === "result") return resultView();
     const q = activeQuestion(),
@@ -32,7 +50,11 @@ export function createPracticeViews(readContext) {
       isTransfer = phase === "transfer",
       selected = practice.selected;
     const correct = practice.submitted && selected === q.answer;
-    return `${pageHeading("KHÔNG GIAN LÀM BÀI", esc(lessonFor(state.lesson).shortTitle), "Bạn không cần làm thật nhanh. Hãy dành thời gian cho cách mình suy nghĩ.", button("Đổi chủ đề", "choose-practice", "ghost small"))}
+    const activeLessonObj = lessonFor(state.lesson);
+    const slideFormula = activeLessonObj.slides.find((s) => s.formula)?.formula || "sin² α + cos² α = 1";
+    const slideTip = activeLessonObj.slides.find((s) => s.tip)?.tip || "Nắm chắc công thức gốc để tự tin khi làm bài.";
+
+    return `${pageHeading("KHÔNG GIAN LÀM BÀI", esc(activeLessonObj.shortTitle), "Bạn không cần làm thật nhanh. Hãy dành thời gian cho cách mình suy nghĩ.", button("Đổi chủ đề", "choose-practice", "ghost small"))}
     <div class="steps-bar">${[
       ["base", "Làm bài"],
       ["probe", "Xác minh"],
@@ -51,24 +73,24 @@ export function createPracticeViews(readContext) {
     ${phase === "base" ? `<label class="reflection"><span>Cách bạn suy nghĩ <small>Không bắt buộc</small></span><textarea id="reflection" rows="2" placeholder="Mình chọn đáp án này vì…" ${practice.submitted ? "disabled" : ""}>${esc(practice.reflection)}</textarea></label>` : ""}
     ${practice.submitted ? `<div class="feedback-box ${correct ? "success" : "warning"}" role="status">${icon(correct ? "check" : "bulb")}<div><strong>${correct ? (phase === "base" && practice.confidence === "unsure" ? "Bạn đã chọn đúng dù còn phân vân — hãy xem kỹ công thức bên dưới để củng cố niềm tin nhé!" : "Bạn đã chọn đúng.") : "Có một điểm mình cùng xem lại nhé."}</strong><p>${esc(phase === "base" && !correct ? "Câu trả lời này chưa khớp. Mình sẽ kiểm tra thêm một bước trước khi kết luận." : q.explanation)}</p>${phase === "base" ? `<small>${correct && practice.confidence === "unsure" ? "Đừng lo nếu bước đầu còn ngập ngừng. Nắm chắc công thức gốc sẽ giúp bạn tự tin ở câu vận dụng tiếp theo." : "Một câu trả lời chưa đủ để kết luận. Cùng kiểm tra thêm ở bước tiếp theo."}</small>` : ""}</div></div>` : ""}
     <div class="practice-actions"><span>${icon("shield")} Căn cứ được lưu khi hoàn thành phiên</span>${practice.submitted ? button(`${isTransfer ? "Xem kết quả" : phase === "base" && !correct && practice.probeKey ? "Xác minh một chút" : "Làm câu vận dụng"} ${icon("arrow")}`, "next-question", "primary") : button(`Kiểm tra đáp án ${icon("arrow")}`, "submit-answer", "primary", selected === null ? "disabled" : "")}</div></section>
-    <aside class="support-card card"><div class="support-tabs"><button class="${state.support === "formula" ? "active" : ""}" data-action="support" data-tab="formula">${icon("book")} Sổ tay</button><button class="${state.support === "hints" ? "active" : ""}" data-action="support" data-tab="hints">${icon("sparkle")} Hỏi đáp</button></div><div class="support-content">${state.support === "formula" ? `<span class="eyebrow">NHẮC NHỚ KIẾN THỨC</span><h3>${state.lesson === "cosine" ? "Định lý cosin" : "Đường tròn lượng giác"}</h3>${state.lesson === "cosine" ? triangleVisual() : interactiveCircle(state.interactiveAngle, false)}<div class="formula-block small-formula">${state.lesson === "cosine" ? "a² = b² + c² − 2bc cos A" : "sin² α + cos² α = 1"}</div><p class="muted">${state.lesson === "cosine" ? "Cạnh a nằm đối diện góc A. Hãy xác định đúng hai cạnh kề góc trước khi thay số." : "Nhớ kiểm tra miền của góc trước khi chọn dấu của giá trị lượng giác."}</p><div class="support-note">${icon("leaf")} Hiểu từng bước, vững từng chút.</div>` : workspace.chat(q, practice)}</div></aside></div>`;
+    <aside class="support-card card"><div class="support-tabs"><button class="${state.support === "formula" ? "active" : ""}" data-action="support" data-tab="formula">${icon("book")} Sổ tay</button><button class="${state.support === "hints" ? "active" : ""}" data-action="support" data-tab="hints">${icon("sparkle")} Hỏi đáp</button></div><div class="support-content">${state.support === "formula" ? `<span class="eyebrow">NHẮC NHỚ KIẾN THỨC</span><h3>${esc(activeLessonObj.shortTitle)}</h3>${state.lesson === "cosine" ? triangleVisual() : state.lesson === "values" || state.lesson === "signs" ? interactiveCircle(state.interactiveAngle, false) : visual(activeLessonObj.slides[0].visual)}<div class="formula-block small-formula">${esc(slideFormula)}</div><p class="muted">${esc(slideTip)}</p><div class="support-note">${icon("leaf")} Hiểu từng bước, vững từng chút.</div>` : workspace.chat(q, practice)}</div></aside></div>`;
   }
-  function resultView() {
-    const { data, practice } = readContext();
 
+  function resultView() {
+    const { practice } = readContext();
     const r = practice.result;
     return `${pageHeading("MỘT BƯỚC TIẾN MỚI", "Bạn đã dành thời gian để hiểu.", "Cùng nhìn lại những gì câu trả lời của bạn cho thấy.")}<div class="progress-layout"><section class="card result-card"><div class="result-symbol ${r.status}">${icon(r.status === "supported" ? "check" : r.status === "practice" ? "leaf" : "target")}</div><span class="tag ${r.status === "supported" ? "green" : "amber"}">${r.status === "supported" ? "Có bằng chứng làm đúng" : r.status === "practice" ? "Cần luyện thêm" : "Chưa đủ bằng chứng"}</span><h2>${esc(r.title)}</h2><p class="muted">${esc(r.detail)}</p><div class="result-stats"><span><strong>${r.history.filter((h) => h.correct).length}/${r.history.length}</strong>Câu trả lời đúng</span><span><strong>${r.hints}</strong>Lượt mở gợi ý</span><span><strong>${Math.max(1, Math.round(r.duration / 60))} phút</strong>Thời gian của bạn</span></div><div class="result-actions">${button(`Xem tiến bộ ${icon("arrow")}`, "nav", "primary", 'data-view="progress"')}${button("Học lại chủ đề", "open-lesson", "secondary", `data-lesson="${r.lessonId}"`)}</div></section><section class="card evidence-summary"><h3>Căn cứ của phiên học</h3>${evidenceHistory(r)}<div class="tip-box">${icon("shield")}<p>Nhận xét chỉ áp dụng cho những câu vừa kiểm tra, chưa phản ánh toàn bộ mức độ hiểu.</p></div></section></div>`;
   }
+
   function evidenceHistory(s) {
-    const { evidenceHistory } = readContext();
     return `<ol class="evidence-timeline">${s.history.map((h) => `<li><span class="timeline-dot ${h.correct ? "correct" : ""}">${icon(h.correct ? "check" : "pen")}</span><div><span class="tiny-label">${h.phase === "base" ? "LÀM BÀI" : h.phase === "probe" ? "XÁC MINH" : "VẬN DỤNG"}</span><p>${esc(h.prompt)}</p><span class="answer-evidence">Bạn chọn: <strong>${esc(h.answer)}</strong> · ${h.correct ? "Đúng" : `Cần xem lại · Đáp án: ${esc(h.expected)}`}</span></div></li>`).join("")}</ol>`;
   }
-  function progressView() {
-    const { state, data, practice, lessonFor, lessonIcon } = readContext();
 
+  function progressView() {
+    const { state, data, lessonFor, lessonIcon } = readContext();
     const sessions = data.sessions,
       supported = sessions.filter((s) => s.status === "supported").length;
-    return `${pageHeading("NHÌN LẠI ĐỂ ĐI XA HƠN", state.role === "student" ? "Tiến bộ có căn cứ." : "Căn cứ học tập trên thiết bị.", "Mỗi nhận xét đi cùng câu trả lời, thời điểm và mức hỗ trợ đã sử dụng.", button(`${icon("download")} Xuất kết quả`, "export", "secondary small", sessions.length ? "" : "disabled"))}<div class="metric-grid"><div class="metric-card card"><span class="metric-icon">${icon("pen")}</span><span class="metric-value">${sessions.length}</span><span>Phiên học đã hoàn thành</span></div><div class="metric-card card"><span class="metric-icon">${icon("check")}</span><span class="metric-value">${supported}</span><span>Phiên có bằng chứng làm đúng</span></div><div class="metric-card card"><span class="metric-icon">${icon("book")}</span><span class="metric-value">${data.completed.length}<small> / 3</small></span><span>Chủ đề đã xem hết slide</span></div></div><div class="progress-layout"><section><div class="section-heading"><h2>Hành trình học tập</h2><span class="tag gray">${sessions.length ? "Dữ liệu của bạn" : "Chưa có dữ liệu"}</span></div>${
+    return `${pageHeading("NHÌN LẠI ĐỂ ĐI XA HƠN", state.role === "student" ? "Tiến bộ có căn cứ." : "Căn cứ học tập trên thiết bị.", "Mỗi nhận xét đi cùng câu trả lời, thời điểm và mức hỗ trợ đã sử dụng.", button(`${icon("download")} Xuất kết quả`, "export", "secondary small", sessions.length ? "" : "disabled"))}<div class="metric-grid"><div class="metric-card card"><span class="metric-icon">${icon("pen")}</span><span class="metric-value">${sessions.length}</span><span>Phiên học đã hoàn thành</span></div><div class="metric-card card"><span class="metric-icon">${icon("check")}</span><span class="metric-value">${supported}</span><span>Phiên có bằng chứng làm đúng</span></div><div class="metric-card card"><span class="metric-icon">${icon("book")}</span><span class="metric-value">${data.completed.length}<small> / ${lessons.length}</small></span><span>Chủ đề đã xem hết slide</span></div></div><div class="progress-layout"><section><div class="section-heading"><h2>Hành trình học tập</h2><span class="tag gray">${sessions.length ? "Dữ liệu của bạn" : "Chưa có dữ liệu"}</span></div>${
       sessions.length
         ? `<div class="evidence-list">${[...sessions]
             .reverse()
@@ -88,17 +110,10 @@ export function createPracticeViews(readContext) {
         "",
       )}<p class="muted small-text">Trạng thái dựa trên phiên gần nhất của mỗi chủ đề.</p></section><section class="teacher-note-preview">${icon("shield")}<p><strong>Tiến bộ không chỉ là điểm số.</strong><span>Câu trả lời đúng sau gợi ý vẫn cần được kiểm tra bằng một bài độc lập.</span></p></section>${
       data.notes.length
-        ? `<section class="card note-card"><h3>Nhận xét của giáo viên</h3>${data.notes
-            .slice(-3)
-            .reverse()
-            .map(
-              (n) =>
-                `<div class="saved-note"><time>${dateLabel(n.time)}</time><p>${esc(n.text)}</p></div>`,
-            )
-            .join("")}</section>`
+        ? `<section class="card"><h3>Nhận xét đã ghi (${data.notes.length})</h3>${data.notes.map((n) => `<p class="muted small-text">${esc(n.text)}</p>`).join("")}</section>`
         : ""
     }</aside></div>`;
   }
 
-  return { practiceView, resultView, evidenceHistory, progressView };
+  return { practiceView, resultView, progressView, evidenceHistory };
 }

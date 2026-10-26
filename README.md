@@ -1,6 +1,6 @@
 # Hiểu Thật
 
-Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.4.0 tách hoàn toàn hai không gian làm việc trực tuyến theo vai trò **Học sinh** và **Giáo viên** ngay sau khi đăng nhập, tự động khôi phục phiên và vai trò khi tải lại trang.
+Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.5.0 tích hợp toàn bộ 9 chương Toán 10 theo sách Kết nối tri thức với cuộc sống (15 bài học chuyên sâu, 75 slide, 60 câu hỏi tương tác có gợi ý từng bước và lời giải chi tiết, hỗ trợ lọc theo chương và giao bài linh hoạt), đồng thời kế thừa đầy đủ hai không gian làm việc trực tuyến theo vai trò **Học sinh** và **Giáo viên**.
 
 Vào **Đăng nhập / Tạo tài khoản** để mở không gian học tập (Học sinh) hoặc không gian giảng dạy (Giáo viên) với dữ liệu đồng bộ qua Supabase. Phần tự học và lớp mẫu khi chưa đăng nhập vẫn lưu trên thiết bị. Đăng ký công khai còn cần chủ website cấu hình dịch vụ gửi email; Google/Facebook/SMS chưa được bật. Xem [trạng thái triển khai và việc còn lại](docs/HOAN-THIEN-ONLINE.md).
 
@@ -17,9 +17,10 @@ Mở **http://127.0.0.1:4174/**. Website dùng ES modules, cần chạy qua máy
 
 ## Chức năng hiện có
 
-- 3 bài học, 15 slide, đường tròn lượng giác tương tác, trình chiếu và điều khiển bàn phím.
-- Luyện tập, xác minh, vận dụng, lưu căn cứ và tiến độ trên trình duyệt.
-- Giáo viên soạn câu trắc nghiệm/tự luận, nhập văn bản, OCR ảnh và duyệt câu hỏi trước khi giao.
+- 15 bài học chuyên sâu qua 9 chương Toán 10 KNTT, 75 slide bài học, hình vẽ SVG trực quan, trình chiếu và điều khiển bàn phím.
+- Lọc theo chương và chủ đề; xem công thức, điều kiện áp dụng và mẹo giải nhanh.
+- Luyện tập 60 câu hỏi có căn cứ, 3 cấp độ gợi ý lũy tiến, xác minh, vận dụng và lưu tiến độ trên trình duyệt.
+- Giáo viên soạn câu trắc nghiệm/tự luận, nhập văn bản, OCR ảnh, lọc theo chủ đề và duyệt câu hỏi trước khi giao bài trực tuyến.
 - Giao bài từ câu đã duyệt, chia sẻ bằng liên kết, lưu nháp bài làm và nhận xét trên thiết bị.
 - Hồ sơ học sinh/giáo viên trải nghiệm; mã giáo viên được nhập lúc đầu hoặc bổ sung sau.
 - Chatbot nổi Bạn Hiểu giữ hội thoại khi chuyển trang, có gợi ý soạn sẵn và tùy chọn gọi Ollama cục bộ.
