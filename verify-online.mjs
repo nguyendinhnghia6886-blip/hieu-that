@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import handler, { allowedOrigin } from "./api/learning.js";
+import { lessons, questionBank } from "./dist/learning.js";
 import { createOnline, resolveScreenForRole } from "./dist/online.js";
 import {
   studentOverview,
@@ -1160,4 +1161,102 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
   const otherTeacherHtml = online.view();
   assert.doesNotMatch(otherTeacherHtml, /value="0\.85"/);
   assert.doesNotMatch(otherTeacherHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
+});
+
+test("teacher sample import imports all 60 questions across all 9 chapters without the old 30-item limit", async () => {
+  const state = { view: "online" };
+  const requests = [];
+  const teacherSnapshot = {
+    profile: {
+      id: "tea-sample-test",
+      name: "Thầy Hùng",
+      role: "teacher",
+      code: "THAYHUNG",
+    },
+    questions: [],
+    members: [],
+    assignments: [],
+    submissions: [],
+  };
+
+  const online = createOnline({
+    state,
+    render() {},
+    toast() {},
+    questionBank,
+    lessons,
+    fetchImpl: async (url, opts) => {
+      const body = opts?.body ? JSON.parse(opts.body) : {};
+      requests.push({ url, body });
+      if (body.action === "login") {
+        return {
+          ok: true,
+          json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }),
+        };
+      }
+      if (body.action === "load") {
+        return {
+          ok: true,
+          json: async () => ({ data: teacherSnapshot }),
+        };
+      }
+      if (body.action === "question") {
+        return {
+          ok: true,
+          json: async () => ({ data: { id: "q-created" } }),
+        };
+      }
+      return { ok: true, json: async () => ({ data: {} }) };
+    },
+  });
+
+  // Đăng nhập vai trò giáo viên
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "login" },
+              values: { email: "hung@example.com", password: "password123" },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+
+  assert.equal(online.role(), "teacher");
+
+  // Bấm nút lấy câu mẫu
+  await online.handleClick({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online]")
+          ? { dataset: { online: "samples" }, tagName: "BUTTON" }
+          : null,
+    },
+    preventDefault() {},
+  });
+
+  const questionRequests = requests.filter((r) => r.body.action === "question");
+  // Xác nhận nhập đủ 60 câu, không bị chặn ở 30 câu như trước
+  assert.equal(questionRequests.length, 60);
+
+  // Xác nhận các câu hỏi được gắn đúng chủ đề bài học thay vì gán cứng 'Toán 10'
+  const topics = new Set(
+    questionRequests.map((r) => r.body.payload.content.topic),
+  );
+  assert.ok(topics.has("Mệnh đề toán học"));
+  assert.ok(topics.has("Tập hợp & Phép toán"));
+  assert.ok(topics.has("BPT bậc nhất hai ẩn"));
+  assert.ok(topics.has("Hệ BPT bậc nhất hai ẩn"));
+  assert.ok(topics.has("Giá trị lượng giác"));
+  assert.ok(topics.has("Định lý cosin"));
+  assert.ok(topics.has("Định lý sin & Diện tích"));
+  assert.ok(topics.has("Vectơ & Phép cộng trừ"));
+  assert.ok(topics.has("Tích vô hướng"));
+  assert.ok(topics.has("Thống kê mô tả"));
+  assert.ok(topics.has("Hàm số bậc hai & Tam thức"));
+  assert.ok(topics.has("Đường thẳng & Đường tròn"));
+  assert.ok(topics.has("Đại số tổ hợp"));
+  assert.ok(topics.has("Xác suất cổ điển"));
 });

@@ -1103,7 +1103,7 @@ export function createOnline({
       return;
     }
     if (["refresh", "samples", "local"].includes(action)) {
-      perform(async () => {
+      return perform(async () => {
         if (action === "refresh") {
           await load();
           message = "Dữ liệu đã được làm mới.";
@@ -1125,15 +1125,14 @@ export function createOnline({
               : localQuestions().map((q) => ({ ...q, status: "draft" }));
           if (!source.length)
             throw new Error("Chưa có câu hỏi đã soạn trên thiết bị này.");
-          for (const q of source.slice(0, 30)) {
+          for (const q of source) {
             await request("question", { content: q });
           }
           await load();
           applyRoleNavigation("questions");
-          message = `Đã nhập ${Math.min(source.length, 30)} câu thành bản nháp.`;
+          message = `Đã nhập toàn bộ ${source.length} câu vào kho câu hỏi.`;
         }
       });
-      return;
     }
     navigate(action, el.dataset);
   }

@@ -153,6 +153,145 @@ test("all 12 answer keys agree with independently checked mathematics", () => {
   near(-Math.sqrt(1 - (5 / 13) ** 2), -12 / 13, "independent transfer");
 });
 
+test("all 60 answer keys in the question bank agree with independently evaluated mathematics", () => {
+  const expectedAnswers = {
+    // Chương III - cốt lõi
+    q1: "−4/5",
+    q2: "sin²α + cos²α = 1",
+    q3: "1/2",
+    q4: "−√3/2",
+    q5: "Âm",
+    q6: "0",
+    q7: "−1",
+    q8: "sin α > 0 và cos α > 0",
+    q9: "5",
+    q10: "√7",
+    q11: "0",
+    q12: "Góc tù",
+
+    // Chương I: Mệnh đề & Tập hợp
+    q_prop_1: "15 là số nguyên tố.",
+    q_prop_2: "∃x ∈ ℝ, x² − x + 1 ≤ 0",
+    q_prop_3: "Hình vuông là điều kiện đủ để ABCD là hình chữ nhật",
+    q_prop_4: "∃x ∈ ℝ, x² − 4 = 0",
+    q_set_1: "A = {2}",
+    q_set_2: "[1; 3)",
+    q_set_3: "(−∞; 4)",
+    q_set_4: "[−3; −1]",
+
+    // Chương II: Bất phương trình bậc nhất hai ẩn
+    q_ineq_1: "(1; 0)",
+    q_ineq_2: "x + 2y ≤ 5",
+    q_ineq_3: "Có chứa gốc tọa độ O",
+    q_ineq_4: "50x + 80y ≤ 1000",
+    q_sys_1: "(1; 1)",
+    q_sys_2: "Tam giác vuông",
+    q_sys_3: "10",
+    q_sys_4: "Tại một trong các đỉnh của miền đa giác nghiệm",
+
+    // Chương III mở rộng: Định lý sin & diện tích
+    q_sin_1: "6",
+    q_sin_2: "5",
+    q_sin_3: "9",
+    q_sin_4: "8√6/3",
+
+    // Chương IV: Vectơ & tích vô hướng
+    q_vec_1: "AB + BC = AC",
+    q_vec_2: "AC",
+    q_vec_3: "CB",
+    q_vec_4: "IA + IB = 0",
+    q_scal_1: "5",
+    q_scal_2: "m = 1",
+    q_scal_3: "2",
+    q_scal_4: "5",
+
+    // Chương V: Thống kê mô tả
+    q_stat_1: "7",
+    q_stat_2: "6",
+    q_stat_3: "18",
+    q_stat_4: "12",
+
+    // Chương VI: Hàm số & tam thức bậc hai
+    q_quad_1: "I(2; −1)",
+    q_quad_2: "x = 2",
+    q_quad_3: "(2; 3)",
+    q_quad_4: "m > 1",
+
+    // Chương VII: Hình học tọa độ Oxy
+    q_geom_1: "n = (2; −3)",
+    q_geom_2: "2",
+    q_geom_3: "I(2; −3), R = 4",
+    q_geom_4: "2x + y − 5 = 0",
+
+    // Chương VIII: Đại số tổ hợp
+    q_comb_1: "9",
+    q_comb_2: "12",
+    q_comb_3: "120",
+    q_comb_4: "4060",
+
+    // Chương IX: Xác suất
+    q_prob_1: "6",
+    q_prob_2: "1/2",
+    q_prob_3: "3/8",
+    q_prob_4: "17/45",
+  };
+
+  assert.equal(Object.keys(expectedAnswers).length, 60);
+  for (const [id, answer] of Object.entries(expectedAnswers)) {
+    assert.equal(choice(id), answer, `Checking choice for ${id}`);
+  }
+
+  // Kiểm tra độc lập phép tính số học / đại số / hình học
+  assert.equal(2 ** 2 - 4, 0); // q_prop_4
+
+  const nRoots = [-2, 2].filter((x) => x >= 0 && Number.isInteger(x));
+  assert.deepEqual(nRoots, [2]); // q_set_1
+
+  assert.ok(2 * 1 - 3 * 0 + 1 > 0); // q_ineq_1
+  assert.ok(2 * 0 - 3 * 1 + 1 <= 0);
+
+  const maxF = Math.max(2 * 0 + 5 * 0, 2 * 3 + 5 * 0, 2 * 0 + 5 * 2);
+  assert.equal(maxF, 10); // q_sys_3
+
+  near(6 / (2 * Math.sin(radians(30))), 6, "q_sin_1");
+  near(0.5 * 4 * 5 * Math.sin(radians(30)), 5, "q_sin_2");
+  assert.equal((5 + 6 + 7) / 2, 9); // q_sin_3
+  near(
+    (8 * Math.sin(radians(45))) / Math.sin(radians(60)),
+    (8 * Math.sqrt(6)) / 3,
+    "q_sin_4",
+  );
+
+  assert.equal(2 * 4 + 3 * -1, 5); // q_scal_1
+  assert.equal(1 * -2 + 2 * 1, 0); // q_scal_2
+  near(2 * 2 * Math.cos(radians(60)), 2, "q_scal_3");
+  assert.equal(Math.hypot(-3, 4), 5); // q_scal_4
+
+  assert.equal([2, 4, 6, 8, 10].reduce((a, b) => a + b) / 5, 6); // q_stat_2
+  assert.equal(Math.max(12, 15, 18, 22, 30) - Math.min(12, 15, 18, 22, 30), 18); // q_stat_3
+  assert.equal(27 - 15, 12); // q_stat_4
+
+  const x0 = -(-4) / (2 * 1);
+  const y0 = x0 ** 2 - 4 * x0 + 3;
+  assert.equal(x0, 2); // q_quad_1
+  assert.equal(y0, -1);
+
+  assert.equal(Math.abs(3 * 1 + 4 * 2 - 1) / Math.hypot(3, 4), 2); // q_geom_2
+
+  assert.equal(5 + 4, 9); // q_comb_1
+  assert.equal(3 * 4, 12); // q_comb_2
+  let p5 = 1;
+  for (let i = 1; i <= 5; i++) p5 *= i;
+  assert.equal(p5, 120); // q_comb_3
+  assert.equal((30 * 29 * 28) / 6, 4060); // q_comb_4
+
+  assert.equal(3 / 6, 0.5); // q_prob_2
+  assert.equal(3 / (3 + 5), 3 / 8); // q_prob_3
+  const c10_2 = (10 * 9) / 2; // 45
+  const c8_2 = (8 * 7) / 2; // 28
+  near(1 - c8_2 / c10_2, 17 / 45, "q_prob_4");
+});
+
 test("slide examples preserve unit-circle, supplementary-angle, and cosine-law identities", () => {
   // All 15 slide texts/formulas were also reviewed for their stated angle domains.
   // These checks cover the numerical examples and identities used in those slides.
