@@ -995,3 +995,142 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   // Bản nháp của người 1 (stu-1) TUYỆT ĐỐI KHÔNG xuất hiện trên form của người 2 (stu-2)
   assert.doesNotMatch(otherUserTaskHtml, /checked/);
 });
+
+test("teacher mark drafts are preserved for the same teacher but cleared when a different teacher logs in", async () => {
+  const teacher1Snapshot = {
+    profile: { id: "tea-1", name: "Cô Mai", role: "teacher", code: "GV-MAI" },
+    members: [],
+    questions: [],
+    assignments: [],
+    submissions: [
+      {
+        id: "sub-100",
+        assignment_id: "a-100",
+        student_id: "stu-99",
+        title: "Bài kiểm tra hình",
+        score: null,
+        pending: 1,
+        answers: [
+          {
+            questionId: "q-w1",
+            type: "written",
+            prompt: "Chứng minh định lý cos",
+            response: "Áp dụng tích vô hướng hai vectơ...",
+            explanation: "Dùng tam giác vuông hạ đường cao",
+          },
+        ],
+      },
+    ],
+  };
+
+  const teacher2Snapshot = {
+    ...teacher1Snapshot,
+    profile: { id: "tea-2", name: "Thầy Bình", role: "teacher", code: "GV-BINH" },
+  };
+
+  let activeSnapshot = teacher1Snapshot;
+  let sessionExpired = false;
+  const state = { role: "teacher", view: "online", mobile: false, presentation: false };
+  const online = createOnline({
+    state,
+    render() {},
+    toast() {},
+    fetchImpl: async (_url, opts) => {
+      const { action } = JSON.parse(opts.body);
+      if (sessionExpired) {
+        return {
+          ok: false,
+          status: 401,
+          json: async () => ({ error: "Phiên đăng nhập đã hết hạn.", signedOut: true }),
+        };
+      }
+      if (action === "load") {
+        return { ok: true, json: async () => ({ data: activeSnapshot }) };
+      }
+      if (action === "login") {
+        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }) };
+      }
+      return { ok: true, json: async () => ({ ok: true }) };
+    },
+  });
+
+  // 1. Giáo viên 1 (Cô Mai - tea-1) mở bài nộp và nhập điểm tự luận + nhận xét
+  await online.open("submission", "sub-100");
+  online.handleInput({
+    target: {
+      dataset: { onlineMark: "q-w1" },
+      value: "0.85",
+    },
+  });
+  online.handleInput({
+    target: {
+      dataset: { onlineFeedback: "1" },
+      value: "Lập luận chặt chẽ, cần vẽ thêm hình",
+    },
+  });
+
+  // Kiểm tra điểm nháp hiển thị
+  let detailHtml = online.view();
+  assert.match(detailHtml, /value="0\.85"/);
+  assert.match(detailHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
+
+  // 2. Phiên hết hạn khi gửi yêu cầu
+  sessionExpired = true;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "mark" },
+              values: {
+                "mark-q-w1": "0.85",
+                feedback: "Lập luận chặt chẽ, cần vẽ thêm hình",
+              },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+  assert.equal(online.isSignedIn(), false);
+
+  // 3. Cô Mai (tea-1) đăng nhập lại -> Điểm nháp và nhận xét được giữ nguyên
+  sessionExpired = false;
+  activeSnapshot = teacher1Snapshot;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "login" },
+              values: { email: "mai@example.com", password: "password123" },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+  assert.equal(online.profile().id, "tea-1");
+  online.navigate("submission", { id: "sub-100" });
+  detailHtml = online.view();
+  assert.match(detailHtml, /value="0\.85"/);
+  assert.match(detailHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
+
+  // 4. Nếu Thầy Bình (tea-2) đăng nhập vào cùng tab -> Bản nháp chấm bài của Cô Mai bị xóa sạch
+  activeSnapshot = teacher2Snapshot;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "login" },
+              values: { email: "binh@example.com", password: "password456" },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+  assert.equal(online.profile().id, "tea-2");
+  online.navigate("submission", { id: "sub-100" });
+  const otherTeacherHtml = online.view();
+  assert.doesNotMatch(otherTeacherHtml, /value="0\.85"/);
+  assert.doesNotMatch(otherTeacherHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
+});
