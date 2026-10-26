@@ -266,7 +266,7 @@ export function studentAssignedView(ctx) {
     <div>
       <div class="eyebrow">NHIỆM VỤ HỌC TẬP</div>
       <h1>Bài được giao (${assignments.length})</h1>
-      <p class="muted">Mỗi bài chỉ nộp một lần. Bản nháp được lưu tự động trong khi bạn làm bài.</p>
+      <p class="muted">Mỗi bài chỉ nộp một lần. Bản nháp đang làm được giữ trong phiên trang hiện tại (tải lại hoặc đóng tab có thể mất).</p>
     </div>
     <div class="online-actions">
       ${onlineBtn("Làm mới dữ liệu", "refresh", "", "secondary small")}
@@ -411,7 +411,7 @@ export function studentTaskView(ctx) {
       ? `<section class="card online-section"><p class="preserve-lines"><strong>Hướng dẫn của giáo viên:</strong> ${esc(a.instructions)}</p></section>`
       : ""
   }
-  <p class="muted small-text">Bản nháp bài làm được giữ tự động trong phiên trang này, kể cả khi mất mạng tạm thời.</p>
+  <p class="muted small-text">Bản nháp bài làm được giữ trong phiên trang hiện tại (kể cả khi mất mạng tạm thời; tải lại hoặc đóng tab có thể mất).</p>
   <form data-online-form="submit">
     ${a.questions
       .map(

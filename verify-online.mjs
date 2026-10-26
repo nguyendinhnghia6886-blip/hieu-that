@@ -218,6 +218,26 @@ test("student login opens learning overview, restores on reload, and hides teach
   online.navigate("questions");
   assert.equal(online.currentScreen(), "overview");
   assert.match(online.view(), /không thuộc vai trò tài khoản của bạn/);
+
+  // Navigating between lessons and practice synchronizes state.view, online.currentScreen(), and resets activeLesson/presentation
+  state.activeLesson = true;
+  state.presentation = true;
+  online.navigate("lessons");
+  assert.equal(online.currentScreen(), "lessons");
+  assert.equal(state.view, "lessons");
+  assert.equal(state.presentation, false);
+  assert.equal(state.activeLesson, true);
+
+  online.navigate("practice");
+  assert.equal(online.currentScreen(), "practice");
+  assert.equal(state.view, "practice");
+  assert.equal(state.activeLesson, false);
+  assert.equal(state.presentation, false);
+
+  online.navigate("assigned");
+  assert.equal(online.currentScreen(), "assigned");
+  assert.equal(state.view, "online");
+  assert.equal(state.activeLesson, false);
 });
 
 test("teacher login opens teaching overview with code, stats, and full workflow views", async () => {

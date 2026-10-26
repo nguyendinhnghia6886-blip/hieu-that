@@ -142,7 +142,15 @@ function render() {
   const isOnlineSignedIn = online?.isSignedIn?.() || false;
   const onlineProf = online?.profile?.() || null;
   const activeRole = hasOnlineProfile ? online.role() : state.role;
-  if (hasOnlineProfile) state.role = activeRole;
+  if (hasOnlineProfile) {
+    state.role = activeRole;
+    const onlineScreen = online.currentScreen?.();
+    state.view =
+      activeRole === "student" &&
+      (onlineScreen === "lessons" || onlineScreen === "practice")
+        ? onlineScreen
+        : "online";
+  }
 
   const title = hasOnlineProfile
     ? online.screenTitle()

@@ -227,8 +227,16 @@ export function createOnline({
     }
     if (r === "student" && (screen === "lessons" || screen === "practice")) {
       state.view = screen;
+      if (screen === "lessons") {
+        state.presentation = false;
+      } else {
+        state.activeLesson = false;
+        state.presentation = false;
+      }
     } else {
       state.view = "online";
+      state.activeLesson = false;
+      state.presentation = false;
     }
     updateHash(screen);
   }
