@@ -1125,12 +1125,39 @@ export function createOnline({
               : localQuestions().map((q) => ({ ...q, status: "draft" }));
           if (!source.length)
             throw new Error("Chưa có câu hỏi đã soạn trên thiết bị này.");
-          for (const q of source) {
+
+          const existingIds = new Set(
+            (snapshot?.questions || [])
+              .map((item) => item.content?.id)
+              .filter(Boolean),
+          );
+          const existingPrompts = new Set(
+            (snapshot?.questions || [])
+              .map((item) => item.content?.prompt?.trim())
+              .filter(Boolean),
+          );
+          const toImport = source.filter(
+            (q) =>
+              !existingIds.has(q.id) && !existingPrompts.has(q.prompt?.trim()),
+          );
+
+          if (!toImport.length) {
+            applyRoleNavigation("questions");
+            message = `Tất cả ${source.length} câu hỏi đã có trong kho, không bị trùng lặp.`;
+            return;
+          }
+
+          let importedCount = 0;
+          for (const q of toImport) {
             await request("question", { content: q });
+            importedCount++;
           }
           await load();
           applyRoleNavigation("questions");
-          message = `Đã nhập toàn bộ ${source.length} câu vào kho câu hỏi.`;
+          message =
+            toImport.length === source.length
+              ? `Đã nhập toàn bộ ${source.length} câu vào kho câu hỏi.`
+              : `Đã bổ sung ${importedCount} câu còn thiếu vào kho câu hỏi (${source.length - toImport.length} câu đã có trước đó).`;
         }
       });
     }
@@ -1299,6 +1326,7 @@ export function createOnline({
     profile,
     role,
     currentScreen: () => screen,
+    currentMessage: () => message,
     navItems,
     activeNavId,
     screenTitle,

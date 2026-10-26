@@ -1259,4 +1259,40 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   assert.ok(topics.has("Đường thẳng & Đường tròn"));
   assert.ok(topics.has("Đại số tổ hợp"));
   assert.ok(topics.has("Xác suất cổ điển"));
+
+  // Giả lập sau khi nhập thành công, snapshot có đủ 60 câu
+  teacherSnapshot.questions = questionRequests.map((r, idx) => ({
+    id: `q-db-${idx}`,
+    content: r.body.payload.content,
+  }));
+
+  // Bấm lại lần thứ 2: Chống nhập trùng, không gửi thêm bất kỳ yêu cầu tạo câu hỏi nào
+  const reqCountBefore = requests.filter((r) => r.body.action === "question").length;
+  await online.handleClick({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online]")
+          ? { dataset: { online: "samples" }, tagName: "BUTTON" }
+          : null,
+    },
+    preventDefault() {},
+  });
+  const reqCountAfter = requests.filter((r) => r.body.action === "question").length;
+  assert.equal(reqCountAfter, reqCountBefore, "Không gửi thêm request nào khi 60 câu đã có trong kho");
+  assert.match(online.currentMessage(), /không bị trùng lặp/);
+
+  // Giả lập trường hợp mạng đứt giữa chừng: chỉ có 39 câu trong kho
+  teacherSnapshot.questions = teacherSnapshot.questions.slice(0, 39);
+  await online.handleClick({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online]")
+          ? { dataset: { online: "samples" }, tagName: "BUTTON" }
+          : null,
+    },
+    preventDefault() {},
+  });
+  const reqCountResume = requests.filter((r) => r.body.action === "question").length;
+  assert.equal(reqCountResume - reqCountAfter, 21, "Chỉ gửi đúng 21 câu còn thiếu để hoàn tất 60 câu");
+  assert.match(online.currentMessage(), /Đã bổ sung 21 câu còn thiếu/);
 });

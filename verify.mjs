@@ -241,55 +241,45 @@ test("all 60 answer keys in the question bank agree with independently evaluated
     assert.equal(choice(id), answer, `Checking choice for ${id}`);
   }
 
-  // Kiểm tra độc lập phép tính số học / đại số / hình học
-  assert.equal(2 ** 2 - 4, 0); // q_prop_4
+  // Kiểm tra độc lập phép tính số học / đại số / hình học trực tiếp đối chiếu với đáp án lưu trong kho câu hỏi
+  assert.equal(choice("q_comb_1"), String(5 + 4)); // Quy tắc cộng: 5 áo + 4 quần = 9
+  assert.equal(choice("q_comb_2"), String(3 * 4)); // Quy tắc nhân: 3 áo x 4 quần = 12
+  let p5 = 1;
+  for (let i = 1; i <= 5; i++) p5 *= i;
+  assert.equal(choice("q_comb_3"), String(p5)); // Hoán vị P5 = 5! = 120
+  assert.equal(choice("q_comb_4"), String((30 * 29 * 28) / (3 * 2 * 1))); // Tổ hợp C(30, 3) = 4060
 
-  const nRoots = [-2, 2].filter((x) => x >= 0 && Number.isInteger(x));
-  assert.deepEqual(nRoots, [2]); // q_set_1
+  assert.equal(choice("q_stat_1"), String([3, 5, 7, 9, 11][2])); // Trung vị của dãy 5 số lẻ đã sắp thứ tự = 7
+  assert.equal(choice("q_stat_2"), String([2, 4, 6, 8, 10].reduce((a, b) => a + b) / 5)); // Số trung bình cộng = 6
+  assert.equal(choice("q_stat_3"), String(Math.max(12, 15, 18, 22, 30) - Math.min(12, 15, 18, 22, 30))); // Khoảng biến thiên R = 30 - 12 = 18
+  assert.equal(choice("q_stat_4"), String(27 - 15)); // Khoảng tứ phân vị Delta_Q = Q3 - Q1 = 27 - 15 = 12
 
-  assert.ok(2 * 1 - 3 * 0 + 1 > 0); // q_ineq_1
-  assert.ok(2 * 0 - 3 * 1 + 1 <= 0);
+  assert.equal(choice("q_scal_1"), String(2 * 4 + 3 * -1)); // Tích vô hướng a.b = 2(4) + 3(-1) = 5
+  assert.equal(choice("q_scal_3"), String(Math.round(2 * 2 * Math.cos(radians(60))))); // |a||b|cos(60°) = 2*2*0.5 = 2
+  assert.equal(choice("q_scal_4"), String(Math.hypot(-3, 4))); // Độ dài vectơ (-3; 4) = 5
+  assert.equal(choice("q_scal_2"), "m = 1"); // 1(-2) + 2(m) = 0 => m = 1
 
-  const maxF = Math.max(2 * 0 + 5 * 0, 2 * 3 + 5 * 0, 2 * 0 + 5 * 2);
-  assert.equal(maxF, 10); // q_sys_3
-
-  near(6 / (2 * Math.sin(radians(30))), 6, "q_sin_1");
-  near(0.5 * 4 * 5 * Math.sin(radians(30)), 5, "q_sin_2");
-  assert.equal((5 + 6 + 7) / 2, 9); // q_sin_3
-  near(
-    (8 * Math.sin(radians(45))) / Math.sin(radians(60)),
-    (8 * Math.sqrt(6)) / 3,
-    "q_sin_4",
-  );
-
-  assert.equal(2 * 4 + 3 * -1, 5); // q_scal_1
-  assert.equal(1 * -2 + 2 * 1, 0); // q_scal_2
-  near(2 * 2 * Math.cos(radians(60)), 2, "q_scal_3");
-  assert.equal(Math.hypot(-3, 4), 5); // q_scal_4
-
-  assert.equal([2, 4, 6, 8, 10].reduce((a, b) => a + b) / 5, 6); // q_stat_2
-  assert.equal(Math.max(12, 15, 18, 22, 30) - Math.min(12, 15, 18, 22, 30), 18); // q_stat_3
-  assert.equal(27 - 15, 12); // q_stat_4
+  assert.equal(choice("q_sin_1"), String(Math.round(6 / (2 * Math.sin(radians(30)))))); // R = a / (2 sin A) = 6 / (2 * 0.5) = 6
+  assert.equal(choice("q_sin_2"), String(Math.round(0.5 * 4 * 5 * Math.sin(radians(30)))) ); // S = 0.5 b c sin A = 0.5*4*5*0.5 = 5
+  assert.equal(choice("q_sin_3"), String((5 + 6 + 7) / 2)); // Nửa chu vi p = (5+6+7)/2 = 9
+  assert.equal(choice("q_sin_4"), "8√6/3"); // c = b sin C / sin B = 8 sin 45° / sin 60° = 8*(sqrt(2)/2)/(sqrt(3)/2) = 8*sqrt(6)/3
 
   const x0 = -(-4) / (2 * 1);
   const y0 = x0 ** 2 - 4 * x0 + 3;
-  assert.equal(x0, 2); // q_quad_1
-  assert.equal(y0, -1);
+  assert.equal(choice("q_quad_1"), `I(${x0}; ${y0 < 0 ? "−" + Math.abs(y0) : y0})`); // Đỉnh parabol y = x² - 4x + 3 là I(2; −1)
+  assert.equal(choice("q_quad_2"), `x = ${x0}`); // Trục đối xứng x = 2
+  assert.equal(choice("q_quad_3"), "(2; 3)"); // x² - 5x + 6 < 0 => (x-2)(x-3) < 0 => (2; 3)
 
-  assert.equal(Math.abs(3 * 1 + 4 * 2 - 1) / Math.hypot(3, 4), 2); // q_geom_2
+  const d = Math.abs(3 * 1 + 4 * 2 - 1) / Math.hypot(3, 4);
+  assert.equal(choice("q_geom_2"), String(d)); // Khoảng cách từ M(1; 2) đến 3x + 4y - 1 = 0 là 10/5 = 2
+  assert.equal(choice("q_geom_3"), "I(2; −3), R = 4"); // Tâm và bán kính (x-2)² + (y+3)² = 16
 
-  assert.equal(5 + 4, 9); // q_comb_1
-  assert.equal(3 * 4, 12); // q_comb_2
-  let p5 = 1;
-  for (let i = 1; i <= 5; i++) p5 *= i;
-  assert.equal(p5, 120); // q_comb_3
-  assert.equal((30 * 29 * 28) / 6, 4060); // q_comb_4
-
-  assert.equal(3 / 6, 0.5); // q_prob_2
-  assert.equal(3 / (3 + 5), 3 / 8); // q_prob_3
+  assert.equal(choice("q_prob_1"), "6"); // Số phần tử không gian mẫu khi gieo xúc xắc 6 mặt
+  assert.equal(choice("q_prob_2"), "1/2"); // Xác suất xuất hiện mặt chẵn {2, 4, 6} = 3/6 = 1/2
+  assert.equal(choice("q_prob_3"), "3/8"); // 3 bi đỏ trên tổng số (3+5) bi = 3/8
   const c10_2 = (10 * 9) / 2; // 45
   const c8_2 = (8 * 7) / 2; // 28
-  near(1 - c8_2 / c10_2, 17 / 45, "q_prob_4");
+  assert.equal(choice("q_prob_4"), "17/45"); // Xác suất có ít nhất 1 phế phẩm: 1 - C(8,2)/C(10,2) = 1 - 28/45 = 17/45
 });
 
 test("slide examples preserve unit-circle, supplementary-angle, and cosine-law identities", () => {
