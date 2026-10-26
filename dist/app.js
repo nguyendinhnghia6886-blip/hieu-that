@@ -609,7 +609,11 @@ companion = createCompanion({
 });
 
 document.addEventListener("click", async (event) => {
-  if (event.target.closest("[data-online]")) {
+  if (
+    event.target.closest("[data-online]") ||
+    event.target.closest(".sidebar-brand") ||
+    event.target.closest(".sidebar a")
+  ) {
     state.mobile = false;
   }
   const el = event.target.closest("[data-action]");

@@ -86,7 +86,13 @@ export function studentOverview(ctx) {
   const pendingSubmissions = submissions.filter(
     (s) => s.score === null || s.pending > 0,
   );
-  const gradedSubmissions = submissions.filter((s) => s.score !== null);
+  const gradedSubmissions = submissions
+    .filter((s) => s.score !== null)
+    .sort(
+      (a, b) =>
+        new Date(b.reviewed_at || b.created_at || 0).getTime() -
+        new Date(a.reviewed_at || a.created_at || 0).getTime(),
+    );
   const latestGraded = gradedSubmissions[0] || null;
 
   return `<div class="welcome-row">

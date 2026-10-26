@@ -156,7 +156,7 @@ export function createOnline({
     }
   }
 
-  function clearSessionState() {
+  function clearSessionState({ keepDrafts = false } = {}) {
     ocrState.run++;
     ocrState.worker?.terminate?.().catch(() => {});
     if (
@@ -191,8 +191,10 @@ export function createOnline({
     profileDraft = { name: "", role: "student" };
     importDraft = { topic: "Toán 10", source: "" };
     publishDraft = { title: "", due: "", instructions: "", ids: [] };
-    drafts.clear();
-    markDrafts.clear();
+    if (!keepDrafts) {
+      drafts.clear();
+      markDrafts.clear();
+    }
   }
 
   function refreshView() {
@@ -200,11 +202,32 @@ export function createOnline({
     render();
   }
 
+  function parseHashTarget(raw) {
+    if (!raw) return { screen: "overview", id: null };
+    const clean = String(raw).replace(/^#/, "").split("?")[0].trim();
+    if (!clean || clean === "home") return { screen: "overview", id: null };
+    if (clean.includes("/")) {
+      const parts = clean.split("/");
+      const scr = parts[0] || "overview";
+      const id = decodeURIComponent(parts.slice(1).join("/")) || null;
+      return { screen: scr, id };
+    }
+    return { screen: clean, id: null };
+  }
+
   function updateHash(targetScreen) {
     if (typeof history === "undefined" || typeof location === "undefined")
       return;
-    const hash =
-      targetScreen && targetScreen !== "overview" ? `#${targetScreen}` : "";
+    let hash = "";
+    if (targetScreen && targetScreen !== "overview") {
+      if (targetScreen === "task" && selectedAssignment) {
+        hash = `#task/${encodeURIComponent(selectedAssignment)}`;
+      } else if (targetScreen === "submission" && selectedSubmission) {
+        hash = `#submission/${encodeURIComponent(selectedSubmission)}`;
+      } else {
+        hash = `#${targetScreen}`;
+      }
+    }
     const search = hasProfile() ? "" : location.search;
     const nextUrl = `${location.pathname}${search}${hash}`;
     if (`${location.pathname}${location.search}${location.hash}` !== nextUrl) {
@@ -212,7 +235,7 @@ export function createOnline({
     }
   }
 
-  function applyRoleNavigation(requestedScreen) {
+  function applyRoleNavigation(requestedScreen, targetId = null) {
     const r = role();
     if (!r) return;
     syncRoleState();
@@ -221,6 +244,10 @@ export function createOnline({
       requestedScreen,
     );
     screen = resolved;
+    if (targetId) {
+      if (screen === "task") selectedAssignment = targetId;
+      if (screen === "submission") selectedSubmission = targetId;
+    }
     if (redirected) {
       message =
         "Màn hình vừa yêu cầu không thuộc vai trò tài khoản của bạn. Hệ thống đã mở trang Tổng quan.";
@@ -256,10 +283,17 @@ export function createOnline({
       .json()
       .catch(() => ({ error: "Máy chủ chưa sẵn sàng. Hãy thử lại sau." }));
     if (!response.ok) {
+      const errMsg = body.signedOut
+        ? `${body.error || "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."} (Bản nháp của bạn vẫn được giữ trong phiên trang này).`
+        : body.error || "Kết nối chưa thành công.";
       if (body.signedOut) {
-        clearSessionState();
+        clearSessionState({ keepDrafts: true });
+        state.view = "online";
+        authMode = "login";
+        message = errMsg;
+        refreshView();
       }
-      throw new Error(body.error || "Kết nối chưa thành công.");
+      throw new Error(errMsg);
     }
     return body;
   }
@@ -271,7 +305,7 @@ export function createOnline({
     syncRoleState();
   }
 
-  async function open(requestedScreen) {
+  async function open(requestedScreen, targetId = null) {
     state.view = "online";
     state.mobile = false;
     state.presentation = false;
@@ -281,7 +315,7 @@ export function createOnline({
     try {
       await load();
       if (hasProfile()) {
-        applyRoleNavigation(requestedScreen || screen);
+        applyRoleNavigation(requestedScreen || screen, targetId);
       }
     } catch (e) {
       if (signedIn || !String(e.message || "").includes("đăng nhập")) {
@@ -630,10 +664,17 @@ export function createOnline({
 
     const submitForm = target.closest?.('[data-online-form="submit"]');
     if (submitForm && selectedAssignment) {
-      drafts.set(
-        selectedAssignment,
-        Object.fromEntries(new FormData(submitForm)),
-      );
+      let vals = {};
+      if (submitForm.values) {
+        vals = { ...submitForm.values, [target.name]: target.value };
+      } else {
+        try {
+          vals = Object.fromEntries(new FormData(submitForm));
+        } catch {
+          vals = { [target.name]: target.value };
+        }
+      }
+      drafts.set(selectedAssignment, vals);
       return;
     }
 
@@ -747,7 +788,7 @@ export function createOnline({
       if (["login", "signup", "recover"].includes(action)) {
         authEmailDraft = String(values.email || "").trim();
         if (action === "login" || action === "signup") {
-          clearSessionState();
+          clearSessionState({ keepDrafts: action === "login" });
           authEmailDraft = String(values.email || "").trim();
         }
         const r = await request(action, values);
@@ -928,13 +969,14 @@ export function createOnline({
 
   function navigate(targetScreen, dataset = {}) {
     if (busy) return;
+    state.mobile = false;
     message = "";
     if (targetScreen === "logout") {
       perform(async () => {
         try {
           await request("logout");
         } finally {
-          clearSessionState();
+          clearSessionState({ keepDrafts: false });
           state.role = "student";
           state.view = "online";
           authMode = "login";
@@ -971,10 +1013,10 @@ export function createOnline({
       }
     } else if (targetScreen === "task") {
       selectedAssignment = dataset.id || selectedAssignment;
-      applyRoleNavigation("task");
+      applyRoleNavigation("task", selectedAssignment);
     } else if (targetScreen === "submission") {
       selectedSubmission = dataset.id || selectedSubmission;
-      applyRoleNavigation("submission");
+      applyRoleNavigation("submission", selectedSubmission);
     } else if (targetScreen === "submissions") {
       if ("assignment" in dataset)
         selectedAssignment = dataset.assignment || null;
@@ -1193,11 +1235,11 @@ export function createOnline({
 
     const searchParams = new URLSearchParams(location.search);
     const explicitOnline = searchParams.has("online");
-    const requestedHashScreen =
-      rawHash && !rawHash.includes("=") && rawHash !== "home" ? rawHash : "";
+    const { screen: requestedHashScreen, id: requestedHashId } =
+      parseHashTarget(rawHash);
 
     if (explicitOnline) {
-      await open(requestedHashScreen || "overview");
+      await open(requestedHashScreen || "overview", requestedHashId);
       return;
     }
 
@@ -1206,7 +1248,10 @@ export function createOnline({
       await load();
       if (signedIn) {
         if (hasProfile()) {
-          applyRoleNavigation(requestedHashScreen || "overview");
+          applyRoleNavigation(
+            requestedHashScreen || "overview",
+            requestedHashId,
+          );
         } else {
           state.view = "online";
         }
@@ -1219,9 +1264,10 @@ export function createOnline({
 
   if (typeof window !== "undefined" && window.addEventListener) {
     window.addEventListener("popstate", () => {
+      state.mobile = false;
       if (!hasProfile()) return;
-      const hashScreen = location.hash ? location.hash.slice(1) : "overview";
-      applyRoleNavigation(hashScreen || "overview");
+      const { screen: s, id } = parseHashTarget(location.hash);
+      applyRoleNavigation(s || "overview", id);
       refreshView();
     });
   }

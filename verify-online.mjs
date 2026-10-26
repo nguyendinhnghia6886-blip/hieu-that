@@ -783,3 +783,123 @@ test("network or server error on submit preserves student work, teacher question
   assert.match(gradingAfterError, /value="0\.75"/);
   assert.match(gradingAfterError, /Nhận xét không bị mất khi lỗi mạng/);
 });
+
+test("detail views restore from hash with ID, latest score sorts by review time, and session expiry preserves drafts", async () => {
+  const studentSnapshot = {
+    profile: { id: "stu-1", name: "Lê Bảo", role: "student" },
+    members: [],
+    questions: [],
+    assignments: [
+      {
+        id: "a-old",
+        title: "Bài tập 1",
+        questions: [{ id: "q1", type: "choice", prompt: "1+1=?", options: ["2", "3", "4", "5"] }],
+      },
+      {
+        id: "a-new",
+        title: "Bài tập 2",
+        questions: [{ id: "q2", type: "choice", prompt: "2+2=?", options: ["4", "5", "6", "7"] }],
+      },
+      {
+        id: "a-todo",
+        title: "Bài tập 3 chưa làm",
+        questions: [{ id: "q3", type: "choice", prompt: "3+3=?", options: ["6", "7", "8", "9"] }],
+      },
+    ],
+    // Mảng trả về có bài cũ ở đầu (được chấm sau), bài mới ở sau (được chấm trước)
+    submissions: [
+      {
+        id: "sub-old-assign",
+        assignment_id: "a-old",
+        student_id: "stu-1",
+        title: "Bài tập 1",
+        score: 7,
+        pending: 0,
+        created_at: "2026-09-01T00:00:00Z",
+        reviewed_at: "2026-10-26T12:00:00Z", // Chấm gần đây nhất!
+        answers: [],
+      },
+      {
+        id: "sub-new-assign",
+        assignment_id: "a-new",
+        student_id: "stu-1",
+        title: "Bài tập 2",
+        score: 10,
+        pending: 0,
+        created_at: "2026-10-20T00:00:00Z",
+        reviewed_at: "2026-10-21T00:00:00Z",
+        answers: [],
+      },
+    ],
+  };
+
+  let sessionExpired = false;
+  const state = { role: "student", view: "online", mobile: true, presentation: false };
+  const online = createOnline({
+    state,
+    render() {},
+    toast() {},
+    fetchImpl: async (_url, opts) => {
+      const { action } = JSON.parse(opts.body);
+      if (sessionExpired) {
+        return {
+          ok: false,
+          status: 401,
+          json: async () => ({ error: "Phiên đăng nhập đã hết hạn.", signedOut: true }),
+        };
+      }
+      if (action === "load") {
+        return { ok: true, json: async () => ({ data: studentSnapshot }) };
+      }
+      if (action === "submit") {
+        return { ok: true, json: async () => ({ data: { id: "sub-todo" } }) };
+      }
+      return { ok: true, json: async () => ({ ok: true }) };
+    },
+  });
+
+  // 1. Mở trực tiếp bài tập theo hash có ID (như khi bấm F5 tại #task/a-todo)
+  await online.open("task", "a-todo");
+  assert.equal(online.currentScreen(), "task");
+  assert.equal(state.mobile, false); // Sidebar mobile đóng khi mở bài
+  const taskHtml = online.view();
+  assert.match(taskHtml, /Bài tập 3 chưa làm/);
+  assert.match(taskHtml, /3\+3=\?/);
+
+  // 2. Điểm mới nhất phải ưu tiên bài có reviewed_at mới nhất (Bài tập 1: 7/10 lúc 26/10) thay vì bài nộp lúc trước
+  online.navigate("overview");
+  const overviewHtml = online.view();
+  assert.match(overviewHtml, /7\/10/);
+  assert.match(overviewHtml, /Bài tập 1/);
+
+  // 3. Học sinh nhập nháp bài làm, sau đó phiên hết hạn
+  online.navigate("task", { id: "a-todo" });
+  online.handleInput({
+    target: {
+      closest: (sel) => (sel === '[data-online-form="submit"]' ? { dataset: { onlineForm: "submit" } } : null),
+      name: "q3",
+      value: "0",
+    },
+  });
+
+  // Giả lập phiên hết hạn khi gửi yêu cầu
+  sessionExpired = true;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? { dataset: { onlineForm: "submit" }, values: { q3: "0" } }
+          : null,
+    },
+    preventDefault() {},
+  });
+
+  // Sau khi hết hạn: không còn hiển thị dữ liệu tài khoản cũ, giao diện chuyển về form đăng nhập
+  assert.equal(online.isSignedIn(), false);
+  assert.equal(online.hasProfile(), false);
+  const expiredHtml = online.view();
+  assert.match(expiredHtml, /Phiên đăng nhập đã hết hạn/);
+  assert.match(expiredHtml, /Bản nháp của bạn vẫn được giữ trong phiên trang này/);
+  assert.match(expiredHtml, /Đăng nhập/);
+  assert.doesNotMatch(expiredHtml, /Chào Lê Bảo/); // Không lộ dữ liệu tài khoản cũ
+});
