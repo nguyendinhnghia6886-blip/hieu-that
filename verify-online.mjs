@@ -1024,8 +1024,29 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
   };
 
   const teacher2Snapshot = {
-    ...teacher1Snapshot,
     profile: { id: "tea-2", name: "Thầy Bình", role: "teacher", code: "GV-BINH" },
+    members: [],
+    questions: [],
+    assignments: [],
+    submissions: [
+      {
+        id: "sub-200",
+        assignment_id: "a-200",
+        student_id: "stu-101",
+        title: "Bài kiểm tra lượng giác lớp Thầy Bình",
+        score: null,
+        pending: 1,
+        answers: [
+          {
+            questionId: "q-w2",
+            type: "written",
+            prompt: "Giải phương trình lượng giác",
+            response: "sin x = 1/2...",
+            explanation: "x = pi/6 + k2pi...",
+          },
+        ],
+      },
+    ],
   };
 
   let activeSnapshot = teacher1Snapshot;
@@ -1114,7 +1135,7 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
   assert.match(detailHtml, /value="0\.85"/);
   assert.match(detailHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
 
-  // 4. Nếu Thầy Bình (tea-2) đăng nhập vào cùng tab -> Bản nháp chấm bài của Cô Mai bị xóa sạch
+  // 4. Nếu Thầy Bình (tea-2) đăng nhập vào cùng tab:
   activeSnapshot = teacher2Snapshot;
   await online.handleSubmit({
     target: {
@@ -1129,7 +1150,13 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
     preventDefault() {},
   });
   assert.equal(online.profile().id, "tea-2");
+
+  // 4a. Thầy Bình mở bài nộp sub-100 (thuộc quyền Cô Mai) -> Bị từ chối truy cập vì không thuộc lớp của mình
   online.navigate("submission", { id: "sub-100" });
+  assert.match(online.view(), /Không tìm thấy bài nộp/);
+
+  // 4b. Thầy Bình mở bài nộp sub-200 (thuộc quyền của Thầy Bình) -> Form sạch, không dính điểm/nhận xét của Cô Mai
+  online.navigate("submission", { id: "sub-200" });
   const otherTeacherHtml = online.view();
   assert.doesNotMatch(otherTeacherHtml, /value="0\.85"/);
   assert.doesNotMatch(otherTeacherHtml, /Lập luận chặt chẽ, cần vẽ thêm hình/);
