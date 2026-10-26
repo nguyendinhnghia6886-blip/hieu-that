@@ -108,6 +108,12 @@ const { practiceView, resultView, evidenceHistory, progressView } =
 const { teacherHome, libraryView, settingsView } =
   createTeacherViews(viewContext);
 
+function initials(name = "") {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "HT";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts.at(-1)[0]).toUpperCase();
+}
 function navItems() {
   if (state.role === "teacher")
     return [
@@ -132,54 +138,128 @@ function navItems() {
   ];
 }
 function render() {
-  const title =
-    navItems().find((i) => i[0] === state.view)?.[2] ||
-    {
-      editor: "Soạn câu hỏi",
-      import: "Nhập đề bài",
-      assign: "Giao bài",
-      task: "Bài được giao",
-      account: "Tài khoản",
-      online: "Tài khoản & lớp học online",
-      connections: "Kết nối dịch vụ",
-    }[state.view] ||
-    "Không gian học tập";
+  const hasOnlineProfile = online?.hasProfile?.() || false;
+  const isOnlineSignedIn = online?.isSignedIn?.() || false;
+  const onlineProf = online?.profile?.() || null;
+  const activeRole = hasOnlineProfile ? online.role() : state.role;
+  if (hasOnlineProfile) state.role = activeRole;
+
+  const title = hasOnlineProfile
+    ? online.screenTitle()
+    : isOnlineSignedIn && state.view === "online"
+      ? online.screenTitle()
+      : navItems().find((i) => i[0] === state.view)?.[2] ||
+        {
+          editor: "Soạn câu hỏi",
+          import: "Nhập đề bài",
+          assign: "Giao bài",
+          task: "Bài được giao",
+          account: "Tài khoản",
+          online: "Đăng nhập & tài khoản",
+          connections: "Kết nối dịch vụ",
+        }[state.view] ||
+        "Không gian học tập";
+
+  const sidebarNavHTML = hasOnlineProfile
+    ? online
+        .navItems()
+        .map(
+          ([id, ic, text, badge]) =>
+            `<button class="nav-item" data-online="${id}" ${
+              online.activeNavId() === id ? 'aria-current="page"' : ""
+            }>${icon(ic)}<span>${text}</span>${
+              badge ? `<span class="nav-badge">${esc(badge)}</span>` : ""
+            }</button>`,
+        )
+        .join("")
+    : navItems()
+        .map(
+          ([id, ic, text]) =>
+            `<button class="nav-item" data-action="nav" data-view="${id}" ${
+              state.view === id ? 'aria-current="page"' : ""
+            }>${icon(ic)}<span>${text}</span>${
+              id === "lessons" ? '<span class="nav-badge">3</span>' : ""
+            }</button>`,
+        )
+        .join("");
+
+  const avatarLabel = hasOnlineProfile
+    ? initials(onlineProf.name)
+    : activeRole === "teacher"
+      ? "GV"
+      : activeRole === "admin"
+        ? "QT"
+        : "B";
+
+  const spaceName =
+    activeRole === "teacher" ? "Không gian giảng dạy" : "Không gian học tập";
+
   document.body.classList.toggle("presentation-mode", state.presentation);
   $("#app").innerHTML = `<div class="app-shell">
     ${state.mobile ? '<button class="sidebar-scrim" data-action="close-menu" aria-label="Đóng điều hướng"></button>' : ""}
     <aside class="sidebar ${state.mobile ? "open" : ""}" aria-label="Điều hướng chính">
-      <a class="sidebar-brand" href="#home" data-action="nav" data-view="home"><span class="brand-mark">${icon("book")}</span><span><span class="brand-name">Hiểu Thật<span class="brand-period">.</span></span><span class="brand-sub">HỌC ĐỂ HIỂU, HIỂU ĐỂ LÀM</span></span></a>
-      <div class="sidebar-label">${state.role === "student" ? "KHÔNG GIAN HỌC TẬP" : state.role === "teacher" ? "KHÔNG GIAN GIẢNG DẠY" : "QUẢN LÝ TRẢI NGHIỆM"}</div>
-      <nav class="nav-list">${navItems()
-        .map(
-          ([id, ic, text]) =>
-            `<button class="nav-item" data-action="nav" data-view="${id}" ${state.view === id ? 'aria-current="page"' : ""}>${icon(ic)}<span>${text}</span>${id === "lessons" ? '<span class="nav-badge">3</span>' : ""}</button>`,
-        )
-        .join("")}</nav>
+      <a class="sidebar-brand" href="${hasOnlineProfile ? "#overview" : "#home"}" ${
+        hasOnlineProfile
+          ? 'data-online="overview"'
+          : 'data-action="nav" data-view="home"'
+      }><span class="brand-mark">${icon("book")}</span><span><span class="brand-name">Hiểu Thật<span class="brand-period">.</span></span><span class="brand-sub">HỌC ĐỂ HIỂU, HIỂU ĐỂ LÀM</span></span></a>
+      <div class="sidebar-label">${activeRole === "student" ? "KHÔNG GIAN HỌC TẬP" : activeRole === "teacher" ? "KHÔNG GIAN GIẢNG DẠY" : "QUẢN LÝ TRẢI NGHIỆM"}</div>
+      <nav class="nav-list">${sidebarNavHTML}</nav>
       <div class="sidebar-bottom"><div class="sidebar-note"><span class="note-leaf">${icon("leaf")}</span><strong>Hiểu thêm một chút,<br>tiến xa thêm một bước.</strong><p>Mỗi câu hỏi là một cơ hội<br>hiểu rõ chính mình.</p></div>
-      <button class="nav-item" data-action="online">${icon("users")}<span>Tài khoản & lớp học online</span></button>
+      ${
+        hasOnlineProfile
+          ? ""
+          : `<button class="nav-item ${state.view === "online" ? "active" : ""}" data-action="online">${icon("users")}<span>Đăng nhập / Tài khoản online</span></button>`
+      }
       <button class="nav-item" data-action="help">${icon("help")}<span>Về Hiểu Thật</span></button>
-      <div class="sidebar-user"><div class="avatar">${state.role === "teacher" ? "GV" : state.role === "admin" ? "QT" : "B"}</div><div class="user-details"><strong>${esc(workspace.profileName())}</strong><span>Hồ sơ trải nghiệm</span></div><span class="online-dot"></span></div>
-      <div class="local-note">Bản trải nghiệm · Lưu trên thiết bị</div></div>
+      <div class="sidebar-user"><div class="avatar">${esc(avatarLabel)}</div><div class="user-details"><strong>${esc(hasOnlineProfile ? onlineProf.name : workspace.profileName())}</strong><span>${
+        hasOnlineProfile
+          ? activeRole === "teacher"
+            ? `Giáo viên · ${esc(onlineProf.code || "")}`
+            : "Tài khoản Học sinh"
+          : "Chế độ tự học & trải nghiệm"
+      }</span></div><span class="online-dot"></span></div>
+      <div class="local-note">${
+        hasOnlineProfile
+          ? "Tài khoản trực tuyến · Đồng bộ cơ sở dữ liệu"
+          : "Bản tự học & trải nghiệm · Lưu trên thiết bị"
+      }</div></div>
     </aside>
-    <div class="app-main"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Mở điều hướng">${icon("menu")}</button><span>Không gian học tập</span>${icon("right")}<strong>${title}</strong></div><div class="top-actions"><div class="role-switch" aria-label="Chọn vai trò minh họa">${[
-      ["student", "Học sinh"],
-      ["teacher", "Giáo viên"],
-    ]
-      .map(
-        ([r, t]) =>
-          `<button data-action="role" data-role="${r}" class="${state.role === r ? "active" : ""}" aria-pressed="${state.role === r}">${t}</button>`,
-      )
-      .join(
-        "",
-      )}</div><button class="icon-button" data-action="notifications" aria-label="Thông báo">${icon("bell")}<span class="notification-dot"></span></button><button class="profile-avatar" data-action="settings" aria-label="Cài đặt tài khoản">${state.role === "teacher" ? "GV" : "B"}</button></div></header>
+    <div class="app-main"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Mở điều hướng">${icon("menu")}</button><span>${spaceName}</span>${icon("right")}<strong>${esc(title)}</strong></div><div class="top-actions">${
+      hasOnlineProfile
+        ? `<span class="tag green online-role-badge">${
+            activeRole === "teacher"
+              ? "Vai trò: Giáo viên"
+              : "Vai trò: Học sinh"
+          }</span><button type="button" class="button ghost small" data-online="refresh">Làm mới</button><button type="button" class="profile-avatar" data-online="profile" aria-label="Hồ sơ tài khoản">${esc(avatarLabel)}</button>`
+        : isOnlineSignedIn
+          ? `<button type="button" class="button ghost small" data-online="logout">Đăng xuất</button>`
+          : `<div class="role-switch" aria-label="Chọn vai trò minh họa">${[
+              ["student", "Học sinh"],
+              ["teacher", "Giáo viên"],
+            ]
+              .map(
+                ([r, t]) =>
+                  `<button data-action="role" data-role="${r}" class="${state.role === r ? "active" : ""}" aria-pressed="${state.role === r}">${t}</button>`,
+              )
+              .join(
+                "",
+              )}</div><button type="button" class="button primary small" data-action="online">Đăng nhập</button><button class="icon-button" data-action="notifications" aria-label="Thông báo">${icon("bell")}<span class="notification-dot"></span></button><button class="profile-avatar" data-action="settings" aria-label="Cài đặt trải nghiệm">${state.role === "teacher" ? "GV" : "B"}</button>`
+    }</div></header>
     <main id="main-content" class="page-content" tabindex="-1">${viewContent()}</main>
-    <footer class="footer-note"><span>Hiểu Thật © 2026</span><span>Học theo bằng chứng. Tiến bộ theo cách của bạn.</span>${button("Về bản trải nghiệm", "help", "ghost small")}</footer></div></div>`;
+    <footer class="footer-note"><span>Hiểu Thật © 2026</span><span>Học theo bằng chứng. Tiến bộ theo cách của bạn.</span>${button("Về Hiểu Thật", "help", "ghost small")}</footer></div></div>`;
   document.title = `${title} · Hiểu Thật`;
   companion?.sync();
 }
 function viewContent() {
-  if (state.view === "online") return online.view();
+  if (online?.hasProfile?.()) {
+    if (online.role() === "student") {
+      if (online.currentScreen() === "lessons") return lessonView();
+      if (online.currentScreen() === "practice") return practiceView();
+    }
+    return online.view();
+  }
+  if (online?.isSignedIn?.() || state.view === "online") return online.view();
   const additional = workspace.view();
   if (additional !== null) return additional;
   if (state.view === "home")
@@ -349,7 +429,11 @@ function openLesson(id) {
   state.interactiveAngle = defaultSlideAngle(state.lesson, state.slide);
   state.mobile = false;
   markSlideVisited();
-  render();
+  if (online?.hasProfile?.() && online.role() === "student") {
+    online.navigate("lessons");
+  } else {
+    render();
+  }
   window.scrollTo({ top: 0 });
 }
 function moveSlide(n) {
@@ -477,25 +561,34 @@ companion = createCompanion({
   ai: createOllamaClient(),
   getPractice: () => practice,
   getContext: () => {
-    const learning = state.view === "lessons" && state.activeLesson;
+    const hasOnline = online?.hasProfile?.() || false;
+    const activeRole = hasOnline ? online.role() : state.role;
+    const currentView =
+      hasOnline && online.role() === "student"
+        ? online.currentScreen() === "task"
+          ? "task"
+          : online.currentScreen()
+        : state.view;
+    const learning = currentView === "lessons" && state.activeLesson;
     const practicing =
-      state.view === "practice" && practice && practice.phase !== "result";
+      currentView === "practice" && practice && practice.phase !== "result";
     const lesson = learning || practicing ? lessonFor(state.lesson) : null;
-    const page =
-      navItems().find((i) => i[0] === state.view)?.[2] ||
-      {
-        editor: "Soạn câu hỏi",
-        import: "Nhập đề bài",
-        assign: "Giao bài",
-        task: "Bài được giao",
-        account: "Tài khoản",
-        connections: "Kết nối dịch vụ",
-        settings: "Cài đặt",
-      }[state.view] ||
-      "Hiểu Thật";
+    const page = hasOnline
+      ? online.screenTitle()
+      : navItems().find((i) => i[0] === state.view)?.[2] ||
+        {
+          editor: "Soạn câu hỏi",
+          import: "Nhập đề bài",
+          assign: "Giao bài",
+          task: "Bài được giao",
+          account: "Tài khoản",
+          connections: "Kết nối dịch vụ",
+          settings: "Cài đặt",
+        }[state.view] ||
+        "Hiểu Thật";
     return {
-      role: state.role,
-      view: state.view,
+      role: activeRole,
+      view: currentView,
       lesson,
       slide: learning ? lesson.slides[state.slide] : null,
       question: practicing ? activeQuestion() : null,
@@ -508,24 +601,39 @@ companion = createCompanion({
 });
 
 document.addEventListener("click", async (event) => {
+  if (event.target.closest("[data-online]")) {
+    state.mobile = false;
+  }
   const el = event.target.closest("[data-action]");
   if (!el) return;
   if (el.tagName === "A") event.preventDefault();
   const action = el.dataset.action;
-  if (action === "account") {
+  if (action === "account" || action === "online") {
     closeModal();
     await online.open();
     return;
   }
   if (await workspace.handle(action, el)) return;
   if (action === "nav") {
-    state.view = el.dataset.view;
+    const targetView = el.dataset.view;
     state.activeLesson = false;
     state.presentation = false;
     state.mobile = false;
-    render();
+    if (online?.hasProfile?.()) {
+      const mapped =
+        targetView === "progress"
+          ? "grades"
+          : targetView === "home"
+            ? "overview"
+            : targetView;
+      online.navigate(mapped);
+    } else {
+      state.view = targetView;
+      render();
+    }
     window.scrollTo({ top: 0 });
   } else if (action === "role") {
+    if (online?.isSignedIn?.()) return;
     state.role = el.dataset.role;
     state.view = "home";
     state.activeLesson = false;
@@ -551,11 +659,19 @@ document.addEventListener("click", async (event) => {
   } else if (action === "finish-lesson") {
     markSlideVisited();
     newPractice(state.lesson);
-    render();
+    if (online?.hasProfile?.() && online.role() === "student") {
+      online.navigate("practice");
+    } else {
+      render();
+    }
     window.scrollTo({ top: 0 });
   } else if (action === "start-practice") {
     newPractice(el.dataset.lesson);
-    render();
+    if (online?.hasProfile?.() && online.role() === "student") {
+      online.navigate("practice");
+    } else {
+      render();
+    }
     window.scrollTo({ top: 0 });
   } else if (action === "choose-practice") {
     practice = null;
@@ -765,9 +881,13 @@ online = createOnline({
   toast,
   questionBank,
   localQuestions: () => data.customQuestions || [],
-});
-document.addEventListener("click", (e) => {
-  if (e.target.closest('[data-action="online"]')) online.open();
+  localProgress: () => ({
+    completedCount: data.completed.length,
+    totalLessons: lessons.length,
+    sessionCount: data.sessions.length,
+    supportedCount: data.sessions.filter((s) => s.status === "supported")
+      .length,
+  }),
 });
 render();
 online.init();

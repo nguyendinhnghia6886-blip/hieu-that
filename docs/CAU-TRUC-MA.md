@@ -11,6 +11,10 @@
 | Tổng quan giáo viên, thư viện, cài đặt            | `dist/views/teacher.js`                                                                      |
 | Giao diện soạn câu, nhập đề, giao bài, lớp, hồ sơ | `dist/views/workspace.js`                                                                    |
 | Lưu nháp, OCR, giao/nộp bài, hồ sơ                | `dist/workspace.js`                                                                          |
+| Phiên đăng nhập, điều hướng vai trò và lớp online | `dist/online.js`, `dist/online.css`                                                          |
+| Màn hình không gian Học sinh đã đăng nhập         | `dist/views/online-student.js`                                                               |
+| Màn hình không gian Giáo viên đã đăng nhập        | `dist/views/online-teacher.js`                                                               |
+| API xác thực, cookie phiên và RPC Supabase        | `api/learning.js`, `db/schema.sql`, `db/verify-access.sql`                                   |
 | Hình tròn lượng giác và tam giác                  | `dist/ui/visuals.js`                                                                         |
 | Biểu tượng và HTML dùng chung                     | `dist/ui/icons.js`, `dist/ui/helpers.js`, `dist/ui/dom.js`                                   |
 | Màu nền, kiểu chữ                                 | `dist/styles/base.css`                                                                       |

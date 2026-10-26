@@ -1,13 +1,17 @@
-# Hiểu Thật 2.3 — trạng thái triển khai
+# Hiểu Thật 2.4 — trạng thái triển khai
 
 Cập nhật 27/10/2026. Website chính: https://hieu-that.vercel.app/
 
 ## Chức năng mới
 
-- Tài khoản email/mật khẩu qua Supabase Auth, khôi phục mật khẩu; chọn vai trò lần đầu.
-- Mã giáo viên riêng; học sinh có thể nhập mã sau. Kho câu hỏi riêng, nhập tay, dán văn bản hoặc nhập câu đã soạn/OCR trên máy, duyệt trước khi giao.
-- Bài giao giữ nguyên đề lúc giao; sửa kho không làm đổi đề. Chấm trắc nghiệm phía máy chủ, tự luận do giáo viên chấm; điểm thang 10, trọng số mỗi câu bằng nhau.
-- Lớp online đồng bộ Supabase. Tiến độ tự học, lớp minh họa và chat có sẵn vẫn lưu trên thiết bị.
+- Tài khoản email/mật khẩu qua Supabase Auth, khôi phục mật khẩu; chọn vai trò một lần khi tạo hồ sơ lần đầu, các lần đăng nhập hoặc tải lại trang sau tự mở đúng không gian theo `hieu_private.profiles.role`.
+- Tách hoàn toàn hai không gian làm việc theo vai trò sau đăng nhập, ẩn thanh chuyển đổi vai trò trải nghiệm (`.role-switch`) và xóa sạch dữ liệu phiên cũ khi đăng xuất hoặc đổi tài khoản:
+  - **Không gian Học sinh (`student`)**: Tổng quan học tập, Bài học, Luyện tập, Bài được giao, Điểm & tiến độ (tách rõ điểm bài giao online với tiến độ tự học lưu cục bộ), Giáo viên của tôi, Hồ sơ và Đăng xuất.
+  - **Không gian Giáo viên (`teacher`)**: Tổng quan giảng dạy (mã giáo viên và nút sao chép, thống kê thật), Kho câu hỏi, Soạn câu hỏi (trắc nghiệm/tự luận, tách văn bản, OCR ảnh trên máy), Bài đã giao (xem trước đề trước khi giao và xem lại bản đề cố định), Bài nộp & chấm điểm (tự luận 0..1 và nhận xét, tính lại thang 10), Học sinh, Hồ sơ và Đăng xuất.
+- Mã giáo viên riêng; học sinh có thể nhập mã ngay hoặc bổ sung sau.
+- Bài giao giữ nguyên đề lúc giao; sửa kho không làm đổi đề. Chấm trắc nghiệm phía máy chủ, tự luận do giáo viên chấm (chưa chấm hiển thị `Chờ chấm`, không bị tính 0); điểm thang 10, trọng số mỗi câu bằng nhau.
+- Giữ nguyên nội dung đang nhập (bài làm học sinh, câu hỏi đang soạn, đề đang chọn giao, điểm/nhận xét đang chấm) khi có lỗi mạng hoặc lỗi kiểm tra dữ liệu.
+- Lớp online đồng bộ Supabase. Tiến độ tự học, lớp minh họa khi chưa đăng nhập và chat có sẵn vẫn lưu trên thiết bị.
 - Cookie HttpOnly/Secure, xác thực phiên và kiểm tra quyền từng thao tác; không gửi đáp án trước khi nộp.
 
 ## Kết nối

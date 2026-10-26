@@ -1,8 +1,8 @@
 # Hiểu Thật
 
-Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.3.0 bổ sung lớp học trực tuyến qua Supabase và chấm điểm thang 10.
+Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.4.0 tách hoàn toàn hai không gian làm việc trực tuyến theo vai trò **Học sinh** và **Giáo viên** ngay sau khi đăng nhập, tự động khôi phục phiên và vai trò khi tải lại trang.
 
-Vào **Tài khoản & lớp học online** để dùng dữ liệu đồng bộ. Phần tự học và lớp mẫu vẫn lưu trên thiết bị. Đăng ký công khai còn cần chủ website cấu hình dịch vụ gửi email; Google/Facebook/SMS chưa được bật. Xem [trạng thái triển khai và việc còn lại](docs/HOAN-THIEN-ONLINE.md).
+Vào **Đăng nhập / Tạo tài khoản** để mở không gian học tập (Học sinh) hoặc không gian giảng dạy (Giáo viên) với dữ liệu đồng bộ qua Supabase. Phần tự học và lớp mẫu khi chưa đăng nhập vẫn lưu trên thiết bị. Đăng ký công khai còn cần chủ website cấu hình dịch vụ gửi email; Google/Facebook/SMS chưa được bật. Xem [trạng thái triển khai và việc còn lại](docs/HOAN-THIEN-ONLINE.md).
 
 ## Chạy trên máy
 
@@ -41,18 +41,24 @@ Máy chủ website chỉ lắng nghe `127.0.0.1:4174`, gọi Ollama tại `127.0
 
 ```text
 dist/
-  app.js                 Khởi tạo, trạng thái, điều hướng và sự kiện chính
-  workspace.js           Điều khiển soạn bài, giao bài, hồ sơ, OCR và bản nháp
+  app.js                 Khởi tạo, trạng thái, điều hướng theo vai trò và sự kiện chính
+  online.js              Xác thực, phiên đăng nhập, điều hướng vai trò và thao tác lớp online
+  online.css             Giao diện không gian Học sinh & Giáo viên online
+  views/online-student.js Các màn hình riêng cho tài khoản Học sinh đã đăng nhập
+  views/online-teacher.js Các màn hình riêng cho tài khoản Giáo viên đã đăng nhập
+  workspace.js           Điều khiển soạn bài, giao bài, hồ sơ, OCR và bản nháp cục bộ
   learning.js            Điểm nhập chung cho nội dung và đánh giá
   content/               Bài học, câu hỏi, câu xác minh, vận dụng, nhãn
   learning/evidence.js   Quy tắc chọn câu xác minh và tổng hợp căn cứ
-  views/                 HTML theo màn hình học sinh, luyện tập, giáo viên, soạn bài
+  views/                 HTML theo màn hình tự học, luyện tập và bản trải nghiệm
   ui/                    Biểu tượng, escape HTML, ngày tháng, hình minh họa
   styles/                CSS nền, điều hướng, bài học, luyện tập, responsive
   styles.css             Nạp CSS theo đúng thứ tự hiển thị
   authoring.js           Kiểm tra đề, tách câu và mã hóa bài chia sẻ
   companion*.js/.css     Chatbot Bạn Hiểu và gợi ý cục bộ
   ollama-client.js       Giao diện chọn model và gửi chat
+api/learning.js          API Vercel xác thực phiên và gọi RPC Supabase
+db/                      Định nghĩa schema và kiểm thử quyền truy cập dữ liệu
 server.mjs               Máy chủ nội bộ phục vụ website
 ollama-server.mjs        Adapter API Ollama, kiểm tra origin và giới hạn yêu cầu
 verify*.mjs              Bộ kiểm thử chức năng, dữ liệu và trạng thái
