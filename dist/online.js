@@ -133,6 +133,7 @@ export function createOnline({
 
   const drafts = new Map();
   const markDrafts = new Map();
+  let draftOwnerId = null;
 
   let ocrState = {
     busy: false,
@@ -194,6 +195,7 @@ export function createOnline({
     if (!keepDrafts) {
       drafts.clear();
       markDrafts.clear();
+      draftOwnerId = null;
     }
   }
 
@@ -303,6 +305,13 @@ export function createOnline({
     snapshot = result.data;
     signedIn = true;
     syncRoleState();
+    if (snapshot?.profile?.id) {
+      if (draftOwnerId && draftOwnerId !== snapshot.profile.id) {
+        drafts.clear();
+        markDrafts.clear();
+      }
+      draftOwnerId = snapshot.profile.id;
+    }
   }
 
   async function open(requestedScreen, targetId = null) {
@@ -664,6 +673,7 @@ export function createOnline({
 
     const submitForm = target.closest?.('[data-online-form="submit"]');
     if (submitForm && selectedAssignment) {
+      if (snapshot?.profile?.id) draftOwnerId = snapshot.profile.id;
       let vals = {};
       if (submitForm.values) {
         vals = { ...submitForm.values, [target.name]: target.value };
@@ -730,6 +740,7 @@ export function createOnline({
         target.dataset?.onlineFeedback !== undefined) &&
       selectedSubmission
     ) {
+      if (snapshot?.profile?.id) draftOwnerId = snapshot.profile.id;
       const current = markDrafts.get(selectedSubmission) || {
         marks: {},
         feedback: undefined,

@@ -851,6 +851,9 @@ test("detail views restore from hash with ID, latest score sorts by review time,
       if (action === "load") {
         return { ok: true, json: async () => ({ data: studentSnapshot }) };
       }
+      if (action === "login") {
+        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công." }) };
+      }
       if (action === "submit") {
         return { ok: true, json: async () => ({ data: { id: "sub-todo" } }) };
       }
@@ -902,4 +905,93 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   assert.match(expiredHtml, /Bản nháp của bạn vẫn được giữ trong phiên trang này/);
   assert.match(expiredHtml, /Đăng nhập/);
   assert.doesNotMatch(expiredHtml, /Chào Lê Bảo/); // Không lộ dữ liệu tài khoản cũ
+
+  // 4. Đăng nhập lại CÙNG tài khoản (Lê Bảo - stu-1): Bản nháp bài làm được khôi phục nguyên vẹn
+  sessionExpired = false;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "login" },
+              values: { email: "lebao@example.com", password: "password123" },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+  assert.equal(online.isSignedIn(), true);
+  assert.equal(online.profile().id, "stu-1");
+  online.navigate("task", { id: "a-todo" });
+  const restoredTaskHtml = online.view();
+  assert.match(restoredTaskHtml, /checked/); // Lựa chọn "0" vẫn được giữ trong form
+
+  // 5. Phiên hết hạn lần 2 và một tài khoản KHÁC (Trần Nam - stu-2) đăng nhập vào cùng tab
+  sessionExpired = true;
+  await online.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? { dataset: { onlineForm: "submit" }, values: { q3: "0" } }
+          : null,
+    },
+    preventDefault() {},
+  });
+  assert.equal(online.isSignedIn(), false);
+
+  // Chuẩn bị snapshot cho tài khoản khác (stu-2)
+  const otherStudentSnapshot = {
+    ...studentSnapshot,
+    profile: { id: "stu-2", name: "Trần Nam", role: "student" },
+  };
+
+  sessionExpired = false;
+  // Khởi tạo phiên của Người 1 (stu-1)
+  let activeSnapshot = studentSnapshot;
+  const onlineOther = createOnline({
+    state,
+    render() {},
+    toast() {},
+    fetchImpl: async (_url, opts) => {
+      const { action } = JSON.parse(opts.body);
+      if (action === "load") {
+        return { ok: true, json: async () => ({ data: activeSnapshot }) };
+      }
+      if (action === "login") {
+        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }) };
+      }
+      return { ok: true, json: async () => ({ ok: true }) };
+    },
+  });
+
+  // Tái hiện luồng: Người 1 (stu-1) gõ nháp
+  await onlineOther.open("task", "a-todo");
+  onlineOther.handleInput({
+    target: {
+      closest: (sel) => (sel === '[data-online-form="submit"]' ? { dataset: { onlineForm: "submit" } } : null),
+      name: "q3",
+      value: "0",
+    },
+  });
+
+  // Người 2 (stu-2) đăng nhập vào cùng tab này
+  activeSnapshot = otherStudentSnapshot;
+  await onlineOther.handleSubmit({
+    target: {
+      closest: (sel) =>
+        sel.includes("[data-online-form")
+          ? {
+              dataset: { onlineForm: "login" },
+              values: { email: "trannam@example.com", password: "password456" },
+            }
+          : null,
+    },
+    preventDefault() {},
+  });
+
+  assert.equal(onlineOther.profile().id, "stu-2");
+  onlineOther.navigate("task", { id: "a-todo" });
+  const otherUserTaskHtml = onlineOther.view();
+  // Bản nháp của người 1 (stu-1) TUYỆT ĐỐI KHÔNG xuất hiện trên form của người 2 (stu-2)
+  assert.doesNotMatch(otherUserTaskHtml, /checked/);
 });

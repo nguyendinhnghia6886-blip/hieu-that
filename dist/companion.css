@@ -513,6 +513,14 @@ body:has(#companion-root) .page-content {
     transform: none;
   }
 }
+@media (max-width: 680px) {
+  body:has(input:focus:not(#companion-root *), textarea:focus:not(#companion-root *)) #companion-root {
+    opacity: 0.15;
+    pointer-events: none;
+    transform: scale(0.85);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+}
 @media print {
   #companion-root {
     display: none !important;
