@@ -1,6 +1,8 @@
 # Hiểu Thật
 
-Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.2.2 tổ chức lại mã nguồn thành các file theo chức năng.
+Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.3.0 bổ sung lớp học trực tuyến qua Supabase và chấm điểm thang 10.
+
+Vào **Tài khoản & lớp học online** để dùng dữ liệu đồng bộ. Phần tự học và lớp mẫu vẫn lưu trên thiết bị. Đăng ký công khai còn cần chủ website cấu hình dịch vụ gửi email; Google/Facebook/SMS chưa được bật. Xem [trạng thái triển khai và việc còn lại](docs/HOAN-THIEN-ONLINE.md).
 
 ## Chạy trên máy
 
@@ -73,6 +75,6 @@ npm run format
 
 ## Dữ liệu và triển khai
 
-Dữ liệu học tập được giữ trong `localStorage`; không nằm trong Git. Hồ sơ là trải nghiệm cục bộ, chưa có xác thực Google/Facebook/OTP, phân quyền thực hoặc đồng bộ lớp học nhiều thiết bị. OCR dùng Tesseract.js và cần mạng để tải lần đầu. Font có phương án dự phòng.
+Dữ liệu tự học được giữ trong `localStorage`. Tài khoản online dùng Supabase Auth; hồ sơ, câu hỏi, bài giao, bài nộp và điểm nằm trong cơ sở dữ liệu có kiểm tra quyền. Trắc nghiệm được chấm phía máy chủ; tự luận chờ giáo viên chấm. Không gửi đáp án cho học sinh trước khi nộp. OCR dùng Tesseract.js và cần mạng để tải lần đầu.
 
-Triển khai riêng `dist/` chỉ có website tĩnh và gợi ý có sẵn. Ollama cần máy chủ Node đang chạy cùng model; tải mã lên GitHub không tự triển khai AI lên website công khai. Xem [hướng dẫn kết nối dịch vụ](dist/HUONG-DAN-KET-NOI.md).
+Triển khai Vercel từ **thư mục gốc dự án**, gồm `api/learning.js`, `dist/`, package và lockfile. Đặt `SUPABASE_URL` và `SUPABASE_PUBLISHABLE_KEY` trên Vercel (mẫu trong `.env.example`); không đưa `.env.local` lên Git. `db/schema.sql` là định nghĩa dữ liệu, `db/verify-access.sql` kiểm tra quyền bằng giao dịch rollback. Chỉ tải `dist/` sẽ không có tài khoản online. Ollama vẫn cần máy chủ Node trên máy có model; Vercel không gọi được Ollama tại máy cá nhân.

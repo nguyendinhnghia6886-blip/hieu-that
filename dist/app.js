@@ -9,6 +9,7 @@ import {
 import { createWorkspace } from "./workspace.js";
 import { createCompanion } from "./companion.js";
 import { createOllamaClient } from "./ollama-client.js";
+import { createOnline } from "./online.js";
 import { esc } from "./ui/dom.js";
 import { icon } from "./ui/icons.js";
 import { button, pageHeading, dateLabel } from "./ui/helpers.js";
@@ -73,6 +74,7 @@ let practice = null;
 let toastTimer;
 let lastModalFocus;
 let companion;
+let online;
 function persist() {
   try {
     localStorage.setItem(storageKey, JSON.stringify(data));
@@ -138,6 +140,7 @@ function render() {
       assign: "Giao bài",
       task: "Bài được giao",
       account: "Tài khoản",
+      online: "Tài khoản & lớp học online",
       connections: "Kết nối dịch vụ",
     }[state.view] ||
     "Không gian học tập";
@@ -154,7 +157,7 @@ function render() {
         )
         .join("")}</nav>
       <div class="sidebar-bottom"><div class="sidebar-note"><span class="note-leaf">${icon("leaf")}</span><strong>Hiểu thêm một chút,<br>tiến xa thêm một bước.</strong><p>Mỗi câu hỏi là một cơ hội<br>hiểu rõ chính mình.</p></div>
-      <button class="nav-item" data-action="account">${icon("users")}<span>Đăng nhập / Đăng ký</span></button>
+      <button class="nav-item" data-action="online">${icon("users")}<span>Tài khoản & lớp học online</span></button>
       <button class="nav-item" data-action="help">${icon("help")}<span>Về Hiểu Thật</span></button>
       <div class="sidebar-user"><div class="avatar">${state.role === "teacher" ? "GV" : state.role === "admin" ? "QT" : "B"}</div><div class="user-details"><strong>${esc(workspace.profileName())}</strong><span>Hồ sơ trải nghiệm</span></div><span class="online-dot"></span></div>
       <div class="local-note">Bản trải nghiệm · Lưu trên thiết bị</div></div>
@@ -176,6 +179,7 @@ function render() {
   companion?.sync();
 }
 function viewContent() {
+  if (state.view === "online") return online.view();
   const additional = workspace.view();
   if (additional !== null) return additional;
   if (state.view === "home")
@@ -508,6 +512,11 @@ document.addEventListener("click", async (event) => {
   if (!el) return;
   if (el.tagName === "A") event.preventDefault();
   const action = el.dataset.action;
+  if (action === "account") {
+    closeModal();
+    await online.open();
+    return;
+  }
   if (await workspace.handle(action, el)) return;
   if (action === "nav") {
     state.view = el.dataset.view;
@@ -750,4 +759,15 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+online = createOnline({
+  state,
+  render,
+  toast,
+  questionBank,
+  localQuestions: () => data.customQuestions || [],
+});
+document.addEventListener("click", (e) => {
+  if (e.target.closest('[data-action="online"]')) online.open();
+});
 render();
+online.init();

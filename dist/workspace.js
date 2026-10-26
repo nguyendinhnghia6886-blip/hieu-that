@@ -1,4 +1,5 @@
 import { createWorkspaceViews } from "./views/workspace.js";
+import { summarizeGrade, parseWrittenMarks } from "./learning/grading.js";
 import {
   emptyQuestion,
   validateQuestion,
@@ -185,9 +186,25 @@ export function createWorkspace(ctx) {
     const teacher = state.role === "teacher",
       choices = s.answers.filter((a) => a.type === "choice"),
       pending = s.answers.some((a) => a.type === "written");
+    const grade = summarizeGrade(s.answers, s.writtenMarks);
+    const gradeHTML = `<div class="tip-box"><strong>${grade.score === null ? "Chờ chấm tự luận" : `Điểm: ${grade.score.toLocaleString("vi-VN")}/10`}</strong><p>Mỗi câu có trọng số bằng nhau. ${grade.pending ? `${grade.pending} câu đang chờ giáo viên chấm.` : "Đã chấm đủ các câu."}</p></div>`;
+    const markingHTML =
+      teacher && pending
+        ? `<fieldset><legend>Chấm tự luận · từ 0 đến 1 điểm mỗi câu</legend>${s.answers
+            .filter((a) => a.type === "written")
+            .map((a, i) =>
+              field(
+                `Câu tự luận ${i + 1}`,
+                `<input type="number" min="0" max="1" step="0.01" data-written-mark="${esc(a.questionId)}" value="${esc(s.writtenMarks?.[a.questionId] ?? "")}" placeholder="Chưa chấm">`,
+              ),
+            )
+            .join("")}</fieldset>`
+        : "";
     openModal(
       teacher ? "Bài nộp của học sinh" : "Bài bạn đã nộp",
-      `<span class="tag green">${choices.filter((a) => a.correct).length}/${choices.length} trắc nghiệm đúng</span>${pending ? ` <span class="tag ${s.feedback ? "green" : "amber"}">Tự luận: ${s.feedback ? "Đã nhận xét" : "Chờ giáo viên"}</span>` : ""}<h3>${esc(s.title)}</h3><p class="muted">${esc(s.studentName)} · ${new Date(s.time).toLocaleString("vi-VN", { timeZone: "Asia/Bangkok" })}</p><ol class="submitted-answers">${s.answers.map((a) => `<li><strong>${esc(a.prompt)}</strong><p class="preserve-lines">Bài làm: ${esc(a.type === "choice" ? s.questions.find((q) => q.id === a.questionId)?.options[a.response] : a.response)}</p><span class="tag ${a.correct === null ? "gray" : a.correct ? "green" : "amber"}">${a.correct === null ? "Giáo viên đọc bài" : a.correct ? "Đúng" : "Cần xem lại"}</span><p class="muted preserve-lines">${a.correct === null ? "Hướng dẫn tham khảo" : "Lời giải"}: ${esc(a.explanation)}</p></li>`).join("")}</ol>${teacher ? field("Nhận xét của giáo viên", `<textarea id="submission-feedback" maxlength="3000" rows="3" placeholder="Nêu bước làm tốt và điều cần luyện thêm…">${esc(s.feedback || "")}</textarea>`) : s.feedback ? `<div class="tip-box preserve-lines"><strong>Nhận xét của giáo viên</strong><p>${esc(s.feedback)}</p></div>` : ""}<p id="workspace-error" class="form-error" role="alert"></p>`,
+      gradeHTML +
+        markingHTML +
+        `<span class="tag green">${choices.filter((a) => a.correct).length}/${choices.length} trắc nghiệm đúng</span>${pending ? ` <span class="tag ${s.feedback ? "green" : "amber"}">Tự luận: ${s.feedback ? "Đã nhận xét" : "Chờ giáo viên"}</span>` : ""}<h3>${esc(s.title)}</h3><p class="muted">${esc(s.studentName)} · ${new Date(s.time).toLocaleString("vi-VN", { timeZone: "Asia/Bangkok" })}</p><ol class="submitted-answers">${s.answers.map((a) => `<li><strong>${esc(a.prompt)}</strong><p class="preserve-lines">Bài làm: ${esc(a.type === "choice" ? s.questions.find((q) => q.id === a.questionId)?.options[a.response] : a.response)}</p><span class="tag ${a.correct === null ? "gray" : a.correct ? "green" : "amber"}">${a.correct === null ? "Giáo viên đọc bài" : a.correct ? "Đúng" : "Cần xem lại"}</span><p class="muted preserve-lines">${a.correct === null ? "Hướng dẫn tham khảo" : "Lời giải"}: ${esc(a.explanation)}</p></li>`).join("")}</ol>${teacher ? field("Nhận xét của giáo viên", `<textarea id="submission-feedback" maxlength="3000" rows="3" placeholder="Nêu bước làm tốt và điều cần luyện thêm…">${esc(s.feedback || "")}</textarea>`) : s.feedback ? `<div class="tip-box preserve-lines"><strong>Nhận xét của giáo viên</strong><p>${esc(s.feedback)}</p></div>` : ""}<p id="workspace-error" class="form-error" role="alert"></p>`,
       teacher
         ? btn(
             "Lưu nhận xét",
@@ -644,6 +661,19 @@ export function createWorkspace(ctx) {
         return true;
       }
       if (s) {
+        try {
+          s.writtenMarks = parseWrittenMarks(
+            s.answers,
+            Object.fromEntries(
+              [...document.querySelectorAll("[data-written-mark]")].map(
+                (input) => [input.dataset.writtenMark, input.value],
+              ),
+            ),
+          );
+        } catch (e) {
+          error(e.message);
+          return true;
+        }
         s.feedback = text;
         s.reviewedAt = Date.now();
         persist();

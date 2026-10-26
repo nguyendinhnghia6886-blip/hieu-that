@@ -3,6 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createOllamaHandler } from "./ollama-server.mjs";
+import learningHandler from "./api/learning.js";
+try {
+  process.loadEnvFile?.(".env.local");
+} catch {
+  /* Optional for offline learning. */
+}
 const handleOllama = createOllamaHandler();
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "dist");
 const mime = {
@@ -13,6 +19,10 @@ const mime = {
   ".json": "application/json",
 };
 const server = http.createServer((req, res) => {
+  if (req.url?.split("?")[0] === "/api/learning") {
+    learningHandler(req, res);
+    return;
+  }
   if (req.url?.startsWith("/api/")) {
     handleOllama(req, res).catch(() => {
       if (!res.headersSent) res.writeHead(500);

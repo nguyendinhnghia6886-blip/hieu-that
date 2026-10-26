@@ -1,0 +1,98 @@
+.online-space {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+.online-auth {
+  max-width: 580px;
+  padding: 32px;
+  margin: 20px auto;
+}
+.online-space form {
+  display: grid;
+  gap: 16px;
+}
+.online-space input:not([type="radio"]):not([type="checkbox"]),
+.online-space textarea,
+.online-space select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d7e2d9;
+  border-radius: 10px;
+  background: #fff;
+  color: #203b31;
+  font: inherit;
+}
+.online-space input[type="radio"],
+.online-space input[type="checkbox"] {
+  accent-color: #146b50;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.online-space fieldset {
+  border: 1px solid #d7e2d9;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+.online-space .field {
+  display: grid;
+  gap: 7px;
+}
+.online-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+}
+.online-section {
+  padding: 24px;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.online-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+.online-list {
+  display: grid;
+  gap: 8px;
+}
+.online-space .online-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+.online-score {
+  display: block;
+  font-size: 32px;
+  color: #146b50;
+  margin: 16px 0;
+}
+.online-space .button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.online-space :focus-visible {
+  outline: 3px solid #4b9279;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .online-auth,
+  .online-section,
+  .online-summary {
+    padding: 18px;
+  }
+  .online-space .field-pair {
+    display: block;
+  }
+  .online-space .field-pair .field {
+    margin-bottom: 12px;
+  }
+}
