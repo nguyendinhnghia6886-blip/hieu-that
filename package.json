@@ -18,6 +18,8 @@
     "prettier": "^3.9.10"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.118.0"
+    "@supabase/supabase-js": "2.118.0",
+    "gsap": "^3.15.0",
+    "rough-notation": "^0.5.1"
   }
 }

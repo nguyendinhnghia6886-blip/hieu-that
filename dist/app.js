@@ -65,6 +65,7 @@ const data = {
   joined: Boolean(saved.joined),
   goal: [2, 3, 5, 7].includes(saved.goal) ? saved.goal : 3,
   teacherDraft: saved.teacherDraft || "",
+  reducedMotion: Boolean(saved.reducedMotion),
 };
 const state = {
   role: "student",
@@ -93,8 +94,26 @@ function persist() {
   }
 }
 const lessonFor = (id) => lessons.find((l) => l.id === id) || lessons[0];
-const lessonIcon = (id) =>
-  id === "cosine" ? "triangle" : id === "signs" ? "target" : "circle";
+const lessonIcon = (id) => {
+  switch (id) {
+    case "propositions": return "sparkle";
+    case "sets": return "grid";
+    case "inequalities-2var":
+    case "system-inequalities": return "target";
+    case "values":
+    case "signs": return "circle";
+    case "cosine":
+    case "sine-law": return "triangle";
+    case "vectors-intro":
+    case "scalar-product": return "arrow";
+    case "statistics": return "chart";
+    case "quadratic-functions": return "target";
+    case "analytic-geometry": return "target";
+    case "combinatorics": return "grid";
+    case "probability": return "sparkle";
+    default: return "book";
+  }
+};
 const thisWeekSessions = () =>
   data.sessions.filter((s) => Date.now() - s.time < 7 * 86400000);
 // Các màn hình đọc trạng thái hiện tại; thay đổi dữ liệu vẫn nằm ở bộ điều khiển.
@@ -144,6 +163,105 @@ function navItems() {
     ["class", "users", "Lớp học của tôi"],
   ];
 }
+let activeRoughAnnotations = [];
+function postRenderAnimations() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  const isReduced =
+    Boolean(data.reducedMotion) ||
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+    document.documentElement.dataset.reducedMotion === "true";
+
+  if (activeRoughAnnotations.length) {
+    activeRoughAnnotations.forEach((a) => {
+      try {
+        a.remove();
+      } catch {}
+    });
+    activeRoughAnnotations = [];
+  }
+
+  if (window.RoughNotation && !isReduced) {
+    const marks = document.querySelectorAll(".notebook-pen-mark");
+    marks.forEach((el) => {
+      try {
+        const penType = el.dataset.pen || "underline";
+        const ann = window.RoughNotation.annotate(el, {
+          type: penType,
+          color: "#2d7a5f",
+          strokeWidth: 2,
+          padding: 2,
+          animationDuration: 400,
+          iterations: 1,
+        });
+        ann.show();
+        activeRoughAnnotations.push(ann);
+      } catch {}
+    });
+  }
+
+  if (window.gsap && state.activeLesson && !isReduced) {
+    const slideContent = document.querySelector(".slide-stage .slide-content");
+    if (slideContent) {
+      window.gsap.fromTo(
+        slideContent,
+        { opacity: 0.65, y: 6 },
+        { opacity: 1, y: 0, duration: 0.2, overwrite: "auto", ease: "power2.out" },
+      );
+    }
+  }
+}
+
+function updateExampleStep(box, targetIdx) {
+  const total = Number(box.dataset.stepTotal || 1);
+  const nextIdx = Math.max(0, Math.min(targetIdx, total - 1));
+  box.dataset.activeStep = nextIdx;
+  box.classList.remove("show-all-steps");
+  const toggleBtn = box.querySelector('[data-example-btn="toggle-all"]');
+  if (toggleBtn) toggleBtn.textContent = "Hiện toàn bộ";
+
+  const pills = box.querySelectorAll(".step-pill");
+  pills.forEach((p, idx) => {
+    p.classList.toggle("active", idx === nextIdx);
+    p.setAttribute("aria-selected", idx === nextIdx ? "true" : "false");
+  });
+
+  const cards = box.querySelectorAll(".step-card");
+  cards.forEach((c, idx) => {
+    const isActive = idx === nextIdx;
+    c.classList.toggle("active", isActive);
+    c.classList.toggle("step-collapsed", !isActive);
+  });
+
+  const prevBtn = box.querySelector('[data-example-btn="prev"]');
+  const nextBtn = box.querySelector('[data-example-btn="next"]');
+  if (prevBtn) prevBtn.disabled = nextIdx === 0;
+  if (nextBtn) {
+    if (nextIdx === total - 1) {
+      nextBtn.innerHTML = `Đã xem hết các bước ✓`;
+      nextBtn.disabled = true;
+    } else {
+      nextBtn.innerHTML = `Xem bước tiếp theo ${icon("right")}`;
+      nextBtn.disabled = false;
+    }
+  }
+
+  const activeCard = box.querySelector(`.step-card[data-step-index="${nextIdx}"]`);
+  if (activeCard && typeof window !== "undefined" && window.gsap) {
+    const isReduced =
+      Boolean(data.reducedMotion) ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.reducedMotion === "true";
+    if (!isReduced) {
+      window.gsap.fromTo(
+        activeCard,
+        { opacity: 0.5, y: 4 },
+        { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" },
+      );
+    }
+  }
+}
+
 function render() {
   const hasOnlineProfile = online?.hasProfile?.() || false;
   const isOnlineSignedIn = online?.isSignedIn?.() || false;
@@ -267,6 +385,7 @@ function render() {
     <footer class="footer-note"><span>Hiểu Thật © 2026</span><span>Học theo bằng chứng. Tiến bộ theo cách của bạn.</span>${button("Về Hiểu Thật", "help", "ghost small")}</footer></div></div>`;
   document.title = `${title} · Hiểu Thật`;
   companion?.sync();
+  postRenderAnimations();
 }
 function viewContent() {
   if (online?.hasProfile?.()) {
@@ -724,10 +843,50 @@ document.addEventListener("click", async (event) => {
   ) {
     state.mobile = false;
   }
+  const stepTarget = event.target.closest("[data-step-target]");
+  if (stepTarget) {
+    const box = stepTarget.closest(".step-interactive-box");
+    if (box) updateExampleStep(box, Number(stepTarget.dataset.stepTarget));
+    return;
+  }
+  const exampleBtn = event.target.closest("[data-example-btn]");
+  if (exampleBtn) {
+    const box = exampleBtn.closest(".step-interactive-box");
+    if (box) {
+      const act = exampleBtn.dataset.exampleBtn;
+      const total = Number(box.dataset.stepTotal || 1);
+      let cur = Number(box.dataset.activeStep || 0);
+      if (act === "next") {
+        if (cur < total - 1) updateExampleStep(box, cur + 1);
+      } else if (act === "prev") {
+        if (cur > 0) updateExampleStep(box, cur - 1);
+      } else if (act === "toggle-all") {
+        const isAll = box.classList.toggle("show-all-steps");
+        exampleBtn.textContent = isAll ? "Thu gọn từng bước" : "Hiện toàn bộ";
+      }
+    }
+    return;
+  }
   const el = event.target.closest("[data-action]");
   if (!el) return;
   if (el.tagName === "A") event.preventDefault();
   const action = el.dataset.action;
+  if (action === "toggle-motion") {
+    data.reducedMotion = !data.reducedMotion;
+    persist();
+    if (typeof document !== "undefined") {
+      document.documentElement.dataset.reducedMotion = data.reducedMotion
+        ? "true"
+        : "false";
+    }
+    toast(
+      data.reducedMotion
+        ? "Đã bật chế độ giảm chuyển động."
+        : "Đã bật chuyển động sinh động.",
+    );
+    render();
+    return;
+  }
   if (action === "account" || action === "online") {
     closeModal();
     await online.open();
@@ -1046,5 +1205,8 @@ online = createOnline({
       .length,
   }),
 });
+if (typeof document !== "undefined" && data.reducedMotion) {
+  document.documentElement.dataset.reducedMotion = "true";
+}
 render();
 online.init();

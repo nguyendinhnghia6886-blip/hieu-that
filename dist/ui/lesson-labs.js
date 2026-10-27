@@ -1,4 +1,5 @@
 import { esc } from "./dom.js";
+import { icon } from "./icons.js";
 import { slideGuides } from "../content/slide-guides.js";
 
 const fmt = (x) => Number(x.toFixed(2)).toLocaleString("vi-VN");
@@ -161,12 +162,26 @@ function controls(kind, v) {
         ["none", "Bỏ cả hai"],
       ])
     );
-  if (["inequalities-2var", "line"].includes(kind))
+  if (kind === "inequalities-2var")
+    return (
+      `<div class="lab-construct-bar">
+        <button type="button" class="btn-construct" data-lab-construct="play">${icon("play")} Xem cách dựng</button>
+        <button type="button" class="btn-construct btn-pause" data-lab-construct="pause" hidden>${icon("close")} Dừng</button>
+        <button type="button" class="btn-construct btn-reset" data-lab-construct="reset">↺ Làm lại</button>
+        <span class="construct-step-indicator" data-lab-construct-status>${v._constructStep ? `Bước ${v._constructStep}/5` : "5 bước chuẩn SGK"}</span>
+      </div>` +
+      range("a", "Hệ số a", v.a, -3, 3) +
+      range("b", "Hệ số b", v.b, -3, 3) +
+      range("c", "Hệ số c", v.c, -6, 6) +
+      select("sign", "Dấu", v.sign, signs) +
+      range("x", "Điểm thử: x", v.x, -5, 5, 0.25) +
+      range("y", "Điểm thử: y", v.y, -4, 4, 0.25)
+    );
+  if (kind === "line")
     return (
       range("a", "Hệ số a", v.a, -3, 3) +
       range("b", "Hệ số b", v.b, -3, 3) +
       range("c", "Hệ số c", v.c, -6, 6) +
-      (kind === "line" ? "" : select("sign", "Dấu", v.sign, signs)) +
       range("x", "Điểm thử: x", v.x, -5, 5, 0.25) +
       range("y", "Điểm thử: y", v.y, -4, 4, 0.25)
     );
@@ -297,15 +312,51 @@ export function renderLab(kind, v) {
     const good = system
       ? v.x >= 0 && v.y >= 0 && value <= 1e-9
       : satisfies(a, b, c, v.x, v.y, sign);
-    graph = svg(
-      `${kind === "line" ? "" : poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50", ["lt", "gt"].includes(sign)) : ""}${dot(v.x, v.y)}${system ? '<text x="206" y="149" font-size="13">Miền chung</text>' : ""}`,
-      system ? "Miền nghiệm x ≥ 0, y ≥ 0, x + y ≤ t" : "Đường bờ và điểm thử M",
-      true,
-    );
-    info =
-      kind === "line"
-        ? `d: ${a}x + ${b}y + (${c}) = 0. M(${fmt(v.x)}; ${fmt(v.y)}): d(M; d) = ${fmt(Math.abs(value) / Math.hypot(a, b))}. Pháp tuyến n = (${a}; ${b}), chỉ phương u = (${b}; ${-a}).`
-        : `${system ? `x ≥ 0; y ≥ 0; x + y ≤ ${v.t}` : `${a}x + ${b}y + (${c}) ${signs.find(([s]) => s === sign)[1]} 0`}. M(${fmt(v.x)}; ${fmt(v.y)}) ${good ? "thuộc" : "không thuộc"} miền nghiệm. Giá trị biểu thức: ${fmt(value)}.${system ? ` Các đỉnh: (0; 0), (${v.t}; 0), (0; ${v.t}); với F = 2x + y, min = 0, max = ${2 * v.t}.` : ""}`;
+
+    if (kind === "inequalities-2var" && v._constructStep) {
+      if (v._constructStep === 1) {
+        graph = svg(axes(), "Bước 1: Hệ trục Oxy", true);
+        info = "Bước 1/5: Dựng hệ trục toạ độ Oxy và chia lưới đơn vị.";
+      } else if (v._constructStep === 2) {
+        graph = svg(
+          `${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}`,
+          "Bước 2: Vẽ bờ d",
+          true,
+        );
+        info = `Bước 2/5: Tìm 2 điểm đặc biệt thuộc bờ d và vẽ đường thẳng d: ${a}x + ${b}y + (${c}) = 0.`;
+      } else if (v._constructStep === 3) {
+        graph = svg(
+          `${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M")}`,
+          "Bước 3: Điểm thử M",
+          true,
+        );
+        info = `Bước 3/5: Lấy điểm thử M(${fmt(v.x)}; ${fmt(v.y)}) không thuộc bờ d. Thay vào biểu thức được: ${fmt(value)}.`;
+      } else if (v._constructStep === 4) {
+        graph = svg(
+          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M")}`,
+          "Bước 4: Miền nghiệm",
+          true,
+        );
+        info = `Bước 4/5: So sánh ${fmt(value)} với 0. Điểm M ${good ? "thuộc" : "không thuộc"} miền nghiệm. Tô màu nửa mặt phẳng ${good ? "chứa" : "không chứa"} M.`;
+      } else {
+        graph = svg(
+          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50", ["lt", "gt"].includes(sign)) : ""}${dot(v.x, v.y, "M")}`,
+          "Bước 5: Kiểm tra tính bờ",
+          true,
+        );
+        info = `Bước 5/5: BPT có dấu "${signs.find(([s]) => s === sign)[1]}": ${["le", "ge"].includes(sign) ? "có dấu '=' nên bờ là NÉT LIỀN (lấy cả bờ)" : "không có dấu '=' nên bờ là NÉT ĐỨT (không lấy bờ)"}. Đã hoàn tất!`;
+      }
+    } else {
+      graph = svg(
+        `${kind === "line" ? "" : poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50", ["lt", "gt"].includes(sign)) : ""}${dot(v.x, v.y)}${system ? '<text x="206" y="149" font-size="13">Miền chung</text>' : ""}`,
+        system ? "Miền nghiệm x ≥ 0, y ≥ 0, x + y ≤ t" : "Đường bờ và điểm thử M",
+        true,
+      );
+      info =
+        kind === "line"
+          ? `d: ${a}x + ${b}y + (${c}) = 0. M(${fmt(v.x)}; ${fmt(v.y)}): d(M; d) = ${fmt(Math.abs(value) / Math.hypot(a, b))}. Pháp tuyến n = (${a}; ${b}), chỉ phương u = (${b}; ${-a}).`
+          : `${system ? `x ≥ 0; y ≥ 0; x + y ≤ ${v.t}` : `${a}x + ${b}y + (${c}) ${signs.find(([s]) => s === sign)[1]} 0`}. M(${fmt(v.x)}; ${fmt(v.y)}) ${good ? "thuộc" : "không thuộc"} miền nghiệm. Giá trị biểu thức: ${fmt(value)}.${system ? ` Các đỉnh: (0; 0), (${v.t}; 0), (0; ${v.t}); với F = 2x + y, min = 0, max = ${2 * v.t}.` : ""}`;
+    }
     return (
       graph +
       `<p class="lab-result" role="status">${esc(info)}</p><p class="lab-note">Kéo điểm M hoặc dùng hai thanh tọa độ. Hình chỉ hiển thị vùng x ∈ [−6; 6], y ∈ [−5; 5].</p>${kind === "inequalities-2var" ? '<div class="lab-check"><p>Tự kiểm tra: nửa mặt phẳng nghiệm nằm về phía nào của đường bờ?</p><button type="button" class="chip" data-lab-answer="negative">Phía ax + by + c &lt; 0</button><button type="button" class="chip" data-lab-answer="positive">Phía ax + by + c &gt; 0</button><p data-lab-feedback role="status"></p></div>' : ""}`
@@ -382,10 +433,21 @@ export function renderLab(kind, v) {
 // Delegated listeners survive application rerenders; state is private to each slide DOM.
 export function installLessonLabs(doc = document) {
   const states = new WeakMap();
+  const timers = new WeakMap();
   const stateFor = (root) => {
     if (!states.has(root))
       states.set(root, JSON.parse(root.dataset.labInitial));
     return states.get(root);
+  };
+  const stopConstruction = (root) => {
+    if (timers.has(root)) {
+      clearInterval(timers.get(root));
+      timers.delete(root);
+    }
+    const playBtn = root.querySelector('[data-lab-construct="play"]');
+    const pauseBtn = root.querySelector('[data-lab-construct="pause"]');
+    if (playBtn) playBtn.hidden = false;
+    if (pauseBtn) pauseBtn.hidden = true;
   };
   const update = (root) => {
     const v = stateFor(root);
@@ -393,6 +455,12 @@ export function installLessonLabs(doc = document) {
       root.dataset.lessonLab,
       v,
     );
+    const statusEl = root.querySelector("[data-lab-construct-status]");
+    if (statusEl) {
+      statusEl.textContent = v._constructStep
+        ? `Bước ${v._constructStep}/5`
+        : "5 bước chuẩn SGK";
+    }
     for (const input of root.querySelectorAll("[data-lab-field]")) {
       input.value = v[input.dataset.labField];
       const output = input.closest("label")?.querySelector("output");
@@ -403,7 +471,9 @@ export function installLessonLabs(doc = document) {
     const input = event.target.closest("[data-lab-field]"),
       root = input?.closest("[data-lesson-lab]");
     if (!root) return;
+    stopConstruction(root);
     const v = stateFor(root);
+    v._constructStep = 0;
     v[input.dataset.labField] =
       input.type === "range" ? Number(input.value) : input.value;
     update(root);
@@ -412,6 +482,39 @@ export function installLessonLabs(doc = document) {
     const root = event.target.closest("[data-lesson-lab]");
     if (!root) return;
     const v = stateFor(root);
+    const construct = event.target.closest("[data-lab-construct]");
+    if (construct) {
+      const act = construct.dataset.labConstruct;
+      if (act === "play") {
+        stopConstruction(root);
+        if (!v._constructStep || v._constructStep >= 5) v._constructStep = 1;
+        update(root);
+        const playBtn = root.querySelector('[data-lab-construct="play"]');
+        const pauseBtn = root.querySelector('[data-lab-construct="pause"]');
+        if (playBtn) playBtn.hidden = true;
+        if (pauseBtn) pauseBtn.hidden = false;
+        const timer = setInterval(() => {
+          if (!root.isConnected) {
+            stopConstruction(root);
+            return;
+          }
+          if (v._constructStep < 5) {
+            v._constructStep++;
+            update(root);
+          } else {
+            stopConstruction(root);
+          }
+        }, 2200);
+        timers.set(root, timer);
+      } else if (act === "pause") {
+        stopConstruction(root);
+      } else if (act === "reset") {
+        stopConstruction(root);
+        v._constructStep = 1;
+        update(root);
+      }
+      return;
+    }
     const outcome = event.target.closest("[data-lab-outcome]");
     if (outcome) {
       const x = Number(outcome.dataset.labOutcome);
@@ -459,6 +562,11 @@ export function installLessonLabs(doc = document) {
     if (plane) {
       event.preventDefault();
       dragging = plane.closest("[data-lesson-lab]");
+      if (dragging) {
+        stopConstruction(dragging);
+        const v = stateFor(dragging);
+        v._constructStep = 0;
+      }
       move(event);
     }
   });

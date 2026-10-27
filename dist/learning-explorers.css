@@ -582,3 +582,347 @@
     min-height: 36px;
   }
 }
+
+/* ==========================================================
+   PHONG CÁCH "CUỐN SỔ TOÁN TƯƠNG TÁC" & HỆ THỐNG CHUYỂN ĐỘNG
+   ========================================================== */
+
+/* 1. Trang chủ - Hero Trig Visual Animation (thứ tự: nửa đường tròn → điểm M → đường chiếu → công thức) */
+.hero-trig-animated .trig-semicircle {
+  opacity: 0;
+  animation: heroTrigFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+.hero-trig-animated .trig-sector {
+  opacity: 0;
+  animation: heroTrigFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+}
+.hero-trig-animated .trig-radius,
+.hero-trig-animated .trig-point-m,
+.hero-trig-animated .trig-label-m {
+  opacity: 0;
+  animation: heroTrigPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s forwards;
+}
+.hero-trig-animated .trig-projections {
+  opacity: 0;
+  stroke-dasharray: 4 4;
+  animation: heroTrigFadeIn 0.35s ease-out 0.85s forwards;
+}
+.hero-trig-animated .trig-labels {
+  opacity: 0;
+  animation: heroTrigFadeIn 0.4s ease-out 1.1s forwards;
+}
+.hero-visual .floating-formula {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: heroFormulaSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 1.25s forwards;
+}
+
+@keyframes heroTrigFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes heroTrigPopIn {
+  0% { opacity: 0; transform: scale(0.6); transform-origin: 160px 154px; }
+  100% { opacity: 1; transform: scale(1); transform-origin: 160px 154px; }
+}
+@keyframes heroFormulaSlideIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Thẻ bài học - Hover/focus nâng nhẹ không làm lệch bố cục */
+.course-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.2s ease !important;
+  will-change: transform;
+}
+.course-card:hover,
+.course-card:focus-within {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(20, 107, 80, 0.09) !important;
+  border-color: #8bac98 !important;
+}
+
+/* 2. Slide bài học - Transition mượt 200ms */
+.slide-stage .slide-content {
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Cuốn sổ toán tương tác: Nền giấy ô ly / lưới toán học nhẹ */
+.slide-stage {
+  background-color: #fafbf9;
+  background-image: 
+    linear-gradient(#f0f4f1 1px, transparent 1px),
+    linear-gradient(90deg, #f0f4f1 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  border-radius: 16px;
+  border: 1px solid #dce8df;
+}
+
+/* Công thức toán trong cuốn sổ */
+.formula-block {
+  background: #f4f8f5 !important;
+  border-left: 4px solid #1B4D3E !important;
+  border-radius: 0 10px 10px 0 !important;
+  box-shadow: inset 0 1px 2px rgba(20, 107, 80, 0.04);
+  color: #164332 !important;
+}
+
+/* Chú thích nét bút Rough Notation / Notebook Pen Mark */
+.notebook-pen-mark {
+  display: inline-block;
+  font-weight: 700;
+  color: #1B4D3E;
+  padding: 0 3px;
+  position: relative;
+}
+
+/* 3. Ví dụ giải từng bước tương tác */
+.step-interactive-box {
+  background: #ffffff !important;
+  border: 1px solid #d4e4d8 !important;
+  border-left: 4px solid #2d7a5f !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  box-shadow: 0 2px 10px rgba(27, 77, 62, 0.04);
+}
+.example-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #e2ece4;
+  padding-bottom: 10px;
+}
+.step-pill-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.step-pill {
+  border: 1px solid #c9ded0;
+  background: #f7faf8;
+  color: #3b604e;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.step-pill:hover {
+  background: #eaf3ed;
+  border-color: #8bac98;
+}
+.step-pill.active {
+  background: #1B4D3E;
+  color: #ffffff;
+  border-color: #1B4D3E;
+}
+.example-intro {
+  background: #f7f9f7;
+  border: 1px solid #e5ede7;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #264634;
+}
+.example-intro-badge {
+  display: inline-block;
+  background: #d8edce;
+  color: #146b50;
+  font-weight: 700;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-right: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.step-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.step-card {
+  border: 1px solid #e0ebe2;
+  border-radius: 8px;
+  background: #fdfefe;
+  padding: 12px 16px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.step-card.active {
+  border-color: #8bac98;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(27, 77, 62, 0.05);
+}
+.step-card.step-collapsed {
+  display: none;
+}
+.show-all-steps .step-card.step-collapsed {
+  display: block !important;
+  opacity: 0.95;
+}
+.step-card-lead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.step-num {
+  font-weight: 700;
+  font-size: 12px;
+  color: #1B4D3E;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.step-reason-hint {
+  font-size: 11px;
+  color: #648171;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.step-reason-hint svg {
+  width: 13px;
+  height: 13px;
+  color: #b45309;
+}
+.step-card-body {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #264634;
+}
+.step-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed #e2ece4;
+}
+.btn-step {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: 1px solid #c9ded0;
+  background: #ffffff;
+  color: #1B4D3E;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+.btn-step:hover:not(:disabled) {
+  background: #eaf3ed;
+  border-color: #1B4D3E;
+}
+.btn-step:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-step-next {
+  background: #1B4D3E;
+  color: #ffffff;
+  border-color: #1B4D3E;
+}
+.btn-step-next:hover:not(:disabled) {
+  background: #143e32;
+  color: #ffffff;
+}
+.btn-step-toggle {
+  margin-left: auto;
+  color: #557565;
+  background: transparent;
+  border-color: transparent;
+}
+.btn-step-toggle:hover {
+  color: #1B4D3E;
+  background: #f0f6f2;
+}
+
+/* 4. Điều khiển dựng hình từng bước (Diagram Construction) */
+.lab-construct-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #edf5ef;
+  border: 1px solid #cfe0d4;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.btn-construct {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid #1B4D3E;
+  background: #1B4D3E;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.btn-construct svg {
+  width: 13px;
+  height: 13px;
+}
+.btn-construct:hover {
+  background: #143e32;
+}
+.btn-construct.btn-pause {
+  background: #a84218;
+  border-color: #a84218;
+}
+.btn-construct.btn-reset {
+  background: #ffffff;
+  color: #1B4D3E;
+  border-color: #b7cebf;
+}
+.btn-construct.btn-reset:hover {
+  background: #e5efe8;
+}
+.construct-step-indicator {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #2b5542;
+  margin-left: auto;
+}
+
+/* 5. Bản đồ kiến thức mượt mà */
+.knowledge-map .map-branch {
+  transition: all 0.25s ease;
+}
+.knowledge-map .map-node button {
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+.knowledge-map .map-node button:hover {
+  transform: translateX(3px);
+  border-color: #1B4D3E;
+}
+
+/* 6. Hỗ trợ Giảm chuyển động (Reduced Motion) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}

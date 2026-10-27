@@ -50,10 +50,10 @@ console.log(`Successfully written: ${lessonsPath}`);
 // 2. Write dist/content/slide-guides.js
 const slideGuides = {};
 for (const lesson of allLessons) {
-  slideGuides[lesson.id] = lesson.slides.map((slide, idx) => [
-    `Bước 1: Nắm khái niệm ${slide.title.slice(0, 35)}`,
-    `Bước 2: Áp dụng ${slide.formula.slice(0, 45)}`,
-    `Bước 3: Tự kiểm tra ${slide.tip.slice(0, 35)} (Slide ${idx + 1})`
+  slideGuides[lesson.id] = lesson.slides.map((slide) => [
+    `Bước 1 (Khái niệm): ${slide.title}`,
+    `Bước 2 (Công thức): ${slide.formula}`,
+    `Bước 3 (Thực hành): ${slide.tip}`
   ]);
 }
 

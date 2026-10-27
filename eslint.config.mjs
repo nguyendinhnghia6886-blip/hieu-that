@@ -1,7 +1,14 @@
 import globals from "globals";
 
 export default [
-  { ignores: ["node_modules/**", "qa-output/**", ".sites-runtime/**"] },
+  {
+    ignores: [
+      "node_modules/**",
+      "qa-output/**",
+      ".sites-runtime/**",
+      "dist/vendor/**",
+    ],
+  },
   {
     files: ["**/*.js", "**/*.mjs"],
     languageOptions: {
