@@ -35,6 +35,7 @@ test("all lessons contain five complete, identifiable slides", () => {
       assert.ok(
         [
           "circle",
+          "logic",
           "signs",
           "triangle",
           "venn",
@@ -250,23 +251,41 @@ test("all 60 answer keys in the question bank agree with independently evaluated
   assert.equal(choice("q_comb_4"), String((30 * 29 * 28) / (3 * 2 * 1))); // Tổ hợp C(30, 3) = 4060
 
   assert.equal(choice("q_stat_1"), String([3, 5, 7, 9, 11][2])); // Trung vị của dãy 5 số lẻ đã sắp thứ tự = 7
-  assert.equal(choice("q_stat_2"), String([2, 4, 6, 8, 10].reduce((a, b) => a + b) / 5)); // Số trung bình cộng = 6
-  assert.equal(choice("q_stat_3"), String(Math.max(12, 15, 18, 22, 30) - Math.min(12, 15, 18, 22, 30))); // Khoảng biến thiên R = 30 - 12 = 18
+  assert.equal(
+    choice("q_stat_2"),
+    String([2, 4, 6, 8, 10].reduce((a, b) => a + b) / 5),
+  ); // Số trung bình cộng = 6
+  assert.equal(
+    choice("q_stat_3"),
+    String(Math.max(12, 15, 18, 22, 30) - Math.min(12, 15, 18, 22, 30)),
+  ); // Khoảng biến thiên R = 30 - 12 = 18
   assert.equal(choice("q_stat_4"), String(27 - 15)); // Khoảng tứ phân vị Delta_Q = Q3 - Q1 = 27 - 15 = 12
 
   assert.equal(choice("q_scal_1"), String(2 * 4 + 3 * -1)); // Tích vô hướng a.b = 2(4) + 3(-1) = 5
-  assert.equal(choice("q_scal_3"), String(Math.round(2 * 2 * Math.cos(radians(60))))); // |a||b|cos(60°) = 2*2*0.5 = 2
+  assert.equal(
+    choice("q_scal_3"),
+    String(Math.round(2 * 2 * Math.cos(radians(60)))),
+  ); // |a||b|cos(60°) = 2*2*0.5 = 2
   assert.equal(choice("q_scal_4"), String(Math.hypot(-3, 4))); // Độ dài vectơ (-3; 4) = 5
   assert.equal(choice("q_scal_2"), "m = 1"); // 1(-2) + 2(m) = 0 => m = 1
 
-  assert.equal(choice("q_sin_1"), String(Math.round(6 / (2 * Math.sin(radians(30)))))); // R = a / (2 sin A) = 6 / (2 * 0.5) = 6
-  assert.equal(choice("q_sin_2"), String(Math.round(0.5 * 4 * 5 * Math.sin(radians(30)))) ); // S = 0.5 b c sin A = 0.5*4*5*0.5 = 5
+  assert.equal(
+    choice("q_sin_1"),
+    String(Math.round(6 / (2 * Math.sin(radians(30))))),
+  ); // R = a / (2 sin A) = 6 / (2 * 0.5) = 6
+  assert.equal(
+    choice("q_sin_2"),
+    String(Math.round(0.5 * 4 * 5 * Math.sin(radians(30)))),
+  ); // S = 0.5 b c sin A = 0.5*4*5*0.5 = 5
   assert.equal(choice("q_sin_3"), String((5 + 6 + 7) / 2)); // Nửa chu vi p = (5+6+7)/2 = 9
   assert.equal(choice("q_sin_4"), "8√6/3"); // c = b sin C / sin B = 8 sin 45° / sin 60° = 8*(sqrt(2)/2)/(sqrt(3)/2) = 8*sqrt(6)/3
 
   const x0 = -(-4) / (2 * 1);
   const y0 = x0 ** 2 - 4 * x0 + 3;
-  assert.equal(choice("q_quad_1"), `I(${x0}; ${y0 < 0 ? "−" + Math.abs(y0) : y0})`); // Đỉnh parabol y = x² - 4x + 3 là I(2; −1)
+  assert.equal(
+    choice("q_quad_1"),
+    `I(${x0}; ${y0 < 0 ? "−" + Math.abs(y0) : y0})`,
+  ); // Đỉnh parabol y = x² - 4x + 3 là I(2; −1)
   assert.equal(choice("q_quad_2"), `x = ${x0}`); // Trục đối xứng x = 2
   assert.equal(choice("q_quad_3"), "(2; 3)"); // x² - 5x + 6 < 0 => (x-2)(x-3) < 0 => (2; 3)
 

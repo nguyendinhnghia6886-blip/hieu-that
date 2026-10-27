@@ -7,7 +7,8 @@ export const lessons = [
     lessonNumber: "Bài 1",
     title: "Mệnh đề toán học",
     shortTitle: "Mệnh đề toán học",
-    description: "Khái niệm mệnh đề, mệnh đề phủ định, mệnh đề kéo theo và các kí hiệu với mọi, tồn tại.",
+    description:
+      "Khái niệm mệnh đề, mệnh đề phủ định, mệnh đề kéo theo và các kí hiệu với mọi, tồn tại.",
     duration: "9 phút",
     slides: [
       {
@@ -16,7 +17,7 @@ export const lessons = [
         body: "Mệnh đề toán học là một khẳng định có tính đúng hoặc sai rõ ràng. Một khẳng định không thể vừa đúng vừa sai. Các câu hỏi, câu cảm thán, câu cầu khiến không phải là mệnh đề.",
         formula: "Khẳng định → Đúng (Đ) hoặc Sai (S)",
         tip: "“Số 7 là số nguyên tố” là mệnh đề đúng. “Thời tiết hôm nay đẹp quá!” không phải mệnh đề.",
-        visual: "venn",
+        visual: "logic",
       },
       {
         eyebrow: "MỆNH ĐỀ PHỦ ĐỊNH",
@@ -24,7 +25,7 @@ export const lessons = [
         body: "Mệnh đề phủ định của P (kí hiệu ¬P hoặc P̄) khẳng định điều ngược lại. Khi P đúng thì ¬P sai; khi P sai thì ¬P đúng.",
         formula: "P đúng ⇔ ¬P sai",
         tip: "Để phủ định “Số 12 chia hết cho 3”, ta lập “Số 12 không chia hết cho 3”.",
-        visual: "venn",
+        visual: "logic",
       },
       {
         eyebrow: "SUY LUẬN LOGIC",
@@ -32,7 +33,7 @@ export const lessons = [
         body: "Mệnh đề “Nếu P thì Q” chỉ sai khi P đúng mà Q sai. Ở đây, P là giả thiết (điều kiện đủ để có Q), còn Q là kết luận (điều kiện cần để có P).",
         formula: "P ⇒ Q  (P: điều kiện đủ · Q: điều kiện cần)",
         tip: "Nếu tam giác ABC đều thì tam giác ABC cân: mệnh đề này luôn đúng.",
-        visual: "venn",
+        visual: "logic",
       },
       {
         eyebrow: "VỚI MỌI VÀ TỒN TẠI",
@@ -40,15 +41,16 @@ export const lessons = [
         body: "Kí hiệu ∀ đọc là “với mọi”; kí hiệu ∃ đọc là “tồn tại” (có ít nhất một). Phủ định của mệnh đề chứa “∀x, P(x)” là “∃x, ¬P(x)”, và ngược lại.",
         formula: "¬(∀x ∈ X, P(x)) ⇔ ∃x ∈ X, ¬P(x)",
         tip: "Phủ định của “Mọi số thực bình phương đều dương” là “Tồn tại một số thực có bình phương không dương”.",
-        visual: "venn",
+        visual: "logic",
       },
       {
         eyebrow: "BA BƯỚC XÉT ĐÚNG SAI",
         title: "Phương pháp kiểm tra mệnh đề",
         body: "Đọc kỹ cấu trúc câu. Với mệnh đề với mọi (∀), chỉ cần chỉ ra MỘT phản ví dụ là mệnh đề sai. Với mệnh đề tồn tại (∃), chỉ cần tìm được MỘT ví dụ thỏa mãn là mệnh đề đúng.",
-        formula: "∀ : Cần chứng minh tổng quát (hoặc 1 phản ví dụ để bác bỏ)  ·  ∃ : Chỉ cần 1 ví dụ đúng",
+        formula:
+          "∀ : Cần chứng minh tổng quát (hoặc 1 phản ví dụ để bác bỏ)  ·  ∃ : Chỉ cần 1 ví dụ đúng",
         tip: "Mệnh đề “∃n ∈ ℕ, n² = 2” sai vì √2 là số vô tỉ, không thuộc tập số tự nhiên ℕ.",
-        visual: "venn",
+        visual: "logic",
       },
     ],
   },
@@ -74,7 +76,8 @@ export const lessons = [
         eyebrow: "GIAO VÀ HỢP",
         title: "Lấy phần chung hay gộp tất cả",
         body: "Giao của A và B (A ∩ B) gồm các phần tử vừa thuộc A vừa thuộc B. Hợp của A và B (A ∪ B) gồm các phần tử thuộc A hoặc thuộc B.",
-        formula: "x ∈ A ∩ B ⇔ (x ∈ A và x ∈ B)  ·  x ∈ A ∪ B ⇔ (x ∈ A hoặc x ∈ B)",
+        formula:
+          "x ∈ A ∩ B ⇔ (x ∈ A và x ∈ B)  ·  x ∈ A ∪ B ⇔ (x ∈ A hoặc x ∈ B)",
         tip: "Giao là “và” (phần chung), Hợp là “hoặc” (lấy tất cả không lặp lại).",
         visual: "venn",
       },
@@ -90,7 +93,8 @@ export const lessons = [
         eyebrow: "TẬP CON CỦA SỐ THỰC",
         title: "Khoảng, đoạn và nửa khoảng",
         body: "Đoạn [a; b] lấy cả hai đầu mút a và b. Khoảng (a; b) không lấy hai đầu mút. Nửa khoảng [a; b) lấy a nhưng không lấy b. Nửa khoảng (-∞; a] gồm các số thực ≤ a.",
-        formula: "[a; b] = { x ∈ ℝ | a ≤ x ≤ b }  ·  (a; b) = { x ∈ ℝ | a < x < b }",
+        formula:
+          "[a; b] = { x ∈ ℝ | a ≤ x ≤ b }  ·  (a; b) = { x ∈ ℝ | a < x < b }",
         tip: "Ngoặc vuông [ ] là lấy dấu “=”, ngoặc tròn ( ) là dấu ngặt “<” hoặc “>”.",
         visual: "venn",
       },
@@ -98,7 +102,8 @@ export const lessons = [
         eyebrow: "BIỂU DIỄN TRÊN TRỤC SỐ",
         title: "Kỹ năng xác định giao và hợp",
         body: "Vẽ trục số, đánh dấu các điểm mút theo thứ tự tăng dần từ trái sang phải. Dùng thao tác gạch bỏ vùng không thuộc tập hợp để tìm kết quả của phép giao, hợp hoặc hiệu.",
-        formula: "Vẽ trục → Đánh dấu mút → Xác định ngoặc [ ] hay ( ) → Đọc kết quả",
+        formula:
+          "Vẽ trục → Đánh dấu mút → Xác định ngoặc [ ] hay ( ) → Đọc kết quả",
         tip: "Ví dụ: (-2; 3) ∩ [1; 5] = [1; 3). Chú ý mút 1 có dấu ngoặc vuông và mút 3 có dấu ngoặc tròn.",
         visual: "venn",
       },
@@ -113,7 +118,8 @@ export const lessons = [
     lessonNumber: "Bài 3",
     title: "Bất phương trình bậc nhất hai ẩn",
     shortTitle: "BPT bậc nhất hai ẩn",
-    description: "Nhận dạng bất phương trình và cách biểu diễn miền nghiệm trên mặt phẳng tọa độ.",
+    description:
+      "Nhận dạng bất phương trình và cách biểu diễn miền nghiệm trên mặt phẳng tọa độ.",
     duration: "8 phút",
     slides: [
       {
@@ -144,7 +150,8 @@ export const lessons = [
         eyebrow: "CÓ LẤY ĐƯỜNG BỜ HAY KHÔNG?",
         title: "Phân biệt dấu ngặt và không ngặt",
         body: "Với bất phương trình có dấu ≤ hoặc ≥, miền nghiệm chứa cả các điểm nằm trên đường thẳng bờ d (vẽ nét liền). Với dấu < hoặc >, miền nghiệm không chứa bờ d (vẽ nét đứt).",
-        formula: "≤ hoặc ≥ : nét liền (kể cả bờ)  ·  < hoặc > : nét đứt (không kể bờ)",
+        formula:
+          "≤ hoặc ≥ : nét liền (kể cả bờ)  ·  < hoặc > : nét đứt (không kể bờ)",
         tip: "Quên ghi chú bờ là lỗi học sinh thường mắc nhất khi trình bày bài thi tự luận.",
         visual: "halfplane",
       },
@@ -165,14 +172,16 @@ export const lessons = [
     lessonNumber: "Bài 4",
     title: "Hệ bất phương trình bậc nhất hai ẩn",
     shortTitle: "Hệ BPT bậc nhất hai ẩn",
-    description: "Miền nghiệm đa giác và bài toán tối ưu quy hoạch tuyến tính trong thực tế.",
+    description:
+      "Miền nghiệm đa giác và bài toán tối ưu quy hoạch tuyến tính trong thực tế.",
     duration: "10 phút",
     slides: [
       {
         eyebrow: "KHÁI NIỆM HỆ",
         title: "Nghiệm chung của nhiều điều kiện",
         body: "Hệ bất phương trình bậc nhất hai ẩn gồm hai hay nhiều bất phương trình bậc nhất hai ẩn. Miền nghiệm của hệ là phần giao nhau của các miền nghiệm của từng bất phương trình.",
-        formula: "(x0; y0) là nghiệm của hệ ⇔ thỏa mãn đồng thời tất cả các BPT",
+        formula:
+          "(x0; y0) là nghiệm của hệ ⇔ thỏa mãn đồng thời tất cả các BPT",
         tip: "Thường gặp hệ có điều kiện thực tế x ≥ 0 và y ≥ 0, giới hạn nghiệm trong góc phần tư thứ nhất.",
         visual: "halfplane",
       },
@@ -196,7 +205,8 @@ export const lessons = [
         eyebrow: "BÀI TOÁN TỐI ƯU",
         title: "Định lý giá trị lớn nhất và nhỏ nhất",
         body: "Nếu miền nghiệm là một đa giác lồi kín, bị chặn và khác rỗng, biểu thức F(x; y) = ax + by đạt giá trị lớn nhất và nhỏ nhất tại các đỉnh của miền đó. Với miền không bị chặn hoặc không chứa biên, cần kiểm tra sự tồn tại của cực trị trước.",
-        formula: "Miền đa giác lồi kín, bị chặn, khác rỗng → Tính F tại các đỉnh để tìm max/min",
+        formula:
+          "Miền đa giác lồi kín, bị chặn, khác rỗng → Tính F tại các đỉnh để tìm max/min",
         tip: "Chỉ cần tính giá trị của F(x; y) tại từng đỉnh, sau đó so sánh các kết quả để chọn giá trị lớn nhất và nhỏ nhất.",
         visual: "halfplane",
       },
@@ -204,7 +214,8 @@ export const lessons = [
         eyebrow: "ỨNG DỤNG THỰC TẾ",
         title: "Quy hoạch sản xuất và chi phí",
         body: "Đặt ẩn x, y theo yêu cầu bài toán. Lập hệ bất phương trình ràng buộc về nguyên liệu, thời gian, vốn. Biểu diễn miền nghiệm, tìm đỉnh và tính hàm mục tiêu F(x; y).",
-        formula: "Đặt ẩn → Lập hệ ràng buộc → Xác định đỉnh miền nghiệm → So sánh F(x; y)",
+        formula:
+          "Đặt ẩn → Lập hệ ràng buộc → Xác định đỉnh miền nghiệm → So sánh F(x; y)",
         tip: "Đừng quên các điều kiện tự nhiên x ≥ 0, y ≥ 0 và điều kiện nguyên nếu x, y là số sản phẩm.",
         visual: "halfplane",
       },
@@ -375,7 +386,8 @@ export const lessons = [
     lessonNumber: "Bài 6",
     title: "Định lý sin và diện tích tam giác",
     shortTitle: "Định lý sin & Diện tích",
-    description: "Tỉ số cạnh trên sin góc đối diện, bán kính ngoại tiếp R và các công thức tính diện tích.",
+    description:
+      "Tỉ số cạnh trên sin góc đối diện, bán kính ngoại tiếp R và các công thức tính diện tích.",
     duration: "10 phút",
     slides: [
       {
@@ -414,7 +426,8 @@ export const lessons = [
         eyebrow: "CHIẾN LƯỢC GIẢI TAM GIÁC",
         title: "Chọn công thức đúng lúc",
         body: "Biết 2 cạnh + góc xen giữa: dùng Cosin để tìm cạnh 3. Biết 1 cạnh + 2 góc: dùng Sin. Biết 3 cạnh: dùng Cosin để tìm góc hoặc Heron để tính diện tích.",
-        formula: "2 cạnh + góc kẹp: Cosin  ·  1 cạnh + 2 góc: Sin  ·  3 cạnh: Cosin / Heron",
+        formula:
+          "2 cạnh + góc kẹp: Cosin  ·  1 cạnh + 2 góc: Sin  ·  3 cạnh: Cosin / Heron",
         tip: "Luôn kiểm tra tổng ba góc bằng 180° và bất đẳng thức tam giác trước khi kết luận.",
         visual: "triangle",
       },
@@ -429,7 +442,8 @@ export const lessons = [
     lessonNumber: "Bài 7 & 8",
     title: "Khái niệm vectơ & Phép toán cộng trừ",
     shortTitle: "Vectơ & Phép cộng trừ",
-    description: "Đoạn thẳng có hướng, hai vectơ bằng nhau, quy tắc ba điểm và hình bình hành.",
+    description:
+      "Đoạn thẳng có hướng, hai vectơ bằng nhau, quy tắc ba điểm và hình bình hành.",
     duration: "10 phút",
     slides: [
       {
@@ -481,7 +495,8 @@ export const lessons = [
     lessonNumber: "Bài 11",
     title: "Tích vô hướng của hai vectơ",
     shortTitle: "Tích vô hướng",
-    description: "Góc giữa hai vectơ, công thức tích vô hướng và điều kiện vuông góc.",
+    description:
+      "Góc giữa hai vectơ, công thức tích vô hướng và điều kiện vuông góc.",
     duration: "9 phút",
     slides: [
       {
@@ -535,7 +550,8 @@ export const lessons = [
     lessonNumber: "Bài 13 & 14",
     title: "Các số đặc trưng của mẫu số liệu",
     shortTitle: "Thống kê mô tả",
-    description: "Số trung bình, trung vị, tứ phân vị, khoảng biến thiên và độ lệch chuẩn.",
+    description:
+      "Số trung bình, trung vị, tứ phân vị, khoảng biến thiên và độ lệch chuẩn.",
     duration: "10 phút",
     slides: [
       {
@@ -558,7 +574,8 @@ export const lessons = [
         eyebrow: "TỨ PHÂN VỊ",
         title: "Chia mẫu số liệu thành bốn phần",
         body: "Tứ phân vị gồm ba giá trị Q1, Q2, Q3 chia mẫu đã sắp xếp thành 4 phần đều nhau. Q2 chính là trung vị Me. Q1 là trung vị của nửa dưới, Q3 là trung vị của nửa trên.",
-        formula: "Q1: tứ phân vị thứ nhất  ·  Q2: trung vị  ·  Q3: tứ phân vị thứ ba",
+        formula:
+          "Q1: tứ phân vị thứ nhất  ·  Q2: trung vị  ·  Q3: tứ phân vị thứ ba",
         tip: "Khi tính Q1 và Q3, không tính giá trị Q2 (nếu n lẻ) vào hai nửa mẫu số liệu.",
         visual: "statistics",
       },
@@ -589,7 +606,8 @@ export const lessons = [
     lessonNumber: "Bài 16 & 17",
     title: "Hàm số bậc hai và dấu của tam thức",
     shortTitle: "Hàm số bậc hai & Tam thức",
-    description: "Đỉnh parabol, trục đối xứng, bảng biến thiên và quy tắc xét dấu tam thức bậc hai.",
+    description:
+      "Đỉnh parabol, trục đối xứng, bảng biến thiên và quy tắc xét dấu tam thức bậc hai.",
     duration: "11 phút",
     slides: [
       {
@@ -612,7 +630,8 @@ export const lessons = [
         eyebrow: "TAM THỨC BẬC HAI",
         title: "Quy tắc dấu “Trong trái - Ngoài cùng”",
         body: "Cho tam thức f(x) = ax² + bx + c (a ≠ 0). Khi biệt thức Δ > 0, tam thức có hai nghiệm phân biệt x1 < x2. Khi đó f(x) trái dấu với hệ số a ở trong khoảng hai nghiệm và cùng dấu với a ở ngoài khoảng hai nghiệm.",
-        formula: "x1 < x < x2 : trái dấu với a  ·  x < x1 hoặc x > x2 : cùng dấu với a",
+        formula:
+          "x1 < x < x2 : trái dấu với a  ·  x < x1 hoặc x > x2 : cùng dấu với a",
         tip: "Câu thần chú bất hủ: “Trong trái, ngoài cùng”!",
         visual: "parabola",
       },
@@ -628,7 +647,8 @@ export const lessons = [
         eyebrow: "BẤT PHƯƠNG TRÌNH BẬC HAI",
         title: "Tìm tập nghiệm từ bảng xét dấu",
         body: "Để giải bất phương trình bậc hai, ta tính Δ, tìm nghiệm của tam thức, lập bảng xét dấu theo quy tắc rồi đọc tập nghiệm thỏa mãn dấu bất phương trình.",
-        formula: "Tính Δ → Tìm nghiệm x1, x2 → Lập bảng xét dấu → Kết luận tập nghiệm",
+        formula:
+          "Tính Δ → Tìm nghiệm x1, x2 → Lập bảng xét dấu → Kết luận tập nghiệm",
         tip: "Ví dụ: x² − 5x + 6 < 0 có a = 1 > 0 và hai nghiệm 2, 3. Cần tìm f(x) < 0 (trái dấu a) nên nghiệm nằm TRONG: (2; 3).",
         visual: "parabola",
       },
@@ -643,7 +663,8 @@ export const lessons = [
     lessonNumber: "Bài 19 & 21",
     title: "Phương trình đường thẳng và đường tròn",
     shortTitle: "Đường thẳng & Đường tròn",
-    description: "Vectơ chỉ phương, pháp tuyến, phương trình tổng quát, khoảng cách và phương trình đường tròn.",
+    description:
+      "Vectơ chỉ phương, pháp tuyến, phương trình tổng quát, khoảng cách và phương trình đường tròn.",
     duration: "11 phút",
     slides: [
       {
@@ -697,7 +718,8 @@ export const lessons = [
     lessonNumber: "Bài 23 & 24",
     title: "Quy tắc đếm, hoán vị, chỉnh hợp và tổ hợp",
     shortTitle: "Đại số tổ hợp",
-    description: "Quy tắc cộng, quy tắc nhân, hoán vị Pn, chỉnh hợp Ank và tổ hợp Cnk.",
+    description:
+      "Quy tắc cộng, quy tắc nhân, hoán vị Pn, chỉnh hợp Ank và tổ hợp Cnk.",
     duration: "10 phút",
     slides: [
       {
@@ -751,7 +773,8 @@ export const lessons = [
     lessonNumber: "Bài 26 & 27",
     title: "Biến cố và tính xác suất cổ điển",
     shortTitle: "Xác suất cổ điển",
-    description: "Không gian mẫu, biến cố, công thức tính xác suất cổ điển và sử dụng biến cố đối.",
+    description:
+      "Không gian mẫu, biến cố, công thức tính xác suất cổ điển và sử dụng biến cố đối.",
     duration: "9 phút",
     slides: [
       {

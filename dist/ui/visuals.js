@@ -1,3 +1,4 @@
+import { lessonLab } from "./lesson-labs.js";
 // Hình minh họa lượng giác và các chuyên đề Toán 10 KNTT.
 export function circleVisual(angle = 130, large = false) {
   const rad = (angle * Math.PI) / 180,
@@ -45,11 +46,13 @@ export function combinatoricsVisual() {
 }
 
 export function probabilityVisual() {
-  return `<svg class="illustration" viewBox="0 0 340 238" role="img" aria-label="Không gian mẫu và biến cố xác suất"><rect x="16" y="12" width="304" height="210" fill="#faf9f5" stroke="#146b50" stroke-width="2" rx="12"/><ellipse cx="140" cy="115" rx="75" ry="55" fill="#d3e7d7" stroke="#146b50" stroke-width="2"/><text x="32" y="38" fill="#146b50" font-size="14" font-weight="bold">KHÔNG GIAN MẪU Ω</text><text x="125" y="115" fill="#146b50" font-size="16" font-weight="bold">Biến cố A</text><text x="245" y="115" fill="#648171" font-size="14" font-weight="bold">Biến cố đối Ā</text><text x="80" y="200" fill="#146b50" font-size="13" font-weight="bold">Xác suất: P(A) = n(A) / n(Ω)</text></svg>`;
+  return `<div class="probability-static"><strong>Không gian mẫu Ω</strong><svg class="illustration" viewBox="0 0 340 200" role="img" aria-label="Biến cố A nằm trong không gian mẫu Omega"><rect x="16" y="12" width="308" height="176" rx="12" fill="#f8faf8" stroke="#146b50"/><ellipse cx="115" cy="100" rx="75" ry="55" fill="#d3e7d7" stroke="#146b50"/><text x="115" y="105" text-anchor="middle" fill="#146b50" font-size="20">A</text><text x="260" y="105" text-anchor="middle" fill="#52685a" font-size="20">Ā</text></svg><p>A: biến cố · Ā: phần còn lại của Ω</p><p>P(A) = n(A) / n(Ω)</p></div>`;
 }
 
 export function visual(type) {
   switch (type) {
+    case "logic":
+      return `<div class="cover-logic"><span>Một khẳng định</span><strong>P → Đúng / Sai</strong><span>¬P · P ⇒ Q · ∀ · ∃</span></div>`;
     case "triangle":
       return triangleVisual();
     case "signs":
@@ -113,9 +116,8 @@ export function interactiveCircle(angle = 130, signsMode = false) {
 }
 
 export function slideVisual(l, index, s, angle) {
-  if (l.id === "values") return interactiveCircle(angle, false);
-  if (l.id === "signs") return interactiveCircle(angle, true);
-  if (l.id === "cosine" && index === 4)
-    return `<svg class="illustration" viewBox="0 0 340 250" role="img" aria-label="Tam giác có góc tù A, cạnh đối diện A dài 4"><path d="M120 172 50 104 280 172Z" fill="#f3edda" stroke="#998357" stroke-width="2"/><path d="M105 157a22 22 0 0 1 37 15" fill="none" stroke="#146b50"/><text x="111" y="198">A</text><text x="35" y="96">B</text><text x="284" y="193">C</text><text x="169" y="121" fill="#146b50">a = 4</text><text x="187" y="194" fill="#146b50">b = 3</text><text x="59" y="153" fill="#146b50">c = 2</text><text x="88" y="230" fill="#648171" font-size="12">Sơ đồ minh họa góc tù, không theo tỉ lệ</text></svg>`;
-  return visual(s.visual);
+  const guide = lessonLab(l, index);
+  if (l.id === "values") return guide + interactiveCircle(angle, false);
+  if (l.id === "signs") return guide + interactiveCircle(angle, true);
+  return guide;
 }

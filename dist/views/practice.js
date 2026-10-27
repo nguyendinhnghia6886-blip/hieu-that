@@ -1,10 +1,7 @@
+import { knowledgeMap } from "../ui/knowledge-map.js";
 import { lessons } from "../learning.js";
 import { icon } from "../ui/icons.js";
-import {
-  button,
-  pageHeading,
-  dateLabel,
-} from "../ui/helpers.js";
+import { button, pageHeading, dateLabel } from "../ui/helpers.js";
 import { triangleVisual, interactiveCircle, visual } from "../ui/visuals.js";
 import { esc } from "../ui/dom.js";
 import { letters } from "../content/labels.js";
@@ -39,7 +36,15 @@ export function createPracticeViews(readContext) {
           ? lessons
           : lessons.filter((l) => l.chapterId === selectedChapter);
 
-      return `${pageHeading("LUYỆN TẬP CÓ CĂN CỨ", "Bắt đầu từ điều bạn đang học.", "Làm bài → Xác minh khi cần → Vận dụng → Xem căn cứ.")}<div class="filter-row"><span class="tag green">Toán 10 KNTT</span><label for="chapter-filter" class="screen-reader-only">Lọc theo chương</label><select id="chapter-filter" class="filter-select"><option value="all">Tất cả các chương (${lessons.length} chủ đề)</option>${chapters.slice(1).map((ch) => `<option value="${ch.id}" ${selectedChapter === ch.id ? "selected" : ""}>${esc(ch.name)}</option>`).join("")}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 5 phút</span><span>2–3 câu hỏi</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
+      return `${pageHeading("LUYỆN TẬP CÓ CĂN CỨ", "Bắt đầu từ điều bạn đang học.", "Làm bài → Xác minh khi cần → Vận dụng → Xem căn cứ.")}<div class="filter-row"><span class="tag green">Toán 10 KNTT</span><label for="chapter-filter" class="screen-reader-only">Lọc theo chương</label><select id="chapter-filter" class="filter-select"><option value="all">Tất cả các chương (${lessons.length} chủ đề)</option>${chapters
+        .slice(1)
+        .map(
+          (ch) =>
+            `<option value="${ch.id}" ${selectedChapter === ch.id ? "selected" : ""}>${esc(ch.name)}</option>`,
+        )
+        .join(
+          "",
+        )}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 5 phút</span><span>2–3 câu hỏi</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
     }
 
     state.lesson = practice.lessonId;
@@ -51,8 +56,12 @@ export function createPracticeViews(readContext) {
       selected = practice.selected;
     const correct = practice.submitted && selected === q.answer;
     const activeLessonObj = lessonFor(state.lesson);
-    const slideFormula = activeLessonObj.slides.find((s) => s.formula)?.formula || "sin² α + cos² α = 1";
-    const slideTip = activeLessonObj.slides.find((s) => s.tip)?.tip || "Nắm chắc công thức gốc để tự tin khi làm bài.";
+    const slideFormula =
+      activeLessonObj.slides.find((s) => s.formula)?.formula ||
+      "sin² α + cos² α = 1";
+    const slideTip =
+      activeLessonObj.slides.find((s) => s.tip)?.tip ||
+      "Nắm chắc công thức gốc để tự tin khi làm bài.";
 
     return `${pageHeading("KHÔNG GIAN LÀM BÀI", esc(activeLessonObj.shortTitle), "Bạn không cần làm thật nhanh. Hãy dành thời gian cho cách mình suy nghĩ.", button("Đổi chủ đề", "choose-practice", "ghost small"))}
     <div class="steps-bar">${[
@@ -87,7 +96,7 @@ export function createPracticeViews(readContext) {
   }
 
   function progressView() {
-    const { state, data, lessonFor, lessonIcon } = readContext();
+    const { state, data, lessonFor } = readContext();
     const sessions = data.sessions,
       supported = sessions.filter((s) => s.status === "supported").length;
     return `${pageHeading("NHÌN LẠI ĐỂ ĐI XA HƠN", state.role === "student" ? "Tiến bộ có căn cứ." : "Căn cứ học tập trên thiết bị.", "Mỗi nhận xét đi cùng câu trả lời, thời điểm và mức hỗ trợ đã sử dụng.", button(`${icon("download")} Xuất kết quả`, "export", "secondary small", sessions.length ? "" : "disabled"))}<div class="metric-grid"><div class="metric-card card"><span class="metric-icon">${icon("pen")}</span><span class="metric-value">${sessions.length}</span><span>Phiên học đã hoàn thành</span></div><div class="metric-card card"><span class="metric-icon">${icon("check")}</span><span class="metric-value">${supported}</span><span>Phiên có bằng chứng làm đúng</span></div><div class="metric-card card"><span class="metric-icon">${icon("book")}</span><span class="metric-value">${data.completed.length}<small> / ${lessons.length}</small></span><span>Chủ đề đã xem hết slide</span></div></div><div class="progress-layout"><section><div class="section-heading"><h2>Hành trình học tập</h2><span class="tag gray">${sessions.length ? "Dữ liệu của bạn" : "Chưa có dữ liệu"}</span></div>${
@@ -100,19 +109,11 @@ export function createPracticeViews(readContext) {
             )
             .join("")}</div>`
         : `<div class="empty-state card">${icon("leaf")}<h3>Hành trình của bạn bắt đầu từ đây</h3><p>Hoàn thành một phiên luyện tập để xem câu trả lời<br>và những điều bạn cần luyện thêm.</p>${button("Luyện một câu đầu tiên", "start-practice", "primary", 'data-lesson="values"')}</div>`
-    }</section><aside><section class="card knowledge-card"><h3>Bản đồ kiến thức</h3>${lessons
-      .map((l) => {
-        const attempts = sessions.filter((s) => s.lessonId === l.id),
-          last = attempts.at(-1);
-        return `<div class="knowledge-row"><span class="lesson-icon">${icon(lessonIcon(l.id))}</span><div><strong>${esc(l.shortTitle)}</strong><span>${last ? (last.status === "supported" ? "Có bằng chứng trong phiên gần nhất" : last.status === "practice" ? "Cần luyện thêm" : "Cần thêm căn cứ") : "Chưa có dữ liệu kiểm tra"}</span></div><i class="knowledge-dot ${last?.status || ""}"></i></div>`;
-      })
-      .join(
-        "",
-      )}<p class="muted small-text">Trạng thái dựa trên phiên gần nhất của mỗi chủ đề.</p></section><section class="teacher-note-preview">${icon("shield")}<p><strong>Tiến bộ không chỉ là điểm số.</strong><span>Câu trả lời đúng sau gợi ý vẫn cần được kiểm tra bằng một bài độc lập.</span></p></section>${
+    }</section><aside><section class="teacher-note-preview">${icon("shield")}<p><strong>Tiến bộ không chỉ là điểm số.</strong><span>Câu trả lời đúng sau gợi ý vẫn cần được kiểm tra bằng một bài độc lập.</span></p></section>${
       data.notes.length
         ? `<section class="card"><h3>Nhận xét đã ghi (${data.notes.length})</h3>${data.notes.map((n) => `<p class="muted small-text">${esc(n.text)}</p>`).join("")}</section>`
         : ""
-    }</aside></div>`;
+    }</aside></div>${knowledgeMap(lessons, data)}`;
   }
 
   return { practiceView, resultView, progressView, evidenceHistory };

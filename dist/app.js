@@ -1,3 +1,4 @@
+import { installLessonLabs } from "./ui/lesson-labs.js";
 import {
   lessons,
   questionBank,
@@ -186,7 +187,9 @@ function render() {
             `<button class="nav-item" data-action="nav" data-view="${id}" ${
               state.view === id ? 'aria-current="page"' : ""
             }>${icon(ic)}<span>${text}</span>${
-              id === "lessons" ? `<span class="nav-badge">${lessons.length}</span>` : ""
+              id === "lessons"
+                ? `<span class="nav-badge">${lessons.length}</span>`
+                : ""
             }</button>`,
         )
         .join("");
@@ -608,6 +611,8 @@ companion = createCompanion({
   },
 });
 
+installLessonLabs();
+
 document.addEventListener("click", async (event) => {
   if (
     event.target.closest("[data-online]") ||
@@ -879,7 +884,11 @@ document.addEventListener("keydown", (e) => {
     render();
     return;
   }
-  if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+  if (
+    e.target.closest("[data-lesson-lab], .knowledge-map, #companion-root") ||
+    ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)
+  )
+    return;
   if (state.view === "lessons" && state.activeLesson) {
     if (e.key === "ArrowRight") {
       e.preventDefault();
