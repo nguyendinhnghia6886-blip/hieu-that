@@ -13,7 +13,7 @@ Ngày 27/10/2026. Bản đầu vào: bc3dd59, 65 test đạt khi chạy trực t
 
 ## Kiểm tra
 
-- 67 test tự động đạt sau khi bổ sung 2 ca: phân biệt nguồn/cùng đề, và mất phản hồi sau khi máy chủ đã lưu rồi tiếp tục nhập. Đã chạy check và lint.
+- 68 test tự động đạt sau khi bổ sung 3 ca: phân biệt nguồn/cùng đề, mất phản hồi sau khi máy chủ đã lưu rồi tiếp tục nhập, và thăm dò phiên chưa đăng nhập không làm chuyển trang tự học sang form đăng nhập. Đã chạy check và lint.
 - SQL rollback db/verify-import.sql đạt: retry, giữ nội dung đã sửa/duyệt, không gộp câu khác phương án, nhận diện bản nhập cũ, cách ly giáo viên.
 - SQL rollback db/verify-access.sql đạt: chấm điểm, chống nộp lại, không lộ đáp án, quyền sở hữu và cách ly tài khoản.
 - HTTP trên preview với Vercel/Supabase thật: 8 yêu cầu nhập cùng nguồn chạy đồng thời trả cùng ID; retry giữ sửa đổi; giáo viên khác có bản riêng; học sinh không được nhập câu. Luồng đăng nhập, giao/nộp/chấm bài và đăng xuất đạt.

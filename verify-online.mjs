@@ -25,6 +25,35 @@ import {
   teacherStudentsView,
 } from "./dist/views/online-teacher.js";
 
+test("signed-out session probing keeps public self-study open, while explicit online entry shows login", async (t) => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "location");
+  Object.defineProperty(globalThis, "location", {
+    configurable: true,
+    value: { pathname: "/", search: "", hash: "" },
+  });
+  t.after(() => {
+    if (previous) Object.defineProperty(globalThis, "location", previous);
+    else delete globalThis.location;
+  });
+  const state = { role: "student", view: "home" };
+  const online = createOnline({
+    state,
+    render() {},
+    toast() {},
+    fetchImpl: async () => ({
+      ok: false,
+      json: async () => ({ error: "Bạn cần đăng nhập.", signedOut: true }),
+    }),
+  });
+  await online.init();
+  assert.equal(state.view, "home");
+  assert.equal(online.isSignedIn(), false);
+  await online.open();
+  assert.equal(state.view, "online");
+  assert.match(online.view(), /Đăng nhập vào không gian của bạn/);
+  assert.doesNotMatch(online.currentMessage(), /Bản nháp/);
+});
+
 test("import identity keeps same-prompt questions distinct and namespaces local sources", async () => {
   const a = {
     id: "source-a",

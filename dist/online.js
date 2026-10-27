@@ -295,11 +295,18 @@ export function createOnline({
           ? `${body.error || "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."} (Bản nháp của bạn vẫn được giữ trong phiên trang này).`
           : body.error || "Kết nối chưa thành công.";
       if (body.signedOut) {
+        const showLogin =
+          signedIn ||
+          state.view === "online" ||
+          drafts.size > 0 ||
+          markDrafts.size > 0;
         clearSessionState({ keepDrafts: true });
-        state.view = "online";
         authMode = "login";
-        message = errMsg;
-        refreshView();
+        if (showLogin) {
+          state.view = "online";
+          message = errMsg;
+          refreshView();
+        }
       }
       throw new Error(errMsg);
     }
