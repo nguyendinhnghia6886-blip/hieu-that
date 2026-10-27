@@ -293,40 +293,10 @@ function viewContent() {
     );
   return home();
 }
-function selectPracticeQueue(pool, sessionIndex) {
+function selectPracticeQueue(pool) {
   if (!pool || pool.length === 0) return [];
-  if (pool.length <= 4) return [...pool];
-
-  const mcPool = pool.filter((q) => !q.type || q.type === "multiple-choice");
-  const tfPool = pool.filter((q) => q.type === "true-false");
-  const saPool = pool.filter((q) => q.type === "short-answer");
-
-  const selected = [];
-  // 2 câu trắc nghiệm nhiều lựa chọn
-  if (mcPool.length > 0) {
-    const startMC = (sessionIndex * 2) % mcPool.length;
-    selected.push(mcPool[startMC]);
-    if (mcPool.length > 1) {
-      selected.push(mcPool[(startMC + 1) % mcPool.length]);
-    }
-  }
-  // 1 câu trắc nghiệm Đúng / Sai (nếu có)
-  if (tfPool.length > 0) {
-    selected.push(tfPool[sessionIndex % tfPool.length]);
-  }
-  // 1 câu trả lời ngắn (nếu có)
-  if (saPool.length > 0) {
-    selected.push(saPool[sessionIndex % saPool.length]);
-  }
-
-  // Nếu chưa đủ 4 câu, lấy thêm từ pool
-  if (selected.length < 4) {
-    for (const q of pool) {
-      if (!selected.includes(q)) selected.push(q);
-      if (selected.length >= 4) break;
-    }
-  }
-  return selected.slice(0, 4);
+  // Cung cấp đầy đủ toàn bộ ngân hàng câu hỏi (20-26 câu) từ cơ bản đến nâng cao
+  return [...pool];
 }
 
 function newPractice(lessonId) {

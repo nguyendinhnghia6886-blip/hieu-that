@@ -1,5 +1,5 @@
 import { knowledgeMap } from "../ui/knowledge-map.js";
-import { lessons, evaluateTrueFalse, checkShortAnswer } from "../learning.js";
+import { lessons, questionBank, evaluateTrueFalse, checkShortAnswer } from "../learning.js";
 import { icon } from "../ui/icons.js";
 import { button, pageHeading, dateLabel } from "../ui/helpers.js";
 import { triangleVisual, interactiveCircle, visual } from "../ui/visuals.js";
@@ -44,7 +44,10 @@ export function createPracticeViews(readContext) {
         )
         .join(
           "",
-        )}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 5 phút</span><span>2–3 câu hỏi</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
+        )}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => {
+          const qCount = questionBank.filter((q) => q.lessonId === l.id).length;
+          return `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 20–25 phút</span><span><strong>${qCount} câu hỏi</strong> (Trắc nghiệm, Đúng/Sai, Điền số)</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`;
+        }).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
     }
 
     state.lesson = practice.lessonId;

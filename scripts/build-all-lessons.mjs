@@ -63,3 +63,4 @@ export const slideGuides = ${JSON.stringify(slideGuides, null, 2)};
 
 fs.writeFileSync(guidesPath, guidesContent, "utf-8");
 console.log(`Successfully written: ${guidesPath}`);
+

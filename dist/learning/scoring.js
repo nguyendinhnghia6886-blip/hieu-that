@@ -69,3 +69,4 @@ export function evaluateTrueFalse(selectedMap = {}, subQuestions = []) {
     isFullyCorrect: numCorrect === subQuestions.length,
   };
 }
+
