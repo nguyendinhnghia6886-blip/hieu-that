@@ -1210,3 +1210,17 @@ if (typeof document !== "undefined" && data.reducedMotion) {
 }
 render();
 online.init();
+if (typeof window !== "undefined") {
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(() => {
+      postRenderAnimations();
+    });
+  }
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      postRenderAnimations();
+    }, 150);
+  });
+}

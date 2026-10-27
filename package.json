@@ -7,7 +7,7 @@
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "check": "node scripts/check.mjs",
-    "test": "node --test verify.mjs verify-workspace.mjs verify-workspace-state.mjs verify-companion.mjs verify-companion-state.mjs verify-ollama.mjs verify-views.mjs verify-grading.mjs verify-online.mjs",
+    "test": "node --test verify.mjs verify-workspace.mjs verify-workspace-state.mjs verify-companion.mjs verify-companion-state.mjs verify-ollama.mjs verify-views.mjs verify-grading.mjs verify-online.mjs verify-motion-interactions.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

@@ -313,6 +313,25 @@ export function renderLab(kind, v) {
       ? v.x >= 0 && v.y >= 0 && value <= 1e-9
       : satisfies(a, b, c, v.x, v.y, sign);
 
+    const isPointOnBorder = Math.abs(value) < 1e-9;
+    let testX = v.x,
+      testY = v.y,
+      testValue = value;
+    if (isPointOnBorder) {
+      if (Math.abs(a * 1 + b * 0 + c) > 1e-9) {
+        testX = 1;
+        testY = 0;
+      } else if (Math.abs(a * 0 + b * 1 + c) > 1e-9) {
+        testX = 0;
+        testY = 1;
+      } else {
+        testX = v.x + 1;
+        testY = v.y;
+      }
+      testValue = a * testX + b * testY + c;
+    }
+    const testGood = satisfies(a, b, c, testX, testY, sign);
+
     if (kind === "inequalities-2var" && v._constructStep) {
       if (v._constructStep === 1) {
         graph = svg(axes(), "Bước 1: Hệ trục Oxy", true);
@@ -325,22 +344,39 @@ export function renderLab(kind, v) {
         );
         info = `Bước 2/5: Tìm 2 điểm đặc biệt thuộc bờ d và vẽ đường thẳng d: ${a}x + ${b}y + (${c}) = 0.`;
       } else if (v._constructStep === 3) {
-        graph = svg(
-          `${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M")}`,
-          "Bước 3: Điểm thử M",
-          true,
-        );
-        info = `Bước 3/5: Lấy điểm thử M(${fmt(v.x)}; ${fmt(v.y)}) không thuộc bờ d. Thay vào biểu thức được: ${fmt(value)}.`;
+        if (isPointOnBorder) {
+          graph = svg(
+            `${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M (trên bờ)")}${dot(testX, testY, "M' (thử)")}`,
+            "Bước 3: Chọn điểm thử hợp lệ",
+            true,
+          );
+          info = `Bước 3/5: Điểm M(${fmt(v.x)}; ${fmt(v.y)}) nằm ngay trên bờ d (${a}x + ${b}y + (${c}) = 0), không thể dùng làm điểm thử! Ta chọn điểm thay thế M'(${fmt(testX)}; ${fmt(testY)}) không thuộc d, thay vào biểu thức: ${fmt(testValue)} ${testValue > 0 ? "> 0" : "< 0"}.`;
+        } else {
+          graph = svg(
+            `${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M")}`,
+            "Bước 3: Điểm thử M",
+            true,
+          );
+          info = `Bước 3/5: Lấy điểm thử M(${fmt(v.x)}; ${fmt(v.y)}) không thuộc bờ d. Thay vào biểu thức ax + by + c được: ${fmt(value)} ${value > 0 ? "> 0" : "< 0"}.`;
+        }
       } else if (v._constructStep === 4) {
+        const usedX = isPointOnBorder ? testX : v.x;
+        const usedY = isPointOnBorder ? testY : v.y;
+        const usedGood = isPointOnBorder ? testGood : good;
+        const usedVal = isPointOnBorder ? testValue : value;
+        const usedName = isPointOnBorder ? "M'" : "M";
         graph = svg(
-          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(v.x, v.y, "M")}`,
+          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50") : ""}${dot(usedX, usedY, usedName)}`,
           "Bước 4: Miền nghiệm",
           true,
         );
-        info = `Bước 4/5: So sánh ${fmt(value)} với 0. Điểm M ${good ? "thuộc" : "không thuộc"} miền nghiệm. Tô màu nửa mặt phẳng ${good ? "chứa" : "không chứa"} M.`;
+        info = `Bước 4/5: So sánh ${fmt(usedVal)} với 0. Điểm ${usedName} ${usedGood ? "thuộc" : "không thuộc"} miền nghiệm. Tô màu nửa mặt phẳng ${usedGood ? "chứa" : "không chứa"} ${usedName}.`;
       } else {
+        const usedX = isPointOnBorder ? testX : v.x;
+        const usedY = isPointOnBorder ? testY : v.y;
+        const usedName = isPointOnBorder ? "M'" : "M";
         graph = svg(
-          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50", ["lt", "gt"].includes(sign)) : ""}${dot(v.x, v.y, "M")}`,
+          `${poly(region)}${axes()}${border.length === 2 ? segment(border[0], border[1], "#146b50", ["lt", "gt"].includes(sign)) : ""}${dot(usedX, usedY, usedName)}`,
           "Bước 5: Kiểm tra tính bờ",
           true,
         );
@@ -525,7 +561,10 @@ export function installLessonLabs(doc = document) {
       root.querySelector(`[data-lab-outcome="${x}"]`)?.focus();
     }
     if (event.target.closest("[data-lab-reset]")) {
-      states.set(root, JSON.parse(root.dataset.labInitial));
+      stopConstruction(root);
+      const initial = JSON.parse(root.dataset.labInitial);
+      initial._constructStep = 0;
+      states.set(root, initial);
       update(root);
     }
     const answer = event.target.closest("[data-lab-answer]");

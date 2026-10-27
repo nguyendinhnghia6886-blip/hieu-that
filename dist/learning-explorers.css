@@ -587,43 +587,58 @@
    PHONG CÁCH "CUỐN SỔ TOÁN TƯƠNG TÁC" & HỆ THỐNG CHUYỂN ĐỘNG
    ========================================================== */
 
-/* 1. Trang chủ - Hero Trig Visual Animation (thứ tự: nửa đường tròn → điểm M → đường chiếu → công thức) */
+/* 1. Trang chủ - Hero Trig Visual Animation (Vẽ nét hình học theo tiến trình) */
 .hero-trig-animated .trig-semicircle {
-  opacity: 0;
-  animation: heroTrigFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+  animation: heroDrawSemicircle 0.65s cubic-bezier(0.25, 1, 0.5, 1) 0.1s forwards;
 }
 .hero-trig-animated .trig-sector {
   opacity: 0;
-  animation: heroTrigFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+  animation: heroTrigFadeIn 0.35s ease-out 0.75s forwards;
 }
-.hero-trig-animated .trig-radius,
+.hero-trig-animated .trig-radius {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: heroDrawRadius 0.45s ease-out 0.8s forwards;
+}
 .hero-trig-animated .trig-point-m,
 .hero-trig-animated .trig-label-m {
   opacity: 0;
-  animation: heroTrigPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s forwards;
+  transform: scale(0.3);
+  transform-origin: 88px 68px;
+  animation: heroPopPointM 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s forwards;
 }
 .hero-trig-animated .trig-projections {
-  opacity: 0;
-  stroke-dasharray: 4 4;
-  animation: heroTrigFadeIn 0.35s ease-out 0.85s forwards;
+  stroke-dasharray: 180;
+  stroke-dashoffset: 180;
+  animation: heroDrawProjections 0.45s ease-out 1.55s forwards;
 }
 .hero-trig-animated .trig-labels {
   opacity: 0;
-  animation: heroTrigFadeIn 0.4s ease-out 1.1s forwards;
+  animation: heroTrigFadeIn 0.4s ease-out 1.95s forwards;
 }
 .hero-visual .floating-formula {
   opacity: 0;
-  transform: translateY(8px);
-  animation: heroFormulaSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 1.25s forwards;
+  transform: translateY(10px);
+  animation: heroFormulaSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 2.25s forwards;
 }
 
+@keyframes heroDrawSemicircle {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes heroDrawRadius {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes heroPopPointM {
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes heroDrawProjections {
+  to { stroke-dashoffset: 0; }
+}
 @keyframes heroTrigFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-@keyframes heroTrigPopIn {
-  0% { opacity: 0; transform: scale(0.6); transform-origin: 160px 154px; }
-  100% { opacity: 1; transform: scale(1); transform-origin: 160px 154px; }
 }
 @keyframes heroFormulaSlideIn {
   to { opacity: 1; transform: translateY(0); }
@@ -902,6 +917,41 @@
 /* 5. Bản đồ kiến thức mượt mà */
 .knowledge-map .map-branch {
   transition: all 0.25s ease;
+  overflow: hidden;
+}
+.knowledge-map .map-branch summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #1B4D3E;
+  padding: 10px 14px;
+  border-radius: 8px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s ease;
+}
+.knowledge-map .map-branch summary::after {
+  content: "▾";
+  font-size: 14px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.knowledge-map .map-branch:not([open]) summary::after {
+  transform: rotate(-90deg);
+}
+.knowledge-map .map-branch ul {
+  animation: branchReveal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes branchReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .knowledge-map .map-node button {
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;

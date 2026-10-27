@@ -55,9 +55,9 @@ function formatExampleBox(exampleText) {
   </div>`;
 }
 
-function formatFormula(formulaText) {
+export function formatFormula(formulaText) {
   if (!formulaText) return "";
-  const pattern = /(a\s*≠\s*0|a²\s*\+\s*b²\s*≠\s*0|90°\s*<\s*α\s*<\s*180°|sin²\s*α\s*\+\s*cos²\s*α\s*=\s*1|∀|∃|Δ\s*>\s*0|Δ\s*=\s*0|Δ\s*<\s*0)/g;
+  const pattern = /(a\s*≠\s*0|a²\s*\+\s*b²\s*≠\s*0|90°\s*(?:<|&lt;)\s*α\s*(?:<|&lt;)\s*180°|sin²\s*α\s*\+\s*cos²\s*α\s*=\s*1|∀|∃|Δ\s*(?:>|&gt;|=|!=|≠|<|&lt;)\s*0|a\s*(?:>|&gt;|<|&lt;)\s*0)/g;
   const escaped = esc(formulaText);
   const highlighted = escaped.replace(
     pattern,

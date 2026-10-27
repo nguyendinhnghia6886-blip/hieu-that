@@ -50,11 +50,13 @@ console.log(`Successfully written: ${lessonsPath}`);
 // 2. Write dist/content/slide-guides.js
 const slideGuides = {};
 for (const lesson of allLessons) {
-  slideGuides[lesson.id] = lesson.slides.map((slide) => [
-    `Bước 1 (Khái niệm): ${slide.title}`,
-    `Bước 2 (Công thức): ${slide.formula}`,
-    `Bước 3 (Thực hành): ${slide.tip}`
-  ]);
+  slideGuides[lesson.id] = lesson.slides.map((slide) => {
+    const sentences = slide.body.split(/(?<=[.!?])\s+/);
+    const step1 = sentences[0] || slide.title;
+    const step2 = slide.formula || (sentences[1] ? sentences[1] : slide.title);
+    const step3 = slide.tip || "Vận dụng lý thuyết vào từng dạng bài cụ thể.";
+    return [step1, step2, step3];
+  });
 }
 
 const guidesContent = `// One explanatory path per slide; these are teaching aids, not assessment results.

@@ -388,7 +388,19 @@ body:has(#companion-root) .page-content {
   display: none;
 }
 #companion-root[data-open="true"] .companion-header .companion-mascot {
-  animation: companion-hello 0.55s ease-out 1;
+  animation: companion-book-open 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
+  transform-origin: center;
+}
+@keyframes companion-book-open {
+  0% {
+    transform: scaleX(0.7) rotate(-4deg);
+  }
+  60% {
+    transform: scaleX(1.08) rotate(2deg);
+  }
+  100% {
+    transform: scaleX(1) rotate(0deg);
+  }
 }
 @keyframes companion-appear {
   from {
