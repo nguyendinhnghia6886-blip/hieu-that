@@ -90,4 +90,147 @@ export const probes = {
     explanation:
       "Vì mệnh đề khẳng định đúng với TẤT CẢ mọi x, nên chỉ cần tìm được MỘT phản ví dụ x0 làm khẳng định sai là đủ kết luận mệnh đề sai.",
   },
+  set_interval: {
+    prompt:
+      "Khi lấy hợp hai tập hợp A = (-∞; 2] và B = (0; 5), phần tử x = 2 có thuộc tập hợp A ∪ B không?",
+    options: [
+      "Có, vì 2 thuộc tập hợp A",
+      "Không, vì 2 không thuộc B",
+      "Chỉ thuộc khi 2 là số nguyên dương",
+      "Chưa thể xác định",
+    ],
+    answer: 0,
+    explanation:
+      "Phần tử x thuộc A ∪ B khi và chỉ khi x thuộc A hoặc x thuộc B. Vì 2 ∈ (-∞; 2] nên 2 chắc chắn thuộc A ∪ B.",
+  },
+  ineq_boundary: {
+    prompt:
+      "Miền nghiệm của bất phương trình 2x - y ≥ 4 có chứa các điểm nằm trên đường thẳng bờ 2x - y = 4 không?",
+    options: [
+      "Có chứa (vẽ bằng đường nét liền)",
+      "Không chứa (vẽ bằng đường nét đứt)",
+      "Chỉ chứa gốc tọa độ O(0; 0)",
+      "Chỉ chứa khi hoành độ x > 0",
+    ],
+    answer: 0,
+    explanation:
+      "Bất đẳng thức có chứa dấu bằng (≥) nên các điểm nằm trên đường thẳng 2x - y = 4 cũng là nghiệm và bờ được vẽ nét liền.",
+  },
+  system_ineq_origin: {
+    prompt:
+      "Để kiểm tra xem miền nghiệm của một hệ BPT có chứa gốc tọa độ O(0; 0) hay không, ta thực hiện như thế nào?",
+    options: [
+      "Thay tọa độ (0; 0) vào đồng thời tất cả các BPT của hệ",
+      "Chỉ cần thay tọa độ (0; 0) vào một BPT bất kỳ",
+      "Vẽ đồ thị rồi ước lượng trực giác bằng mắt",
+      "Cộng các hệ số tự do của các BPT lại với nhau",
+    ],
+    answer: 0,
+    explanation:
+      "Điểm O(0; 0) thuộc miền nghiệm của hệ khi và chỉ khi tọa độ của nó thỏa mãn tất cả các bất phương trình trong hệ cùng một lúc.",
+  },
+  sine_law_radius: {
+    prompt:
+      "Trong tam giác ABC, hệ thức đúng của định lý sin liên hệ giữa cạnh a và bán kính đường tròn ngoại tiếp R là gì?",
+    options: [
+      "a / sin A = 2R",
+      "a / sin A = R",
+      "a / sin A = R / 2",
+      "a · sin A = 2R",
+    ],
+    answer: 0,
+    explanation:
+      "Định lý sin khẳng định: a / sin A = b / sin B = c / sin C = 2R, trong đó 2R là đường kính đường tròn ngoại tiếp tam giác.",
+  },
+  vector_opposite: {
+    prompt:
+      "Hai vectơ được gọi là đối nhau khi thỏa mãn đồng thời hai điều kiện nào?",
+    options: [
+      "Ngược hướng và có cùng độ dài",
+      "Cùng hướng và có cùng độ dài",
+      "Cùng phương nhưng có độ dài khác nhau",
+      "Vuông góc với nhau",
+    ],
+    answer: 0,
+    explanation:
+      "Hai vectơ đối nhau là hai vectơ ngược hướng và có cùng độ dài. Tổng của hai vectơ đối nhau luôn bằng vectơ không.",
+  },
+  scalar_prod_angle: {
+    prompt:
+      "Cho hai vectơ khác không a và b. Nếu tích vô hướng a · b = 0 thì góc giữa hai vectơ này bằng bao nhiêu?",
+    options: [
+      "90° (hai vectơ vuông góc)",
+      "0° (hai vectơ cùng hướng)",
+      "180° (hai vectơ ngược hướng)",
+      "45°",
+    ],
+    answer: 0,
+    explanation:
+      "Vì a · b = |a| · |b| · cos(a, b) = 0 và |a|, |b| > 0 nên cos(a, b) = 0, suy ra góc giữa hai vectơ bằng 90°.",
+  },
+  stat_median: {
+    prompt:
+      "Để tìm trung vị (Me) của một mẫu số liệu gồm n số, bước đầu tiên bắt buộc phải thực hiện là gì?",
+    options: [
+      "Sắp xếp mẫu số liệu theo thứ tự không giảm",
+      "Tính trung bình cộng của toàn bộ mẫu",
+      "Tìm giá trị có tần số lớn nhất (Mốt)",
+      "Tính khoảng biến thiên R",
+    ],
+    answer: 0,
+    explanation:
+      "Trung vị là giá trị chia mẫu số liệu đã sắp xếp thành hai nửa bằng nhau. Do đó bắt buộc phải xếp thứ tự trước.",
+  },
+  quad_vertex: {
+    prompt:
+      "Tọa độ đỉnh I của parabol y = ax² + bx + c (a ≠ 0) có hoành độ xI bằng biểu thức nào sau đây?",
+    options: [
+      "-b / (2a)",
+      "b / (2a)",
+      "-b / a",
+      "c / a",
+    ],
+    answer: 0,
+    explanation:
+      "Hoành độ đỉnh parabol và trục đối xứng của đồ thị luôn là đường thẳng x = -b / (2a).",
+  },
+  line_normal_direction: {
+    prompt:
+      "Nếu đường thẳng d có một vectơ pháp tuyến n = (a; b) (a² + b² > 0) thì một vectơ chỉ phương u của d là:",
+    options: [
+      "u = (-b; a)",
+      "u = (a; b)",
+      "u = (b; a)",
+      "u = (a; -b)",
+    ],
+    answer: 0,
+    explanation:
+      "Vectơ chỉ phương u vuông góc với vectơ pháp tuyến n, nên tích vô hướng u · n = (-b)·a + a·b = 0. Do đó u = (-b; a).",
+  },
+  comb_perm_vs_comb: {
+    prompt:
+      "Điểm khác biệt cốt lõi giữa bài toán chỉnh hợp A_n^k và tổ hợp C_n^k (1 ≤ k ≤ n) là gì?",
+    options: [
+      "Chỉnh hợp có sắp xếp thứ tự, còn tổ hợp không phân biệt thứ tự",
+      "Tổ hợp có sắp xếp thứ tự, còn chỉnh hợp không phân biệt thứ tự",
+      "Chỉnh hợp cho phép các phần tử lặp lại",
+      "Tổ hợp luôn có số cách chọn lớn hơn chỉnh hợp",
+    ],
+    answer: 0,
+    explanation:
+      "Chỉnh hợp chọn k phần tử và gán vào k vị trí có thứ tự (A_n^k). Tổ hợp chỉ chọn một tập hợp con gồm k phần tử không phân biệt thứ tự (C_n^k = A_n^k / k!).",
+  },
+  prob_complement: {
+    prompt:
+      "Gọi A là một biến cố và ¬A là biến cố đối của A trong cùng phép thử. Tổng xác suất P(A) + P(¬A) luôn bằng bao nhiêu?",
+    options: [
+      "1",
+      "0",
+      "0.5",
+      "Không xác định được nếu chưa biết không gian mẫu",
+    ],
+    answer: 0,
+    explanation:
+      "Biến cố đối ¬A gồm toàn bộ các kết quả của không gian mẫu không thuận lợi cho A. Vì A và ¬A xung khắc và A ∪ ¬A = Ω nên P(A) + P(¬A) = P(Ω) = 1.",
+  },
 };

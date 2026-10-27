@@ -1,5 +1,23 @@
 import { probes } from "../content/probes.js";
 
+const lessonProbeMap = {
+  propositions: "prop_def",
+  sets: "set_interval",
+  "inequalities-2var": "ineq_boundary",
+  "system-inequalities": "system_ineq_origin",
+  values: "identity",
+  signs: "sign",
+  cosine: "sign",
+  "sine-law": "sine_law_radius",
+  "vectors-intro": "vector_opposite",
+  "scalar-product": "scalar_prod_angle",
+  statistics: "stat_median",
+  "quadratic-functions": "quad_vertex",
+  "analytic-geometry": "line_normal_direction",
+  combinatorics: "comb_perm_vs_comb",
+  probability: "prob_complement",
+};
+
 export function getProbe(question, selected) {
   if (!question || !Array.isArray(question.options)) return null;
   const index =
@@ -58,7 +76,9 @@ export function getVerificationProbe(question, selected) {
     ) {
       return "prop_converse_rule";
     }
-    if (question.lessonId === "propositions") return "prop_def";
+    if (question.lessonId && lessonProbeMap[question.lessonId]) {
+      return lessonProbeMap[question.lessonId];
+    }
     return null;
   }
   if (question.probeKeys && question.probeKeys[index]) {
@@ -82,8 +102,54 @@ export function getVerificationProbe(question, selected) {
   ) {
     return "prop_converse_rule";
   }
-  if (question.lessonId === "propositions") return "prop_def";
+  if (question.lessonId && lessonProbeMap[question.lessonId]) {
+    return lessonProbeMap[question.lessonId];
+  }
   return getProbe(question, selected);
+}
+
+export function getMisconceptionText(probeKey, question) {
+  const map = {
+    prop_def:
+      "Chưa phân biệt được khẳng định có chân trị dứt khoát với câu hỏi, cảm thán hoặc mệnh đề chứa biến",
+    prop_neg_rule:
+      "Chưa nắm đúng quy tắc đổi lượng từ (∀ ↔ ∃) và đổi dấu bất đẳng thức khi lập mệnh đề phủ định",
+    prop_converse_rule:
+      "Ngộ nhận mệnh đề đảo luôn có cùng tính đúng sai với định lý thuận",
+    prop_necessary_rule:
+      "Nhầm lẫn giữa điều kiện cần (kết luận Q) và điều kiện đủ (giả thiết P) trong định lý kéo theo",
+    prop_counterexample_rule:
+      "Chưa nắm vững phương pháp dùng phản ví dụ để bác bỏ mệnh đề với mọi",
+    sign: "Chưa xác định đúng dấu âm của hàm cos (và tan, cot) trong phạm vi góc tù 90° < α < 180°",
+    root: "Bỏ sót nghiệm âm khi khai căn phương trình bình phương u² = a",
+    identity: "Nhầm lẫn hệ thức lượng giác cơ bản sin²α + cos²α = 1",
+    set_interval:
+      "Nhầm lẫn điều kiện thuộc phép hợp (∪) và phép giao (∩) trên các khoảng và nửa khoảng",
+    ineq_boundary:
+      "Chưa phân biệt được bất phương trình ngặt (vẽ nét đứt) và không ngặt có lấy bờ (vẽ nét liền)",
+    system_ineq_origin:
+      "Chưa nắm phương pháp thử điểm đại diện (như gốc O) để xác định miền nghiệm của hệ bất phương trình",
+    sine_law_radius:
+      "Nhầm lẫn tỉ số a/sin A bằng bán kính R thay vì đường kính 2R trong định lý sin",
+    vector_opposite:
+      "Nhầm lẫn giữa hai vectơ ngược hướng cùng độ dài (vectơ đối) và hai vectơ cùng hướng",
+    scalar_prod_angle:
+      "Chưa nắm vững điều kiện hai vectơ vuông góc tương đương tích vô hướng bằng 0",
+    stat_median:
+      "Quên sắp xếp mẫu số liệu theo thứ tự không giảm trước khi tìm trung vị hoặc tứ phân vị",
+    quad_vertex:
+      "Nhầm dấu trong công thức tọa độ đỉnh parabol x = -b/(2a)",
+    line_normal_direction:
+      "Nhầm lẫn chuyển đổi giữa vectơ pháp tuyến n=(a; b) và vectơ chỉ phương u=(-b; a)",
+    comb_perm_vs_comb:
+      "Chưa phân biệt bài toán có thứ tự (chỉnh hợp) và bài toán chọn nhóm không phân biệt thứ tự (tổ hợp)",
+    prob_complement:
+      "Chưa biết tận dụng quy tắc biến cố đối P(A) = 1 - P(¬A) khi bài toán có từ khóa 'ít nhất một'",
+  };
+  if (probeKey && map[probeKey]) return map[probeKey];
+  if (question?.skill)
+    return `Cần củng cố thêm kỹ năng sư phạm về ${question.skill}`;
+  return "Chưa nắm chắc khái niệm và phương pháp trọng tâm của bài học";
 }
 
 /** Summarize only the available, explicit answers from this short session. */
@@ -110,6 +176,17 @@ export function summarizeEvidence({
       prop_necessary_rule: "phân biệt điều kiện cần và điều kiện đủ",
       prop_counterexample_rule:
         "phương pháp phản ví dụ bác bỏ mệnh đề với mọi",
+      set_interval: "phép toán hợp và giao trên tập số",
+      ineq_boundary: "xác định bờ của miền nghiệm bất phương trình",
+      system_ineq_origin: "kiểm tra miền nghiệm của hệ bất phương trình",
+      sine_law_radius: "bán kính đường tròn ngoại tiếp trong định lý sin",
+      vector_opposite: "khái niệm hai vectơ đối nhau",
+      scalar_prod_angle: "điều kiện hai vectơ vuông góc",
+      stat_median: "phương pháp xác định trung vị",
+      quad_vertex: "tọa độ đỉnh parabol",
+      line_normal_direction: "chuyển đổi vectơ pháp tuyến và chỉ phương",
+      comb_perm_vs_comb: "phân biệt chỉnh hợp và tổ hợp",
+      prob_complement: "quy tắc biến cố đối trong xác suất",
     }[probeKey] || "khái niệm trọng tâm";
 
   if (!hasBase || !hasTransfer || (hasProbe && !hasProbeAnswer)) {

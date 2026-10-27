@@ -10,5 +10,6 @@ export {
 export {
   getProbe,
   getVerificationProbe,
+  getMisconceptionText,
   summarizeEvidence,
 } from "./learning/evidence.js";

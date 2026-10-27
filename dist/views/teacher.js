@@ -14,6 +14,7 @@ import { skillLabels } from "../content/labels.js";
 export function createTeacherViews(readContext) {
   function teacherHome() {
     const { state, data, lessonFor } = readContext();
+    const activeAlerts = (data.teacherAlerts || []).filter((a) => !a.resolved);
     return `${pageHeading("ĐỒNG HÀNH CÙNG NGƯỜI HỌC", "Hiểu học sinh từ từng câu trả lời.", "Xem căn cứ, điều chỉnh nhận xét và chuẩn bị bài luyện phù hợp.")}<div class="demo-notice">${icon("shield")}Không gian giáo viên minh họa. Hiện đang xem dữ liệu học trên chính trình duyệt này.</div><div class="metric-grid">${[
       [data.sessions.length, "Phiên học đã ghi nhận", "pen"],
       [
@@ -29,7 +30,16 @@ export function createTeacherViews(readContext) {
       )
       .join(
         "",
-      )}</div><div class="teacher-grid"><section class="card teacher-overview"><div class="section-heading"><h2>Căn cứ gần đây</h2>${button("Xem tất cả", "nav", "ghost small", 'data-view="progress"')}</div>${
+      )}</div>${
+      activeAlerts.length
+        ? `<section class="card alert-card"><div class="section-heading"><div><h2>Tin nhắn cần hỗ trợ từ học sinh</h2><p class="muted">Học sinh làm sai câu xác minh, cần giáo viên giải thích điểm nghẽn nhận thức.</p></div><span class="tag amber">${activeAlerts.length} cần hỗ trợ</span></div><div class="teacher-alerts-list">${activeAlerts
+            .map(
+              (a) =>
+                `<div class="teacher-alert-item" data-id="${esc(a.id)}"><div class="alert-meta"><span class="avatar amber">!</span><div><strong>${esc(a.studentName || "Học sinh")} · Bài: ${esc(a.lessonTitle)}</strong><p class="alert-desc"><strong>Câu hỏi bị sai:</strong> “${esc(a.questionPrompt || a.wrongQuestionPrompt || "")}”</p><p class="alert-misconception"><strong>Chưa hiểu ở:</strong> ${esc(a.misconception)}</p><span class="tiny-label muted">${new Date(a.time || a.timestamp || Date.now()).toLocaleTimeString("vi-VN")}</span></div></div>${button("Đã hỗ trợ", "resolve-alert", "secondary small", `data-id="${esc(a.id)}"`)}</div>`,
+            )
+            .join("")}</div></section>`
+        : ""
+    }<div class="teacher-grid"><section class="card teacher-overview"><div class="section-heading"><h2>Căn cứ gần đây</h2>${button("Xem tất cả", "nav", "ghost small", 'data-view="progress"')}</div>${
       data.sessions.length
         ? [...data.sessions]
             .reverse()

@@ -7,6 +7,7 @@ import {
   getTransferQuestion,
   getProbe,
   getVerificationProbe,
+  getMisconceptionText,
   summarizeEvidence,
 } from "./learning.js";
 import { createWorkspace } from "./workspace.js";
@@ -58,6 +59,7 @@ const data = {
   notes: Array.isArray(saved.notes) ? saved.notes : [],
   approved: Array.isArray(saved.approved) ? saved.approved : [],
   assignments: Array.isArray(saved.assignments) ? saved.assignments : [],
+  teacherAlerts: Array.isArray(saved.teacherAlerts) ? saved.teacherAlerts : [],
   joined: Boolean(saved.joined),
   goal: [2, 3, 5, 7].includes(saved.goal) ? saved.goal : 3,
   teacherDraft: saved.teacherDraft || "",
@@ -289,6 +291,27 @@ function viewContent() {
     );
   return home();
 }
+function selectPracticeQueue(pool, sessionIndex) {
+  if (!pool || pool.length === 0) return [];
+  if (pool.length <= 4) return [...pool];
+  const uniqueSkills = [...new Set(pool.map((q) => q.skill).filter(Boolean))];
+  if (uniqueSkills.length >= 4) {
+    const selected = [];
+    for (const sk of uniqueSkills.slice(0, 4)) {
+      const candidates = pool.filter((q) => q.skill === sk);
+      const chosen = candidates[sessionIndex % candidates.length];
+      if (chosen) selected.push(chosen);
+    }
+    if (selected.length === 4) return selected;
+  }
+  const start = (sessionIndex * 4) % pool.length;
+  const slice = pool.slice(start, start + 4);
+  if (slice.length < 4) {
+    slice.push(...pool.slice(0, 4 - slice.length));
+  }
+  return slice;
+}
+
 function newPractice(lessonId) {
   state.lesson = lessonId || "values";
   state.view = "practice";
@@ -296,12 +319,14 @@ function newPractice(lessonId) {
   state.presentation = false;
   state.support = "formula";
   const pool = questionBank.filter((q) => q.lessonId === state.lesson);
-  const index =
-    data.sessions.filter((s) => s.lessonId === state.lesson).length %
-    pool.length;
+  const sessionCount = data.sessions.filter((s) => s.lessonId === state.lesson).length;
+  const queue = selectPracticeQueue(pool, sessionCount);
   practice = {
     lessonId: state.lesson,
-    base: pool[index],
+    queue,
+    queueIndex: 0,
+    base: queue[0] || pool[0],
+    baseResults: [],
     phase: "base",
     selected: null,
     submitted: false,
@@ -315,20 +340,17 @@ function newPractice(lessonId) {
     history: [],
     started: Date.now(),
     transfer:
-      getTransferQuestion(state.lesson, pool[index]?.id) ||
-      (state.lesson === "values" && index === 0
-        ? transferQuestion
-        : pool[(index + 1) % pool.length]),
+      getTransferQuestion(state.lesson, queue[0]?.id) ||
+      (state.lesson === "values" ? transferQuestion : pool[1 % pool.length]),
+    teacherAlert: null,
   };
   state.interactiveAngle = 130;
 }
 function activeQuestion() {
   if (!practice) return null;
-  return practice.phase === "probe"
-    ? probes[practice.probeKey]
-    : practice.phase === "transfer"
-      ? practice.transfer
-      : practice.base;
+  if (practice.phase === "probe") return probes[practice.probeKey];
+  if (practice.phase === "transfer") return practice.transfer;
+  return (practice.queue && practice.queue[practice.queueIndex]) || practice.base;
 }
 function submitAnswer() {
   if (!practice || practice.submitted || practice.selected === null) return;
@@ -345,11 +367,42 @@ function submitAnswer() {
     time: Date.now(),
   });
   if (practice.phase === "base") {
-    practice.baseCorrect = correct;
-    practice.probeKey = getVerificationProbe(practice.base, practice.selected);
-    if (!probes[practice.probeKey]) practice.probeKey = null;
+    practice.baseResults = practice.baseResults || [];
+    practice.baseResults.push({
+      question: q,
+      selected: practice.selected,
+      correct,
+      confidence: practice.confidence,
+    });
   }
-  if (practice.phase === "probe") practice.probeCorrect = correct;
+  if (practice.phase === "probe") {
+    practice.probeCorrect = correct;
+    if (!correct) {
+      const wrongBase =
+        practice.baseResults?.find((r) => !r.correct)?.question || practice.base;
+      const studentName = online?.hasProfile?.()
+        ? online.currentProfile?.()?.name || "Học sinh"
+        : data.studentProfile?.name || "Học sinh";
+      const alert = {
+        id: safeUUID(),
+        studentName,
+        lessonId: practice.lessonId,
+        lessonTitle: lessonFor(practice.lessonId).shortTitle,
+        wrongQuestionId: q.id || wrongBase?.id || "probe",
+        questionPrompt: q.prompt,
+        wrongQuestionPrompt: q.prompt,
+        baseQuestionPrompt: wrongBase?.prompt || "",
+        misconception: getMisconceptionText(practice.probeKey, q),
+        time: Date.now(),
+        timestamp: Date.now(),
+        resolved: false,
+      };
+      if (!Array.isArray(data.teacherAlerts)) data.teacherAlerts = [];
+      data.teacherAlerts.push(alert);
+      practice.teacherAlert = alert;
+      persist();
+    }
+  }
   if (practice.phase === "transfer") practice.transferCorrect = correct;
   render();
 }
@@ -359,11 +412,48 @@ function nextQuestion() {
     finishPractice();
     return;
   }
-  practice.phase =
-    practice.phase === "base" && practice.probeKey ? "probe" : "transfer";
-  practice.selected = null;
-  practice.submitted = false;
-  render();
+  if (practice.phase === "base") {
+    const queue = practice.queue || [practice.base];
+    if (practice.queueIndex + 1 < queue.length) {
+      practice.queueIndex++;
+      practice.base = queue[practice.queueIndex];
+      practice.selected = null;
+      practice.submitted = false;
+      render();
+      return;
+    }
+    const allResults = practice.baseResults || [];
+    const allCorrect = allResults.length > 0 && allResults.every((r) => r.correct);
+    practice.baseCorrect = allCorrect;
+    const wrongEntry = allResults.find((r) => !r.correct);
+    if (wrongEntry) {
+      practice.probeKey = getVerificationProbe(wrongEntry.question, wrongEntry.selected);
+    } else {
+      const lastEntry = allResults[allResults.length - 1];
+      if (lastEntry) {
+        practice.probeKey = getVerificationProbe(lastEntry.question, lastEntry.selected);
+      }
+    }
+    if (!probes[practice.probeKey]) practice.probeKey = null;
+    const focusQ = wrongEntry?.question || queue[0];
+    practice.transfer =
+      getTransferQuestion(practice.lessonId, focusQ?.id) ||
+      (practice.lessonId === "values"
+        ? transferQuestion
+        : queue[(practice.queueIndex + 1) % queue.length]);
+    practice.phase = practice.probeKey ? "probe" : "transfer";
+    practice.selected = null;
+    practice.submitted = false;
+    render();
+    return;
+  }
+  if (practice.phase === "probe") {
+    practice.phase = "transfer";
+    practice.selected = null;
+    practice.submitted = false;
+    render();
+    return;
+  }
 }
 function finishPractice() {
   let summary = summarizeEvidence(practice);
@@ -391,6 +481,7 @@ function finishPractice() {
     history: practice.history,
     reflection: practice.reflection,
     hints: practice.hints,
+    teacherAlert: practice.teacherAlert || null,
   };
   data.sessions.push(record);
   persist();
@@ -775,6 +866,17 @@ document.addEventListener("click", async (event) => {
     closeModal();
     render();
     toast("Đã lưu trạng thái rà soát câu hỏi.");
+  } else if (action === "resolve-alert") {
+    const alertId = el.dataset.id;
+    if (Array.isArray(data.teacherAlerts)) {
+      const target = data.teacherAlerts.find((a) => a.id === alertId);
+      if (target) {
+        target.resolved = true;
+        persist();
+        render();
+        toast("Đã đánh dấu đã hỗ trợ học sinh.");
+      }
+    }
   } else if (action === "export") exportData();
   else if (action === "reset-confirm")
     openModal(

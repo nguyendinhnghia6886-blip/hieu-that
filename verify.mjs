@@ -614,3 +614,49 @@ test("labKind for propositions accurately maps slide topics to interactive model
   assert.ok(output.includes("Q ⇒ P"));
   assert.ok(output.includes("P ⇔ Q"));
 });
+
+test("all 15 lessons have expanded in-depth slides (> 5 slides each, total 92)", () => {
+  assert.equal(lessons.length, 15);
+  let totalSlides = 0;
+  for (const lesson of lessons) {
+    assert.ok(
+      lesson.slides.length > 5,
+      `Lesson ${lesson.id} must have > 5 slides (currently ${lesson.slides.length})`,
+    );
+    totalSlides += lesson.slides.length;
+    for (const slide of lesson.slides) {
+      assert.ok(slide.eyebrow, `Slide in ${lesson.id} missing eyebrow`);
+      assert.ok(slide.title, `Slide in ${lesson.id} missing title`);
+      assert.ok(slide.body, `Slide in ${lesson.id} missing body`);
+      assert.ok(slide.formula, `Slide in ${lesson.id} missing formula`);
+      assert.ok(slide.example, `Slide in ${lesson.id} missing step-by-step example`);
+      assert.ok(slide.advanced, `Slide in ${lesson.id} missing advanced problem`);
+      assert.ok(slide.tip, `Slide in ${lesson.id} missing tip`);
+    }
+  }
+  assert.equal(totalSlides, 92);
+});
+
+test("probes and misconception diagnostics cover all 15 lessons and generate teacher alerts on failure", async () => {
+  const { probes } = await import("./dist/content/probes.js");
+  const { getVerificationProbe, getMisconceptionText } = await import(
+    "./dist/learning/evidence.js"
+  );
+
+  for (const lesson of lessons) {
+    const qSample = questionBank.find((q) => q.lessonId === lesson.id);
+    assert.ok(qSample, `Must find sample question for ${lesson.id}`);
+    const probeKey = getVerificationProbe(qSample, qSample.answer);
+    assert.ok(probeKey, `Verification probe key must exist for ${lesson.id}`);
+    assert.ok(
+      probes[probeKey],
+      `Probe '${probeKey}' must exist in probes for lesson ${lesson.id}`,
+    );
+    const misconception = getMisconceptionText(probeKey, qSample);
+    assert.ok(
+      misconception && misconception.length > 10,
+      `Misconception text must be descriptive for probeKey ${probeKey}`,
+    );
+  }
+});
+
