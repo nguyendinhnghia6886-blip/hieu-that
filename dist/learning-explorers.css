@@ -74,6 +74,54 @@
   line-height: 1.85;
   color: #52634e;
 }
+.example-box {
+  margin: 16px 0;
+  padding: 14px 18px;
+  background: #f3f8f3;
+  border-left: 3px solid #2d6a4f;
+  border-radius: 0 10px 10px 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #264634;
+}
+.example-box strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1b4332;
+  margin-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.example-content {
+  white-space: pre-line;
+  color: #2d4a3e;
+}
+.advanced-box {
+  margin: 16px 0;
+  padding: 14px 18px;
+  background: #fbf7ee;
+  border-left: 3px solid #d4a373;
+  border-radius: 0 10px 10px 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #5c4327;
+}
+.advanced-box strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8c5a2b;
+  margin-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.advanced-content {
+  white-space: pre-line;
+  color: #4a3b2c;
+}
 .slide-outline .slide-step strong {
   font-size: 11px;
 }

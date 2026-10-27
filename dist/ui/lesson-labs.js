@@ -109,7 +109,8 @@ function defaults(id, index) {
   return { chosen: [2, 4, 6] };
 }
 export function labKind(id, index) {
-  if (id === "propositions" && index >= 3) return "quantifiers";
+  if (id === "propositions")
+    return index === 4 || index === 5 ? "quantifiers" : "propositions";
   return id === "sets" && index >= 3
     ? "interval"
     : id === "analytic-geometry"
@@ -247,7 +248,7 @@ export function renderLab(kind, v) {
     const p = v.p === "true",
       q = v.q === "true";
     graph = `<div class="truth-flow"><span>P: ${p ? "Đúng" : "Sai"}</span><span>⇒</span><span>Q: ${q ? "Đúng" : "Sai"}</span></div>`;
-    info = `¬P: ${p ? "Sai" : "Đúng"} · P ⇒ Q: ${!p || q ? "Đúng" : "Sai"}. Chỉ trường hợp P đúng, Q sai làm mệnh đề kéo theo sai.`;
+    info = `¬P: ${p ? "Sai" : "Đúng"} · P ⇒ Q: ${!p || q ? "Đúng" : "Sai"} · Q ⇒ P: ${!q || p ? "Đúng" : "Sai"} · P ⇔ Q: ${p === q ? "Đúng" : "Sai"}. P ⇒ Q chỉ sai khi P đúng, Q sai.`;
   } else if (kind === "sets") {
     const A = [1, 2, 3, 4],
       B = [3, 4, 5],

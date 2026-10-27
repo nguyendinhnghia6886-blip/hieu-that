@@ -346,9 +346,7 @@ function submitAnswer() {
   });
   if (practice.phase === "base") {
     practice.baseCorrect = correct;
-    practice.probeKey = correct
-      ? practice.base.correctProbe || null
-      : getProbe(practice.base, practice.selected);
+    practice.probeKey = getVerificationProbe(practice.base, practice.selected);
     if (!probes[practice.probeKey]) practice.probeKey = null;
   }
   if (practice.phase === "probe") practice.probeCorrect = correct;

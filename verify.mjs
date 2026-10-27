@@ -546,3 +546,71 @@ test("unrecognized probes cannot supply missing evidence or certify improvement"
     );
   }
 });
+
+test("propositions lesson provides rich slides with step-by-step examples and advanced problems", () => {
+  const propLesson = lessons.find((l) => l.id === "propositions");
+  assert.ok(propLesson);
+  assert.equal(propLesson.slides.length, 7);
+  for (const slide of propLesson.slides) {
+    assert.ok(slide.example && slide.example.trim().length > 30, `Missing example in slide: ${slide.title}`);
+    assert.ok(slide.advanced && slide.advanced.trim().length > 30, `Missing advanced in slide: ${slide.title}`);
+    assert.ok(slide.body && slide.body.trim().length > 50, `Too brief body in slide: ${slide.title}`);
+  }
+});
+
+test("verification probes cover both correct and incorrect answers on propositions", async () => {
+  const { getVerificationProbe } = await import("./dist/learning/evidence.js");
+  const propQuestions = questionBank.filter((q) => q.lessonId === "propositions");
+  assert.equal(propQuestions.length, 24);
+  for (const q of propQuestions) {
+    const probeForCorrect = getVerificationProbe(q, q.answer);
+    assert.ok(probeForCorrect, `Correct answer on ${q.id} must have a verification probe`);
+    assert.ok(probes[probeForCorrect], `Probe key ${probeForCorrect} must exist in probes dictionary`);
+    for (let i = 0; i < q.options.length; i++) {
+      if (i !== q.answer) {
+        const probeForWrong = getVerificationProbe(q, i);
+        assert.ok(probeForWrong, `Wrong option ${i} on ${q.id} must have an investigative probe`);
+        assert.ok(probes[probeForWrong], `Probe key ${probeForWrong} must exist in probes dictionary`);
+      }
+    }
+  }
+});
+
+test("transfer questions maintain strict topic isolation and do not leak across lessons", async () => {
+  const { getTransferQuestion } = await import("./dist/content/transfer.js");
+  // Propositions lesson
+  const propTransfer = getTransferQuestion("propositions", "q_prop_1");
+  assert.ok(propTransfer);
+  assert.equal(propTransfer.lessonId, "propositions");
+
+  // Trigonometry lesson
+  const valuesTransfer = getTransferQuestion("values", "q1");
+  assert.ok(valuesTransfer);
+  assert.equal(valuesTransfer.lessonId, "values");
+
+  // Other lessons must NOT leak trigonometry transfer question
+  for (const otherLesson of ["sets", "inequalities-2var", "system-inequalities", "signs", "cosine", "sine-law", "vectors-intro", "scalar-product", "statistics", "quadratic-functions", "analytic-geometry", "combinatorics", "probability"]) {
+    const leaked = getTransferQuestion(otherLesson, "some_q");
+    assert.equal(leaked, null, `Lesson ${otherLesson} must not receive a leaked foreign transfer question`);
+  }
+});
+
+test("labKind for propositions accurately maps slide topics to interactive models", async () => {
+  const { labKind, renderLab } = await import("./dist/ui/lesson-labs.js");
+  // Slides 0, 1, 2, 3, 6 map to truth-table logic models
+  assert.equal(labKind("propositions", 0), "propositions");
+  assert.equal(labKind("propositions", 1), "propositions");
+  assert.equal(labKind("propositions", 2), "propositions");
+  assert.equal(labKind("propositions", 3), "propositions");
+  assert.equal(labKind("propositions", 6), "propositions");
+
+  // Slides 4 and 5 map to quantifier models
+  assert.equal(labKind("propositions", 4), "quantifiers");
+  assert.equal(labKind("propositions", 5), "quantifiers");
+
+  // renderLab for propositions includes truth value logic for P => Q, Q => P, P <=> Q
+  const output = renderLab("propositions", { p: "true", q: "false" });
+  assert.ok(output.includes("P ⇒ Q"));
+  assert.ok(output.includes("Q ⇒ P"));
+  assert.ok(output.includes("P ⇔ Q"));
+});

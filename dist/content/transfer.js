@@ -91,7 +91,10 @@ export function getTransferQuestion(lessonId, questionId = null) {
     }
     return transferBank.find((q) => q.id === "transfer-prop-1");
   }
-  return transferQuestion;
+  if (lessonId === "values") {
+    return transferQuestion;
+  }
+  return null;
 }
 
 /** A probe is a question to investigate, not a diagnosis of a learner. */

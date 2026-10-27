@@ -61,3 +61,4 @@ $$\text{Câu chính} \longrightarrow \text{Xác minh lập luận khi cần} \lo
 - **Đợt 4:** Triển khai chuyên sâu nhóm Hình học & Vectơ (`vectors-intro`, `scalar-product`, `analytic-geometry`).
 - **Đợt 5:** Triển khai chuyên sâu nhóm Thống kê, Hàm số & Xác suất (`statistics`, `quadratic-functions`, `combinatorics`, `probability`).
 - **Đợt 6:** Tổng kiểm tra toán học độc lập, kiểm thử giao diện trên trình duyệt và lập bản xem thử cục bộ cho người dùng duyệt.
+

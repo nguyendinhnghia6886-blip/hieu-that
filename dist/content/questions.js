@@ -196,6 +196,8 @@ export const questionBank = [
   // CHƯƠNG I: MỆNH ĐỀ TOÁN HỌC (propositions)
   {
     id: "q_prop_1",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt: "Trong các câu sau, câu nào là một mệnh đề toán học?",
     options: [
@@ -216,6 +218,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_2",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt: "Mệnh đề phủ định của “∀x ∈ ℝ, x² − x + 1 > 0” là gì?",
     options: [
@@ -236,6 +240,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_3",
+    correctProbe: "prop_necessary_rule",
+    probeKeys: ["prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule"],
     lessonId: "propositions",
     prompt: "Cho mệnh đề kéo theo: “Nếu tứ giác ABCD là hình vuông thì ABCD là hình chữ nhật”. Phát biểu nào đúng?",
     options: [
@@ -256,6 +262,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_4",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt: "Trong các mệnh đề sau, mệnh đề nào là mệnh đề ĐÚNG?",
     options: [
@@ -276,6 +284,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_5",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt: "Trong các câu sau, câu nào KHÔNG phải là một mệnh đề toán học?",
     options: [
@@ -296,6 +306,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_6",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt:
       "Cho mệnh đề chứa biến P(n): “n² + 1 chia hết cho 5” với n là số tự nhiên. Giá trị nào của n dưới đây làm cho P(n) là mệnh đề đúng?",
@@ -312,6 +324,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_7",
+    correctProbe: "prop_counterexample_rule",
+    probeKeys: ["prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule"],
     lessonId: "propositions",
     prompt: "Trong các mệnh đề sau về số học, mệnh đề nào là mệnh đề SAI?",
     options: [
@@ -332,6 +346,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_8",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt:
       "Mệnh đề phủ định của phát biểu: “Mọi học sinh trong lớp đều có điện thoại thông minh” là:",
@@ -353,6 +369,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_9",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt: "Mệnh đề phủ định của “∃x ∈ ℝ, x² + 1 = 0” là:",
     options: [
@@ -373,6 +391,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_10",
+    correctProbe: "prop_converse_rule",
+    probeKeys: ["prop_converse_rule", "prop_converse_rule", "prop_converse_rule", "prop_converse_rule"],
     lessonId: "propositions",
     prompt:
       "Theo bảng chân trị của mệnh đề kéo theo P ⇒ Q, khẳng định nào sau đây là ĐÚNG?",
@@ -394,6 +414,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_11",
+    correctProbe: "prop_converse_rule",
+    probeKeys: ["prop_converse_rule", "prop_converse_rule", "prop_converse_rule", "prop_converse_rule"],
     lessonId: "propositions",
     prompt:
       "Cho định lý: “Nếu hai tam giác bằng nhau thì hai tam giác đó có chu vi bằng nhau”. Mệnh đề đảo của định lý trên là:",
@@ -415,6 +437,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_12",
+    correctProbe: "prop_necessary_rule",
+    probeKeys: ["prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule"],
     lessonId: "propositions",
     prompt:
       "Cho định lý: “Nếu số tự nhiên n chia hết cho 12 thì n chia hết cho 3”. Khẳng định nào sau đây diễn đạt ĐÚNG về điều kiện cần?",
@@ -436,6 +460,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_13",
+    correctProbe: "prop_necessary_rule",
+    probeKeys: ["prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule"],
     lessonId: "propositions",
     prompt:
       "Trong các khẳng định sau, khẳng định nào sử dụng ĐÚNG thuật ngữ “điều kiện đủ”?",
@@ -457,6 +483,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_14",
+    correctProbe: "prop_necessary_rule",
+    probeKeys: ["prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule", "prop_necessary_rule"],
     lessonId: "propositions",
     prompt:
       "Mệnh đề nào sau đây diễn đạt một “điều kiện cần và đủ” (mệnh đề tương đương) ĐÚNG?",
@@ -478,6 +506,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_15",
+    correctProbe: "prop_counterexample_rule",
+    probeKeys: ["prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule"],
     lessonId: "propositions",
     prompt:
       "Để bác bỏ mệnh đề: “∀n ∈ ℕ*, n² + n + 1 là số nguyên tố”, ta có thể chọn phản ví dụ n bằng bao nhiêu?",
@@ -494,6 +524,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_16",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt:
       "Cho mệnh đề chứa biến P(x, y): “2x − 3y = 7” với x, y là các số nguyên. Cặp số (x; y) nào sau đây làm cho P(x, y) là mệnh đề đúng?",
@@ -510,6 +542,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_17",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt: "Mệnh đề phủ định của: “∀x ∈ ℝ, |x| ≥ x” là:",
     options: [
@@ -530,6 +564,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_18",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt:
       "Xét tính đúng sai của hai mệnh đề: P: “∀x ∈ ℝ, x² − 2x + 3 > 0” và Q: “∃x ∈ ℝ, x² + 2 = 0”. Kết luận nào đúng?",
@@ -551,6 +587,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_19",
+    correctProbe: "prop_def",
+    probeKeys: ["prop_def", "prop_def", "prop_def", "prop_def"],
     lessonId: "propositions",
     prompt: "Trong các mệnh đề sau, mệnh đề nào là mệnh đề ĐÚNG?",
     options: [
@@ -571,6 +609,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_20",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt:
       "Mệnh đề phủ định của mệnh đề: “Có ít nhất một tam giác không có góc nào lớn hơn 60°” là:",
@@ -592,6 +632,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_21",
+    correctProbe: "prop_neg_rule",
+    probeKeys: ["prop_neg_rule", "prop_neg_rule", "prop_neg_rule", "prop_neg_rule"],
     lessonId: "propositions",
     prompt:
       "Phủ định của mệnh đề: “∀x ∈ ℝ, 1 ≤ x ≤ 4” là mệnh đề nào sau đây?",
@@ -613,6 +655,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_22",
+    correctProbe: "prop_converse_rule",
+    probeKeys: ["prop_converse_rule", "prop_converse_rule", "prop_converse_rule", "prop_converse_rule"],
     lessonId: "propositions",
     prompt:
       "Cho mệnh đề: “Nếu hai số nguyên a và b cùng chia hết cho số nguyên c thì a + b chia hết cho c”. Mệnh đề đảo của mệnh đề này là:",
@@ -634,6 +678,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_23",
+    correctProbe: "prop_counterexample_rule",
+    probeKeys: ["prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule", "prop_counterexample_rule"],
     lessonId: "propositions",
     prompt:
       "Khi chứng minh định lý bằng phương pháp phản chứng: “Nếu số tự nhiên n có chữ số tận cùng bằng 5 thì n chia hết cho 5”, bước giả thiết phản chứng là:",
@@ -655,6 +701,8 @@ export const questionBank = [
   },
   {
     id: "q_prop_24",
+    correctProbe: "prop_converse_rule",
+    probeKeys: ["prop_converse_rule", "prop_converse_rule", "prop_converse_rule", "prop_converse_rule"],
     lessonId: "propositions",
     prompt:
       "Xét mệnh đề P: “Nếu một tam giác có một góc bằng 60° thì tam giác đó là tam giác đều”. Khẳng định nào sau đây là ĐÚNG?",

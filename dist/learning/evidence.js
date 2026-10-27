@@ -24,9 +24,6 @@ export function getProbe(question, selected) {
     return "sign";
   if (question.skill === "square-root") return "root";
   if (question.skill === "identity") return "identity";
-  if (question.probeKeys && question.probeKeys[index]) {
-    return question.probeKeys[index];
-  }
   return null;
 }
 
@@ -43,6 +40,7 @@ export function getVerificationProbe(question, selected) {
   )
     return null;
   if (index === question.answer) {
+    if (question.correctProbe) return question.correctProbe;
     if (question.skill === "proposition-negation") return "prop_neg_rule";
     if (question.skill === "proposition-proof")
       return "prop_counterexample_rule";
@@ -63,6 +61,28 @@ export function getVerificationProbe(question, selected) {
     if (question.lessonId === "propositions") return "prop_def";
     return null;
   }
+  if (question.probeKeys && question.probeKeys[index]) {
+    return question.probeKeys[index];
+  }
+  if (question.probe) return question.probe;
+  if (question.skill === "proposition-negation") return "prop_neg_rule";
+  if (question.skill === "proposition-proof")
+    return "prop_counterexample_rule";
+  if (
+    question.id === "q_prop_3" ||
+    question.id === "q_prop_12" ||
+    question.id === "q_prop_13"
+  ) {
+    return "prop_necessary_rule";
+  }
+  if (
+    question.id === "q_prop_11" ||
+    question.id === "q_prop_22" ||
+    question.id === "q_prop_24"
+  ) {
+    return "prop_converse_rule";
+  }
+  if (question.lessonId === "propositions") return "prop_def";
   return getProbe(question, selected);
 }
 
