@@ -9,6 +9,8 @@ import {
   getVerificationProbe,
   getMisconceptionText,
   summarizeEvidence,
+  evaluateTrueFalse,
+  checkShortAnswer,
 } from "./learning.js";
 import { createWorkspace } from "./workspace.js";
 import { createCompanion } from "./companion.js";
@@ -294,22 +296,37 @@ function viewContent() {
 function selectPracticeQueue(pool, sessionIndex) {
   if (!pool || pool.length === 0) return [];
   if (pool.length <= 4) return [...pool];
-  const uniqueSkills = [...new Set(pool.map((q) => q.skill).filter(Boolean))];
-  if (uniqueSkills.length >= 4) {
-    const selected = [];
-    for (const sk of uniqueSkills.slice(0, 4)) {
-      const candidates = pool.filter((q) => q.skill === sk);
-      const chosen = candidates[sessionIndex % candidates.length];
-      if (chosen) selected.push(chosen);
+
+  const mcPool = pool.filter((q) => !q.type || q.type === "multiple-choice");
+  const tfPool = pool.filter((q) => q.type === "true-false");
+  const saPool = pool.filter((q) => q.type === "short-answer");
+
+  const selected = [];
+  // 2 câu trắc nghiệm nhiều lựa chọn
+  if (mcPool.length > 0) {
+    const startMC = (sessionIndex * 2) % mcPool.length;
+    selected.push(mcPool[startMC]);
+    if (mcPool.length > 1) {
+      selected.push(mcPool[(startMC + 1) % mcPool.length]);
     }
-    if (selected.length === 4) return selected;
   }
-  const start = (sessionIndex * 4) % pool.length;
-  const slice = pool.slice(start, start + 4);
-  if (slice.length < 4) {
-    slice.push(...pool.slice(0, 4 - slice.length));
+  // 1 câu trắc nghiệm Đúng / Sai (nếu có)
+  if (tfPool.length > 0) {
+    selected.push(tfPool[sessionIndex % tfPool.length]);
   }
-  return slice;
+  // 1 câu trả lời ngắn (nếu có)
+  if (saPool.length > 0) {
+    selected.push(saPool[sessionIndex % saPool.length]);
+  }
+
+  // Nếu chưa đủ 4 câu, lấy thêm từ pool
+  if (selected.length < 4) {
+    for (const q of pool) {
+      if (!selected.includes(q)) selected.push(q);
+      if (selected.length >= 4) break;
+    }
+  }
+  return selected.slice(0, 4);
 }
 
 function newPractice(lessonId) {
@@ -354,15 +371,39 @@ function activeQuestion() {
 }
 function submitAnswer() {
   if (!practice || practice.submitted || practice.selected === null) return;
-  const q = activeQuestion(),
+  const q = activeQuestion();
+  let correct = false;
+  let formattedAnswer = "";
+  let formattedExpected = "";
+
+  if (q.type === "true-false") {
+    const evalTF = evaluateTrueFalse(practice.selected, q.subQuestions);
+    correct = evalTF.isFullyCorrect;
+    formattedAnswer = Object.entries(practice.selected || {})
+      .map(([k, v]) => `${k.toUpperCase()}:${v ? "Đ" : "S"}`)
+      .join(" ");
+    formattedExpected = (q.subQuestions || [])
+      .map((sq) => `${sq.id.toUpperCase()}:${sq.answer ? "Đ" : "S"}`)
+      .join(" ");
+  } else if (q.type === "short-answer") {
+    correct = checkShortAnswer(practice.selected, q);
+    formattedAnswer = String(practice.selected || "");
+    formattedExpected = Array.isArray(q.acceptedAnswers)
+      ? q.acceptedAnswers.join(" hoặc ")
+      : String(q.answer ?? "");
+  } else {
     correct = practice.selected === q.answer;
+    formattedAnswer = q.options ? q.options[practice.selected] : String(practice.selected);
+    formattedExpected = q.options ? q.options[q.answer] : String(q.answer);
+  }
+
   practice.submitted = true;
   practice.history.push({
     phase: practice.phase,
     prompt: q.prompt,
-    answer: q.options[practice.selected],
+    answer: formattedAnswer,
     correct,
-    expected: q.options[q.answer],
+    expected: formattedExpected,
     confidence: practice.confidence,
     time: Date.now(),
   });
@@ -790,6 +831,16 @@ document.addEventListener("click", async (event) => {
       practice.selected = Number(el.dataset.index);
       render();
     }
+  } else if (action === "answer-tf") {
+    if (practice && !practice.submitted) {
+      const subId = el.dataset.id;
+      const val = el.dataset.val === "true";
+      if (!practice.selected || typeof practice.selected !== "object") {
+        practice.selected = {};
+      }
+      practice.selected[subId] = val;
+      render();
+    }
   } else if (action === "confidence") {
     if (practice && !practice.submitted) {
       practice.confidence = el.dataset.level === "unsure" ? "unsure" : "sure";
@@ -909,6 +960,13 @@ document.addEventListener("click", async (event) => {
   }
 });
 document.addEventListener("input", (e) => {
+  if (e.target.id === "short-answer-input" && practice) {
+    practice.selected = e.target.value;
+    const submitBtn = document.querySelector('button[data-action="submit-answer"]');
+    if (submitBtn) {
+      submitBtn.disabled = !e.target.value.trim();
+    }
+  }
   if (e.target.id === "reflection" && practice)
     practice.reflection = e.target.value;
   if (e.target.id === "angle-slider") {

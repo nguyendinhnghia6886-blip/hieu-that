@@ -386,3 +386,134 @@ textarea:focus,
   font-weight: 600;
   margin: 2px 0 6px;
 }
+
+/* True / False 4 sub-questions (Định dạng Bộ GD&ĐT 2025) */
+.true-false-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.tf-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fdfefd;
+  transition: border-color 0.2s;
+}
+.tf-item:hover {
+  border-color: #a3c299;
+}
+.tf-item.tf-correct {
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+}
+.tf-item.tf-incorrect {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+.tf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.tf-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+}
+.tf-badge {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 15px;
+}
+.tf-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #1f2937;
+}
+.tf-choices {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.tf-choice-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tf-choice-btn:hover:not(:disabled) {
+  border-color: var(--green);
+  background: #f9fbf8;
+}
+.tf-choice-btn.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.tf-choice-btn.answer-is-true {
+  box-shadow: 0 0 0 2px #10b981;
+}
+.tf-choice-btn.answer-is-false {
+  box-shadow: 0 0 0 2px #ef4444;
+}
+.tf-explanation {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed #e5e7eb;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Short answer question (Định dạng Bộ GD&ĐT 2025) */
+.short-answer-container {
+  margin-top: 24px;
+}
+.short-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.short-answer-input {
+  flex: 1;
+  max-width: 360px;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.short-answer-input:focus {
+  border-color: var(--green);
+}
+.short-answer-input:disabled {
+  background: #f9fafb;
+  color: #374151;
+}
+.short-unit {
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+}
+.short-answer-feedback {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #374151;
+}

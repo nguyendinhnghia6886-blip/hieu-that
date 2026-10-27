@@ -26,7 +26,7 @@ test("all lessons contain complete, identifiable slides with in-depth coverage",
     lessons.length,
   );
   assert.ok(lessons.flatMap((lesson) => lesson.slides).length >= 75);
-  assert.equal(lessons.find((l) => l.id === "propositions").slides.length, 7);
+  assert.ok(lessons.find((l) => l.id === "propositions").slides.length >= 8);
   for (const lesson of lessons) {
     assert.ok(lesson.slides.length >= 5, lesson.id);
     for (const slide of lesson.slides) {
@@ -56,10 +56,9 @@ test("all lessons contain complete, identifiable slides with in-depth coverage",
 });
 
 test("question bank and transfer exercise have unique ids, valid answers, hints and lesson references", () => {
-  assert.ok(questionBank.length >= 60);
-  assert.equal(
-    questionBank.filter((q) => q.lessonId === "propositions").length,
-    24,
+  assert.ok(questionBank.length >= 300);
+  assert.ok(
+    questionBank.filter((q) => q.lessonId === "propositions").length >= 24,
   );
   const allQuestions = [
     ...questionBank,
@@ -73,7 +72,7 @@ test("question bank and transfer exercise have unique ids, valid answers, hints 
     const count = questionBank.filter(
       (question) => question.lessonId === lesson.id,
     ).length;
-    assert.ok(count >= 4, `${lesson.id}: ${count} questions`);
+    assert.ok(count >= 20, `${lesson.id}: ${count} questions`);
   }
   for (const question of allQuestions) {
     assert.ok(
@@ -550,7 +549,7 @@ test("unrecognized probes cannot supply missing evidence or certify improvement"
 test("propositions lesson provides rich slides with step-by-step examples and advanced problems", () => {
   const propLesson = lessons.find((l) => l.id === "propositions");
   assert.ok(propLesson);
-  assert.equal(propLesson.slides.length, 7);
+  assert.ok(propLesson.slides.length >= 8);
   for (const slide of propLesson.slides) {
     assert.ok(slide.example && slide.example.trim().length > 30, `Missing example in slide: ${slide.title}`);
     assert.ok(slide.advanced && slide.advanced.trim().length > 30, `Missing advanced in slide: ${slide.title}`);
@@ -561,7 +560,7 @@ test("propositions lesson provides rich slides with step-by-step examples and ad
 test("verification probes cover both correct and incorrect answers on propositions", async () => {
   const { getVerificationProbe } = await import("./dist/learning/evidence.js");
   const propQuestions = questionBank.filter((q) => q.lessonId === "propositions");
-  assert.equal(propQuestions.length, 24);
+  assert.ok(propQuestions.length >= 24);
   for (const q of propQuestions) {
     const probeForCorrect = getVerificationProbe(q, q.answer);
     assert.ok(probeForCorrect, `Correct answer on ${q.id} must have a verification probe`);
@@ -615,13 +614,13 @@ test("labKind for propositions accurately maps slide topics to interactive model
   assert.ok(output.includes("P ⇔ Q"));
 });
 
-test("all 15 lessons have expanded in-depth slides (> 5 slides each, total 92)", () => {
+test("all 15 lessons have expanded in-depth slides (>= 8 slides each, total 120)", () => {
   assert.equal(lessons.length, 15);
   let totalSlides = 0;
   for (const lesson of lessons) {
     assert.ok(
-      lesson.slides.length > 5,
-      `Lesson ${lesson.id} must have > 5 slides (currently ${lesson.slides.length})`,
+      lesson.slides.length >= 8,
+      `Lesson ${lesson.id} must have >= 8 slides (currently ${lesson.slides.length})`,
     );
     totalSlides += lesson.slides.length;
     for (const slide of lesson.slides) {
@@ -634,7 +633,7 @@ test("all 15 lessons have expanded in-depth slides (> 5 slides each, total 92)",
       assert.ok(slide.tip, `Slide in ${lesson.id} missing tip`);
     }
   }
-  assert.equal(totalSlides, 92);
+  assert.equal(totalSlides, 120);
 });
 
 test("probes and misconception diagnostics cover all 15 lessons and generate teacher alerts on failure", async () => {
@@ -659,4 +658,78 @@ test("probes and misconception diagnostics cover all 15 lessons and generate tea
     );
   }
 });
+
+test("2025 question scoring engine evaluates short answers and true-false according to MOET rules", async () => {
+  const { checkShortAnswer, evaluateTrueFalse } = await import(
+    "./dist/learning/scoring.js"
+  );
+
+  // Short answer evaluations
+  const qSA = {
+    type: "short-answer",
+    answer: 2.5,
+    acceptedAnswers: ["2.5", "5/2"],
+  };
+  assert.equal(checkShortAnswer("2.5", qSA), true);
+  assert.equal(checkShortAnswer("2,5", qSA), true);
+  assert.equal(checkShortAnswer("5/2", qSA), true);
+  assert.equal(checkShortAnswer(" 2.5 ", qSA), true);
+  assert.equal(checkShortAnswer("2", qSA), false);
+  assert.equal(checkShortAnswer("", qSA), false);
+  assert.equal(checkShortAnswer(null, qSA), false);
+
+  // True / False evaluations (0, 1, 2, 3, 4 points check)
+  const subQuestions = [
+    { id: "a", answer: true },
+    { id: "b", answer: false },
+    { id: "c", answer: true },
+    { id: "d", answer: false },
+  ];
+
+  // 0 correct -> 0.0 pt
+  const res0 = evaluateTrueFalse(
+    { a: false, b: true, c: false, d: true },
+    subQuestions,
+  );
+  assert.equal(res0.numCorrect, 0);
+  assert.equal(res0.score, 0);
+  assert.equal(res0.isFullyCorrect, false);
+
+  // 1 correct -> 0.1 pt
+  const res1 = evaluateTrueFalse(
+    { a: true, b: true, c: false, d: true },
+    subQuestions,
+  );
+  assert.equal(res1.numCorrect, 1);
+  assert.equal(res1.score, 0.1);
+  assert.equal(res1.isFullyCorrect, false);
+
+  // 2 correct -> 0.25 pt
+  const res2 = evaluateTrueFalse(
+    { a: true, b: false, c: false, d: true },
+    subQuestions,
+  );
+  assert.equal(res2.numCorrect, 2);
+  assert.equal(res2.score, 0.25);
+  assert.equal(res2.isFullyCorrect, false);
+
+  // 3 correct -> 0.5 pt
+  const res3 = evaluateTrueFalse(
+    { a: true, b: false, c: true, d: true },
+    subQuestions,
+  );
+  assert.equal(res3.numCorrect, 3);
+  assert.equal(res3.score, 0.5);
+  assert.equal(res3.isFullyCorrect, false);
+
+  // 4 correct -> 1.0 pt
+  const res4 = evaluateTrueFalse(
+    { a: true, b: false, c: true, d: false },
+    subQuestions,
+  );
+  assert.equal(res4.numCorrect, 4);
+  assert.equal(res4.score, 1.0);
+  assert.equal(res4.isFullyCorrect, true);
+});
+
 

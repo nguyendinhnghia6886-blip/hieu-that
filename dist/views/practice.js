@@ -1,5 +1,5 @@
 import { knowledgeMap } from "../ui/knowledge-map.js";
-import { lessons } from "../learning.js";
+import { lessons, evaluateTrueFalse, checkShortAnswer } from "../learning.js";
 import { icon } from "../ui/icons.js";
 import { button, pageHeading, dateLabel } from "../ui/helpers.js";
 import { triangleVisual, interactiveCircle, visual } from "../ui/visuals.js";
@@ -59,7 +59,39 @@ export function createPracticeViews(readContext) {
     const currentQNum = String(curIdx + 1).padStart(2, "0");
     const totalQNum = String(queue.length).padStart(2, "0");
     const isLastBase = curIdx + 1 >= queue.length;
-    const correct = practice.submitted && selected === q.answer;
+
+    // Xác định tính đúng/sai tùy theo loại câu hỏi
+    const isTF = q.type === "true-false";
+    const isSA = q.type === "short-answer";
+    let correct = false;
+    let tfScore = null;
+    if (practice.submitted) {
+      if (isTF) {
+        tfScore = evaluateTrueFalse(selected, q.subQuestions);
+        correct = tfScore.isFullyCorrect;
+      } else if (isSA) {
+        correct = checkShortAnswer(selected, q);
+      } else {
+        correct = selected === q.answer;
+      }
+    }
+
+    // Kiểm tra đã đủ điều kiện để bấm nộp chưa
+    const canSubmit = (() => {
+      if (isTF) {
+        return Boolean(
+          selected &&
+          typeof selected === "object" &&
+          (q.subQuestions || []).length > 0 &&
+          (q.subQuestions || []).every((sq) => typeof selected[sq.id] === "boolean")
+        );
+      }
+      if (isSA) {
+        return typeof selected === "string" && selected.trim().length > 0;
+      }
+      return selected !== null && selected !== undefined;
+    })();
+
     const activeLessonObj = lessonFor(state.lesson);
     const slideFormula =
       activeLessonObj.slides.find((s) => s.formula)?.formula ||
@@ -67,6 +99,60 @@ export function createPracticeViews(readContext) {
     const slideTip =
       activeLessonObj.slides.find((s) => s.tip)?.tip ||
       "Nắm chắc công thức gốc để tự tin khi làm bài.";
+
+    // Render phần câu hỏi tùy theo loại
+    let questionBodyHTML = "";
+    if (isTF) {
+      const sel = selected && typeof selected === "object" ? selected : {};
+      const subQuestions = q.subQuestions || [];
+      questionBodyHTML = `<div class="true-false-container" role="group" aria-label="Đánh giá Đúng Sai cho từng ý">
+        ${subQuestions
+          .map((sq) => {
+            const chosen = sel[sq.id];
+            const isSubSubmitted = practice.submitted;
+            const isSubCorrect = isSubSubmitted && chosen === Boolean(sq.answer);
+            return `<div class="tf-item ${isSubSubmitted ? (isSubCorrect ? "tf-correct" : "tf-incorrect") : ""}">
+            <div class="tf-row">
+              <div class="tf-content">
+                <span class="tf-badge">${esc(sq.id.toUpperCase())})</span>
+                <span class="tf-text">${esc(sq.text)}</span>
+              </div>
+              <div class="tf-choices">
+                <button type="button" class="tf-choice-btn ${chosen === true ? "active" : ""}" data-action="answer-tf" data-id="${esc(sq.id)}" data-val="true" ${isSubSubmitted ? "disabled" : ""}>Đúng</button>
+                <button type="button" class="tf-choice-btn ${chosen === false ? "active" : ""}" data-action="answer-tf" data-id="${esc(sq.id)}" data-val="false" ${isSubSubmitted ? "disabled" : ""}>Sai</button>
+              </div>
+            </div>
+            ${isSubSubmitted ? `<div class="tf-explanation"><span class="tag ${isSubCorrect ? "green" : "amber"}">${isSubCorrect ? "Chính xác" : `Đáp án đúng: ${sq.answer ? "ĐÚNG" : "SAI"}`}</span> ${esc(sq.explanation || "")}</div>` : ""}
+          </div>`;
+          })
+          .join("")}
+      </div>`;
+    } else if (isSA) {
+      const userVal = typeof selected === "string" ? selected : "";
+      questionBodyHTML = `<div class="short-answer-container">
+        <label class="field" for="short-answer-input">
+          <span>Nhập đáp số hoặc kết quả tính toán:</span>
+          <div class="short-input-wrap">
+            <input type="text" id="short-answer-input" class="short-answer-input" placeholder="Ví dụ: 12 hoặc 3/4 hoặc -2.5" value="${esc(userVal)}" ${practice.submitted ? "disabled" : ""} autocomplete="off" />
+            ${q.unit ? `<span class="short-unit">${esc(q.unit)}</span>` : ""}
+          </div>
+        </label>
+        ${practice.submitted ? `<div class="short-answer-feedback"><p><strong>Đáp số chấp nhận:</strong> <span class="tag green">${esc(Array.isArray(q.acceptedAnswers) ? q.acceptedAnswers.join(" hoặc ") : String(q.answer ?? ""))}</span></p></div>` : ""}
+      </div>`;
+    } else {
+      // Multiple choice mặc định
+      questionBodyHTML = `<div class="answer-grid" role="group" aria-label="Chọn đáp án">${(q.options || []).map((o, i) => `<button class="answer-option ${selected === i ? "selected" : ""} ${practice.submitted && (phase !== "base" || correct) && i === q.answer ? "correct" : ""} ${practice.submitted && selected === i && !correct ? "incorrect" : ""}" data-action="answer" data-index="${i}" aria-pressed="${selected === i}" ${practice.submitted ? "disabled" : ""}><span class="answer-letter">${letters[i]}</span><span class="answer-value">${esc(o)}</span>${practice.submitted && (phase !== "base" || correct) && i === q.answer ? icon("check") : ""}</button>`).join("")}</div>`;
+    }
+
+    const typeBadge = isProbe
+      ? `<span class="tag amber">${icon("target")} Câu hỏi xác minh tư duy</span>`
+      : isTransfer
+        ? `<span class="tag green">${icon("pen")} Bài vận dụng độc lập</span>`
+        : isTF
+          ? `<span class="tag purple">${icon("target")} Trắc nghiệm Đúng / Sai (4 ý) · Dạng ${currentQNum}/${totalQNum}</span>`
+          : isSA
+            ? `<span class="tag blue">${icon("pen")} Trả lời ngắn (Điền số) · Dạng ${currentQNum}/${totalQNum}</span>`
+            : `<span class="tag green">${icon("pen")} Trắc nghiệm nhiều lựa chọn · Dạng ${currentQNum}/${totalQNum}</span>`;
 
     return `${pageHeading("KHÔNG GIAN LÀM BÀI", esc(activeLessonObj.shortTitle), "Bạn không cần làm thật nhanh. Hãy dành thời gian cho cách mình suy nghĩ.", button("Đổi chủ đề", "choose-practice", "ghost small"))}
     <div class="steps-bar">${[
@@ -80,13 +166,14 @@ export function createPracticeViews(readContext) {
           `<div class="step ${phase === p ? "active" : ""}"><span>${i + 1}</span>${t}${i < 3 ? icon("right") : ""}</div>`,
       )
       .join("")}</div>
-    <div class="practice-layout"><section class="practice-card card"><div class="question-top"><span class="tag ${isProbe ? "amber" : "green"}">${icon(isProbe ? "target" : "pen")} ${isProbe ? "Câu hỏi xác minh tư duy" : isTransfer ? "Bài vận dụng độc lập" : `Dạng bài ${currentQNum} / ${totalQNum}`}</span><span class="question-number">${isProbe ? "XÁC MINH" : isTransfer ? "VẬN DỤNG" : `${currentQNum}/${totalQNum}`}</span></div>
+    <div class="practice-layout"><section class="practice-card card"><div class="question-top">${typeBadge}<span class="question-number">${isProbe ? "XÁC MINH" : isTransfer ? "VẬN DỤNG" : `${currentQNum}/${totalQNum}`}</span></div>
     ${isProbe ? '<div class="verification-intro">Cùng kiểm tra một bước nhỏ để hiểu rõ câu trả lời vừa rồi của bạn.</div>' : ""}
-    <div class="question-prompt"><h2>${esc(q.prompt)}</h2></div><div class="answer-grid" role="group" aria-label="Chọn đáp án">${q.options.map((o, i) => `<button class="answer-option ${selected === i ? "selected" : ""} ${practice.submitted && (phase !== "base" || correct) && i === q.answer ? "correct" : ""} ${practice.submitted && selected === i && !correct ? "incorrect" : ""}" data-action="answer" data-index="${i}" aria-pressed="${selected === i}" ${practice.submitted ? "disabled" : ""}><span class="answer-letter">${letters[i]}</span><span class="answer-value">${esc(o)}</span>${practice.submitted && (phase !== "base" || correct) && i === q.answer ? icon("check") : ""}</button>`).join("")}</div>
+    <div class="question-prompt"><h2>${esc(q.prompt)}</h2></div>
+    ${questionBodyHTML}
     ${phase === "base" && !practice.submitted ? `<div class="confidence-selector" role="group" aria-label="Mức độ tự tin của bạn"><span>Mức độ tự tin:</span><button type="button" class="chip ${practice.confidence === "sure" ? "active" : ""}" data-action="confidence" data-level="sure" aria-pressed="${practice.confidence === "sure"}">Chắc chắn căn cứ</button><button type="button" class="chip ${practice.confidence === "unsure" ? "active" : ""}" data-action="confidence" data-level="unsure" aria-pressed="${practice.confidence === "unsure"}">Đang phân vân</button></div>` : ""}
     ${phase === "base" ? `<label class="reflection"><span>Cách bạn suy nghĩ <small>Không bắt buộc</small></span><textarea id="reflection" rows="2" placeholder="Mình chọn đáp án này vì…" ${practice.submitted ? "disabled" : ""}>${esc(practice.reflection)}</textarea></label>` : ""}
-    ${practice.submitted ? `<div class="feedback-box ${correct ? "success" : "warning"}" role="status">${icon(correct ? "check" : "bulb")}<div><strong>${correct ? (phase === "base" && practice.confidence === "unsure" ? "Bạn đã chọn đúng dù còn phân vân — hãy xem kỹ công thức bên dưới để củng cố niềm tin nhé!" : "Bạn đã chọn đúng.") : "Có một điểm mình cùng xem lại nhé."}</strong><p>${esc(phase === "base" && !correct ? "Câu trả lời này chưa khớp. Mình sẽ kiểm tra thêm một bước trước khi kết luận." : q.explanation)}</p>${phase === "base" ? `<small>${correct && practice.confidence === "unsure" ? "Đừng lo nếu bước đầu còn ngập ngừng. Nắm chắc công thức gốc sẽ giúp bạn tự tin ở câu vận dụng tiếp theo." : "Một câu trả lời chưa đủ để kết luận. Cùng kiểm tra thêm ở bước tiếp theo."}</small>` : ""}</div></div>` : ""}
-    <div class="practice-actions"><span>${icon("shield")} Căn cứ được lưu khi hoàn thành phiên</span>${practice.submitted ? button(`${isTransfer ? "Xem căn cứ & kết quả" : isProbe ? "Làm câu vận dụng" : isLastBase ? "Tổng hợp & Bước tiếp theo" : "Câu tiếp theo"} ${icon("arrow")}`, "next-question", "primary") : button(`Kiểm tra đáp án ${icon("arrow")}`, "submit-answer", "primary", selected === null ? "disabled" : "")}</div></section>
+    ${practice.submitted ? `<div class="feedback-box ${correct ? "success" : "warning"}" role="status">${icon(correct ? "check" : "bulb")}<div><strong>${correct ? (phase === "base" && practice.confidence === "unsure" ? "Bạn đã chọn đúng dù còn phân vân — hãy xem kỹ công thức bên dưới để củng cố niềm tin nhé!" : isTF ? `Hoàn thành xuất sắc: Đạt ${tfScore?.score}/1.0 điểm!` : "Bạn đã chọn đúng.") : isTF ? `Cần xem lại một số ý: Đạt ${tfScore?.score || 0}/1.0 điểm (đúng ${tfScore?.numCorrect || 0}/4 ý)` : "Có một điểm mình cùng xem lại nhé."}</strong><p>${esc(phase === "base" && !correct && !isTF ? "Câu trả lời này chưa khớp. Mình sẽ kiểm tra thêm một bước trước khi kết luận." : q.explanation)}</p>${phase === "base" ? `<small>${correct && practice.confidence === "unsure" ? "Đừng lo nếu bước đầu còn ngập ngừng. Nắm chắc công thức gốc sẽ giúp bạn tự tin ở câu vận dụng tiếp theo." : "Một câu trả lời chưa đủ để kết luận. Cùng kiểm tra thêm ở bước tiếp theo."}</small>` : ""}</div></div>` : ""}
+    <div class="practice-actions"><span>${icon("shield")} Căn cứ được lưu khi hoàn thành phiên</span>${practice.submitted ? button(`${isTransfer ? "Xem căn cứ & kết quả" : isProbe ? "Làm câu vận dụng" : isLastBase ? "Tổng hợp & Bước tiếp theo" : "Câu tiếp theo"} ${icon("arrow")}`, "next-question", "primary") : button(`Kiểm tra đáp án ${icon("arrow")}`, "submit-answer", "primary", !canSubmit ? "disabled" : "")}</div></section>
     <aside class="support-card card"><div class="support-tabs"><button class="${state.support === "formula" ? "active" : ""}" data-action="support" data-tab="formula">${icon("book")} Sổ tay</button><button class="${state.support === "hints" ? "active" : ""}" data-action="support" data-tab="hints">${icon("sparkle")} Hỏi đáp</button></div><div class="support-content">${state.support === "formula" ? `<span class="eyebrow">NHẮC NHỚ KIẾN THỨC</span><h3>${esc(activeLessonObj.shortTitle)}</h3>${state.lesson === "cosine" ? triangleVisual() : state.lesson === "values" || state.lesson === "signs" ? interactiveCircle(state.interactiveAngle, false) : visual(activeLessonObj.slides[0].visual)}<div class="formula-block small-formula">${esc(slideFormula)}</div><p class="muted">${esc(slideTip)}</p><div class="support-note">${icon("leaf")} Hiểu từng bước, vững từng chút.</div>` : workspace.chat(q, practice)}</div></aside></div>`;
   }
 
