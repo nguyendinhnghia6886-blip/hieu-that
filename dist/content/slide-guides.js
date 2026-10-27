@@ -9,14 +9,24 @@ export const slideGuides = {
     ["Mệnh đề P", "Phủ định: ¬P", "Đổi giá trị đúng ↔ sai"],
     ["Giả thiết P", "Nếu P thì Q", "Chỉ sai khi P đúng, Q sai"],
     [
+      "Định lý P ⇒ Q",
+      "P: điều kiện đủ (đứng trước)",
+      "Q: điều kiện cần (đứng sau)",
+    ],
+    [
       "∀x: mọi phần tử",
       "Phủ định → đổi ∀ thành ∃",
       "∃x: có ít nhất một phản ví dụ",
     ],
     [
-      "Đọc lượng từ",
-      "∀: chứng minh mọi trường hợp; ∃: tìm một ví dụ",
-      "Muốn bác bỏ ∀ → tìm một phản ví dụ",
+      "Muốn bác bỏ ∀x",
+      "Tìm MỘT phản ví dụ x0",
+      "P(x0) sai → cả mệnh đề ∀ sai",
+    ],
+    [
+      "Kiểm tra 3 bẫy sai lầm",
+      "1. Quên đổi ∀ ↔ ∃  2. Nhầm điều kiện cần/đủ",
+      "3. Tự kiểm tra bảng giả thiết - kết luận",
     ],
   ],
   sets: [

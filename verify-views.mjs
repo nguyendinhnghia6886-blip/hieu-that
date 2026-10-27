@@ -21,13 +21,14 @@ test("every slide has its own explanation path and safe interactive example", ()
     assert.equal(slideGuides[lesson.id].length, lesson.slides.length);
     assert.equal(
       new Set(slideGuides[lesson.id].map((s) => JSON.stringify(s))).size,
-      5,
+      lesson.slides.length,
     );
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < lesson.slides.length; i++) {
       const html = lessonLab(lesson, i);
       assert.match(html, /Sơ đồ giải thích slide/);
       assert.doesNotMatch(html, /undefined|NaN/);
-      if (lesson.id === "propositions") assert.doesNotMatch(html, /Venn|A ∩ B/);
+      if (lesson.id === "propositions")
+        assert.doesNotMatch(html, /Venn|A ∩ B/);
     }
   }
 });

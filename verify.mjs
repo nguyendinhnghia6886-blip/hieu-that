@@ -5,6 +5,7 @@ import {
   questionBank,
   probes,
   transferQuestion,
+  transferBank,
   getProbe,
   summarizeEvidence,
 } from "./dist/learning.js";
@@ -18,15 +19,16 @@ const radians = (degrees) => (degrees * Math.PI) / 180;
 const byId = (id) => questionBank.find((question) => question.id === id);
 const choice = (id) => byId(id).options[byId(id).answer];
 
-test("all lessons contain five complete, identifiable slides", () => {
+test("all lessons contain complete, identifiable slides with in-depth coverage", () => {
   assert.equal(lessons.length, 15);
   assert.equal(
     new Set(lessons.map((lesson) => lesson.id)).size,
     lessons.length,
   );
-  assert.equal(lessons.flatMap((lesson) => lesson.slides).length, 75);
+  assert.ok(lessons.flatMap((lesson) => lesson.slides).length >= 75);
+  assert.equal(lessons.find((l) => l.id === "propositions").slides.length, 7);
   for (const lesson of lessons) {
-    assert.equal(lesson.slides.length, 5, lesson.id);
+    assert.ok(lesson.slides.length >= 5, lesson.id);
     for (const slide of lesson.slides) {
       for (const key of ["eyebrow", "title", "body", "formula", "tip"]) {
         assert.equal(typeof slide[key], "string", `${lesson.id}: ${key}`);
@@ -54,17 +56,25 @@ test("all lessons contain five complete, identifiable slides", () => {
 });
 
 test("question bank and transfer exercise have unique ids, valid answers, hints and lesson references", () => {
-  assert.equal(questionBank.length, 60);
-  const allQuestions = [...questionBank, transferQuestion];
+  assert.ok(questionBank.length >= 60);
+  assert.equal(
+    questionBank.filter((q) => q.lessonId === "propositions").length,
+    24,
+  );
+  const allQuestions = [
+    ...questionBank,
+    ...(transferBank || [transferQuestion]),
+  ];
   assert.equal(
     new Set(allQuestions.map((question) => question.id)).size,
     allQuestions.length,
   );
-  for (const lesson of lessons)
-    assert.equal(
-      questionBank.filter((question) => question.lessonId === lesson.id).length,
-      4,
-    );
+  for (const lesson of lessons) {
+    const count = questionBank.filter(
+      (question) => question.lessonId === lesson.id,
+    ).length;
+    assert.ok(count >= 4, `${lesson.id}: ${count} questions`);
+  }
   for (const question of allQuestions) {
     assert.ok(
       lessons.some((lesson) => lesson.id === question.lessonId),
@@ -299,6 +309,56 @@ test("all 60 answer keys in the question bank agree with independently evaluated
   const c10_2 = (10 * 9) / 2; // 45
   const c8_2 = (8 * 7) / 2; // 28
   assert.equal(choice("q_prob_4"), "17/45"); // Xác suất có ít nhất 1 phế phẩm: 1 - C(8,2)/C(10,2) = 1 - 28/45 = 17/45
+
+  // Kiểm tra độc lập các câu hỏi mở rộng của propositions (q_prop_5 đến q_prop_24)
+  assert.equal(choice("q_prop_5"), "Hãy cẩn thận khi giải phương trình này!");
+  assert.equal(choice("q_prop_6"), "n = 2");
+  assert.ok((2 ** 2 + 1) % 5 === 0); // 5 chia hết cho 5
+  assert.equal(choice("q_prop_7"), "Mọi số nguyên tố đều là số lẻ."); // 2 là số nguyên tố chẵn
+  assert.equal(
+    choice("q_prop_8"),
+    "Có ít nhất một học sinh trong lớp không có điện thoại thông minh.",
+  );
+  assert.equal(choice("q_prop_9"), "∀x ∈ ℝ, x² + 1 ≠ 0");
+  assert.equal(choice("q_prop_10"), "P ⇒ Q chỉ sai khi P đúng và Q sai.");
+  assert.equal(
+    choice("q_prop_11"),
+    "Nếu hai tam giác có chu vi bằng nhau thì hai tam giác đó bằng nhau.",
+  );
+  assert.equal(
+    choice("q_prop_12"),
+    "n chia hết cho 3 là điều kiện cần để n chia hết cho 12.",
+  );
+  assert.equal(
+    choice("q_prop_13"),
+    "Số tự nhiên a chia hết cho 6 là điều kiện đủ để a chia hết cho 2.",
+  );
+  assert.equal(
+    choice("q_prop_14"),
+    "Tứ giác ABCD là hình thoi khi và chỉ khi ABCD có hai đường chéo vuông góc với nhau và cắt nhau tại trung điểm mỗi đường.",
+  );
+  assert.equal(choice("q_prop_15"), "n = 4");
+  assert.equal(4 ** 2 + 4 + 1, 21); // 21 chia hết cho 3 => hợp số
+  assert.equal(choice("q_prop_16"), "(5; 1)");
+  assert.equal(2 * 5 - 3 * 1, 7);
+  assert.equal(choice("q_prop_17"), "∃x ∈ ℝ, |x| < x");
+  assert.equal(choice("q_prop_18"), "P đúng và Q sai");
+  assert.ok((-2) ** 2 - 4 * 1 * 3 < 0); // Delta < 0 => x² - 2x + 3 > 0 với mọi x
+  assert.equal(choice("q_prop_19"), "∀x ∈ ℝ, x > 1 ⇒ x² > 1");
+  assert.equal(
+    choice("q_prop_20"),
+    "Mọi tam giác đều có ít nhất một góc lớn hơn 60°.",
+  );
+  assert.equal(choice("q_prop_21"), "∃x ∈ ℝ, x < 1 hoặc x > 4");
+  assert.equal(
+    choice("q_prop_22"),
+    "Nếu a + b chia hết cho c thì cả a và b cùng chia hết cho c.",
+  );
+  assert.equal(
+    choice("q_prop_23"),
+    "Giả sử số tự nhiên n không chia hết cho 5.",
+  );
+  assert.equal(choice("q_prop_24"), "Mệnh đề đảo của P là một mệnh đề đúng.");
 });
 
 test("slide examples preserve unit-circle, supplementary-angle, and cosine-law identities", () => {

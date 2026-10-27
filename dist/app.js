@@ -4,7 +4,9 @@ import {
   questionBank,
   probes,
   transferQuestion,
+  getTransferQuestion,
   getProbe,
+  getVerificationProbe,
   summarizeEvidence,
 } from "./learning.js";
 import { createWorkspace } from "./workspace.js";
@@ -313,9 +315,10 @@ function newPractice(lessonId) {
     history: [],
     started: Date.now(),
     transfer:
-      state.lesson === "values" && index === 0
+      getTransferQuestion(state.lesson, pool[index]?.id) ||
+      (state.lesson === "values" && index === 0
         ? transferQuestion
-        : pool[(index + 1) % pool.length],
+        : pool[(index + 1) % pool.length]),
   };
   state.interactiveAngle = 130;
 }
@@ -344,7 +347,7 @@ function submitAnswer() {
   if (practice.phase === "base") {
     practice.baseCorrect = correct;
     practice.probeKey = correct
-      ? null
+      ? practice.base.correctProbe || null
       : getProbe(practice.base, practice.selected);
     if (!probes[practice.probeKey]) practice.probeKey = null;
   }

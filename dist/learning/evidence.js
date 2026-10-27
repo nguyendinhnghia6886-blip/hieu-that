@@ -24,7 +24,46 @@ export function getProbe(question, selected) {
     return "sign";
   if (question.skill === "square-root") return "root";
   if (question.skill === "identity") return "identity";
+  if (question.probeKeys && question.probeKeys[index]) {
+    return question.probeKeys[index];
+  }
   return null;
+}
+
+export function getVerificationProbe(question, selected) {
+  if (!question || !Array.isArray(question.options)) return null;
+  const index =
+    typeof selected === "number"
+      ? selected
+      : question.options.indexOf(selected);
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= question.options.length
+  )
+    return null;
+  if (index === question.answer) {
+    if (question.skill === "proposition-negation") return "prop_neg_rule";
+    if (question.skill === "proposition-proof")
+      return "prop_counterexample_rule";
+    if (
+      question.id === "q_prop_3" ||
+      question.id === "q_prop_12" ||
+      question.id === "q_prop_13"
+    ) {
+      return "prop_necessary_rule";
+    }
+    if (
+      question.id === "q_prop_11" ||
+      question.id === "q_prop_22" ||
+      question.id === "q_prop_24"
+    ) {
+      return "prop_converse_rule";
+    }
+    if (question.lessonId === "propositions") return "prop_def";
+    return null;
+  }
+  return getProbe(question, selected);
 }
 
 /** Summarize only the available, explicit answers from this short session. */
@@ -40,11 +79,18 @@ export function summarizeEvidence({
     probeKey && Object.prototype.hasOwnProperty.call(probes, probeKey),
   );
   const hasProbeAnswer = hasProbe && typeof probeCorrect === "boolean";
-  const focus = {
-    sign: "dấu của cos ở góc tù",
-    root: "hai nghiệm của phương trình bình phương",
-    identity: "hệ thức sin²α + cos²α = 1",
-  }[probeKey];
+  const focus =
+    {
+      sign: "dấu của cos ở góc tù",
+      root: "hai nghiệm của phương trình bình phương",
+      identity: "hệ thức sin²α + cos²α = 1",
+      prop_def: "khái niệm mệnh đề toán học",
+      prop_neg_rule: "quy tắc phủ định lượng từ toán học",
+      prop_converse_rule: "tính độc lập của mệnh đề đảo",
+      prop_necessary_rule: "phân biệt điều kiện cần và điều kiện đủ",
+      prop_counterexample_rule:
+        "phương pháp phản ví dụ bác bỏ mệnh đề với mọi",
+    }[probeKey] || "khái niệm trọng tâm";
 
   if (!hasBase || !hasTransfer || (hasProbe && !hasProbeAnswer)) {
     return {

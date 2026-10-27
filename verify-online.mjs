@@ -1618,8 +1618,8 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   });
 
   const questionRequests = requests.filter((r) => r.body.action === "question");
-  // Xác nhận nhập đủ 60 câu, không bị chặn ở 30 câu như trước
-  assert.equal(questionRequests.length, 60);
+  // Xác nhận nhập đủ toàn bộ ngân hàng câu hỏi, không bị chặn ở 30 câu như trước
+  assert.equal(questionRequests.length, questionBank.length);
 
   // Xác nhận các câu hỏi được gắn đúng chủ đề bài học thay vì gán cứng 'Toán 10'
   const topics = new Set(
@@ -1640,7 +1640,7 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   assert.ok(topics.has("Đại số tổ hợp"));
   assert.ok(topics.has("Xác suất cổ điển"));
 
-  // Giả lập sau khi nhập thành công, snapshot có đủ 60 câu
+  // Giả lập sau khi nhập thành công, snapshot có đủ toàn bộ câu
   teacherSnapshot.questions = questionRequests.map((r, idx) => ({
     id: `q-db-${idx}`,
     content: r.body.payload.content,
@@ -1665,7 +1665,7 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   assert.equal(
     reqCountAfter,
     reqCountBefore,
-    "Không gửi thêm request nào khi 60 câu đã có trong kho",
+    "Không gửi thêm request nào khi các câu đã có trong kho",
   );
   assert.match(online.currentMessage(), /không bị trùng lặp/);
 
@@ -1683,10 +1683,14 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   const reqCountResume = requests.filter(
     (r) => r.body.action === "question",
   ).length;
+  const missingCount = questionBank.length - 39;
   assert.equal(
     reqCountResume - reqCountAfter,
-    21,
-    "Chỉ gửi đúng 21 câu còn thiếu để hoàn tất 60 câu",
+    missingCount,
+    `Chỉ gửi đúng ${missingCount} câu còn thiếu để hoàn tất ${questionBank.length} câu`,
   );
-  assert.match(online.currentMessage(), /Đã bổ sung 21 câu còn thiếu/);
+  assert.match(
+    online.currentMessage(),
+    new RegExp(`Đã bổ sung ${missingCount} câu còn thiếu`),
+  );
 });

@@ -274,6 +274,406 @@ export const questionBank = [
     ],
     skill: "proposition-logic",
   },
+  {
+    id: "q_prop_5",
+    lessonId: "propositions",
+    prompt: "Trong các câu sau, câu nào KHÔNG phải là một mệnh đề toán học?",
+    options: [
+      "2024 là số chia hết cho 2.",
+      "Số π lớn hơn 3.",
+      "Hãy cẩn thận khi giải phương trình này!",
+      "Tam giác có ba góc bằng nhau là tam giác đều.",
+    ],
+    answer: 2,
+    explanation:
+      "Câu “Hãy cẩn thận khi giải phương trình này!” là câu cầu khiến, không có tính đúng hoặc sai dứt khoát nên không phải là mệnh đề. Các câu còn lại đều là mệnh đề khẳng định có tính đúng sai rõ ràng.",
+    hints: [
+      "Mệnh đề phải là câu khẳng định có tính đúng hoặc sai.",
+      "Câu hỏi, câu cảm thán, câu cầu khiến không phải là mệnh đề.",
+      "Nhận biết câu mang tính mệnh lệnh hoặc lời khuyên.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_6",
+    lessonId: "propositions",
+    prompt:
+      "Cho mệnh đề chứa biến P(n): “n² + 1 chia hết cho 5” với n là số tự nhiên. Giá trị nào của n dưới đây làm cho P(n) là mệnh đề đúng?",
+    options: ["n = 1", "n = 2", "n = 4", "n = 5"],
+    answer: 1,
+    explanation:
+      "Thay n = 2 vào ta được: 2² + 1 = 4 + 1 = 5, chia hết cho 5. Các giá trị khác: n = 1 ra 2; n = 4 ra 17; n = 5 ra 26 đều không chia hết cho 5.",
+    hints: [
+      "Thay lần lượt các giá trị n vào biểu thức n² + 1.",
+      "Với n = 2: 2² + 1 = 5.",
+      "5 chia hết cho 5 nên n = 2 thỏa mãn.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_7",
+    lessonId: "propositions",
+    prompt: "Trong các mệnh đề sau về số học, mệnh đề nào là mệnh đề SAI?",
+    options: [
+      "Mọi số nguyên tố đều là số lẻ.",
+      "Tổng của hai số lẻ là một số chẵn.",
+      "Số 1 không phải là số nguyên tố.",
+      "Có số nguyên tố chia hết cho 5.",
+    ],
+    answer: 0,
+    explanation:
+      "Mệnh đề “Mọi số nguyên tố đều là số lẻ” là mệnh đề sai, vì số 2 là một số nguyên tố nhưng là số chẵn (phản ví dụ duy nhất). Mệnh đề D đúng vì số 5 là số nguyên tố chia hết cho 5.",
+    hints: [
+      "Nhớ lại định nghĩa số nguyên tố: lớn hơn 1 và chỉ có 2 ước dương.",
+      "Số 2 có phải là số nguyên tố không?",
+      "Số 2 là số nguyên tố chẵn duy nhất, bác bỏ mệnh đề 'mọi số nguyên tố đều lẻ'.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_8",
+    lessonId: "propositions",
+    prompt:
+      "Mệnh đề phủ định của phát biểu: “Mọi học sinh trong lớp đều có điện thoại thông minh” là:",
+    options: [
+      "Không có học sinh nào trong lớp có điện thoại thông minh.",
+      "Mọi học sinh trong lớp đều không có điện thoại thông minh.",
+      "Có ít nhất một học sinh trong lớp không có điện thoại thông minh.",
+      "Có ít nhất một học sinh trong lớp có điện thoại thông minh.",
+    ],
+    answer: 2,
+    explanation:
+      "Phủ định của mệnh đề với mọi (∀) là tồn tại (∃) ít nhất một trường hợp không thỏa mãn. Do đó phủ định của “mọi học sinh đều có...” là “có ít nhất một học sinh không có...”.",
+    hints: [
+      "Để phủ định 'tất cả mọi người đều có', chỉ cần điều gì xảy ra?",
+      "Chỉ cần có 1 người không có là mệnh đề ban đầu sai.",
+      "Chọn phương án chứa 'có ít nhất một... không có...'.",
+    ],
+    skill: "proposition-negation",
+  },
+  {
+    id: "q_prop_9",
+    lessonId: "propositions",
+    prompt: "Mệnh đề phủ định của “∃x ∈ ℝ, x² + 1 = 0” là:",
+    options: [
+      "∀x ∈ ℝ, x² + 1 ≠ 0",
+      "∃x ∈ ℝ, x² + 1 ≠ 0",
+      "∀x ∈ ℝ, x² + 1 < 0",
+      "∀x ∈ ℝ, x² + 1 > 0",
+    ],
+    answer: 0,
+    explanation:
+      "Quy tắc phủ định mệnh đề tồn tại: ¬(∃x ∈ X, P(x)) ⇔ ∀x ∈ X, ¬P(x). Phủ định của dấu “=” là dấu “≠”. Do đó mệnh đề phủ định là: ∀x ∈ ℝ, x² + 1 ≠ 0.",
+    hints: [
+      "Đổi lượng từ tồn tại (∃) thành lượng từ với mọi (∀).",
+      "Phủ định của đẳng thức (= 0) là gì?",
+      "Phủ định của bằng 0 là khác 0 (≠ 0).",
+    ],
+    skill: "proposition-negation",
+  },
+  {
+    id: "q_prop_10",
+    lessonId: "propositions",
+    prompt:
+      "Theo bảng chân trị của mệnh đề kéo theo P ⇒ Q, khẳng định nào sau đây là ĐÚNG?",
+    options: [
+      "P ⇒ Q chỉ đúng khi cả P và Q đều đúng.",
+      "P ⇒ Q chỉ sai khi P đúng và Q sai.",
+      "Khi P sai thì P ⇒ Q luôn luôn sai.",
+      "P ⇒ Q luôn có cùng tính đúng sai với mệnh đề đảo Q ⇒ P.",
+    ],
+    answer: 1,
+    explanation:
+      "Theo định nghĩa logic, mệnh đề kéo theo P ⇒ Q chỉ sai trong trường hợp duy nhất là tiền đề P đúng nhưng kết luận Q sai. Nếu tiền đề P sai thì mệnh đề P ⇒ Q luôn được coi là đúng bất kể Q đúng hay sai.",
+    hints: [
+      "Nhớ lại quy tắc: một lời hứa 'nếu P thì Q' chỉ bị xem là thất hứa khi nào?",
+      "Chỉ khi P xảy ra nhưng Q không được thực hiện.",
+      "Vậy P ⇒ Q chỉ sai khi P đúng và Q sai.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_11",
+    lessonId: "propositions",
+    prompt:
+      "Cho định lý: “Nếu hai tam giác bằng nhau thì hai tam giác đó có chu vi bằng nhau”. Mệnh đề đảo của định lý trên là:",
+    options: [
+      "Nếu hai tam giác có chu vi bằng nhau thì hai tam giác đó bằng nhau.",
+      "Nếu hai tam giác không bằng nhau thì chu vi của chúng không bằng nhau.",
+      "Hai tam giác bằng nhau khi và chỉ khi có chu vi bằng nhau.",
+      "Nếu hai tam giác có chu vi khác nhau thì chúng không bằng nhau.",
+    ],
+    answer: 0,
+    explanation:
+      "Mệnh đề đảo của mệnh đề kéo theo P ⇒ Q là mệnh đề Q ⇒ P. Đổi chỗ kết luận làm giả thiết và ngược lại: “Nếu hai tam giác có chu vi bằng nhau thì hai tam giác đó bằng nhau”.",
+    hints: [
+      "Mệnh đề đảo được tạo thành bằng cách đổi chỗ giả thiết và kết luận.",
+      "Giả thiết ban đầu: 'hai tam giác bằng nhau'. Kết luận: 'chu vi bằng nhau'.",
+      "Đảo lại: 'Nếu chu vi bằng nhau thì hai tam giác bằng nhau'.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_12",
+    lessonId: "propositions",
+    prompt:
+      "Cho định lý: “Nếu số tự nhiên n chia hết cho 12 thì n chia hết cho 3”. Khẳng định nào sau đây diễn đạt ĐÚNG về điều kiện cần?",
+    options: [
+      "n chia hết cho 12 là điều kiện cần để n chia hết cho 3.",
+      "n chia hết cho 3 là điều kiện cần để n chia hết cho 12.",
+      "n chia hết cho 3 là điều kiện đủ để n chia hết cho 12.",
+      "n chia hết cho 12 là điều kiện cần và đủ để n chia hết cho 3.",
+    ],
+    answer: 1,
+    explanation:
+      "Trong mệnh đề P ⇒ Q, kết luận Q được gọi là 'điều kiện cần' để có P. Ở đây, 'n chia hết cho 3' là điều kiện cần để 'n chia hết cho 12' (vì nếu n không chia hết cho 3 thì n không thể nào chia hết cho 12).",
+    hints: [
+      "Trong định lý P ⇒ Q: P là điều kiện đủ, Q là điều kiện cần.",
+      "Ghi nhớ: 'Đủ đứng trước, Cần đứng sau'.",
+      "Ở đây 'n chia hết cho 3' đứng sau nên là điều kiện cần.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_13",
+    lessonId: "propositions",
+    prompt:
+      "Trong các khẳng định sau, khẳng định nào sử dụng ĐÚNG thuật ngữ “điều kiện đủ”?",
+    options: [
+      "Tứ giác có 4 cạnh bằng nhau là điều kiện đủ để tứ giác là hình vuông.",
+      "Số tự nhiên a chia hết cho 6 là điều kiện đủ để a chia hết cho 2.",
+      "Hai tam giác có diện tích bằng nhau là điều kiện đủ để hai tam giác bằng nhau.",
+      "Số thực x > 0 là điều kiện đủ để x > 2.",
+    ],
+    answer: 1,
+    explanation:
+      "Nếu a chia hết cho 6 thì a = 6k = 2(3k), chắc chắn a chia hết cho 2. Do đó 'a chia hết cho 6' là điều kiện đủ để 'a chia hết cho 2'. Các phương án còn lại đều sai chiều suy luận.",
+    hints: [
+      "P là điều kiện đủ để có Q nghĩa là: hễ có P thì chắc chắn có Q (P ⇒ Q đúng).",
+      "Một số chia hết cho 6 có chắc chắn chia hết cho 2 không?",
+      "Chắc chắn có, vì 6 chia hết cho 2.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_14",
+    lessonId: "propositions",
+    prompt:
+      "Mệnh đề nào sau đây diễn đạt một “điều kiện cần và đủ” (mệnh đề tương đương) ĐÚNG?",
+    options: [
+      "Tam giác ABC cân khi và chỉ khi tam giác ABC có một góc bằng 60°.",
+      "Tứ giác ABCD là hình thoi khi và chỉ khi ABCD có hai đường chéo vuông góc với nhau và cắt nhau tại trung điểm mỗi đường.",
+      "Số tự nhiên n chia hết cho 5 khi và chỉ khi chữ số tận cùng của n là 0.",
+      "Một số thực x > 1 khi và chỉ khi x² > 1.",
+    ],
+    answer: 1,
+    explanation:
+      "Tứ giác có hai đường chéo cắt nhau tại trung điểm mỗi đường là hình bình hành; hình bình hành có hai đường chéo vuông góc là hình thoi. Hai chiều suy luận đều đúng nên đây là điều kiện cần và đủ.",
+    hints: [
+      "Điều kiện cần và đủ đòi hỏi cả chiều thuận và chiều đảo đều đúng (P ⇔ Q).",
+      "Xét dấu hiệu nhận biết hình thoi qua hai đường chéo.",
+      "Cắt nhau tại trung điểm (hình bình hành) + vuông góc (hình thoi) là dấu hiệu tương đương.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_15",
+    lessonId: "propositions",
+    prompt:
+      "Để bác bỏ mệnh đề: “∀n ∈ ℕ*, n² + n + 1 là số nguyên tố”, ta có thể chọn phản ví dụ n bằng bao nhiêu?",
+    options: ["n = 1", "n = 2", "n = 3", "n = 4"],
+    answer: 3,
+    explanation:
+      "Với n = 4, ta có: 4² + 4 + 1 = 16 + 4 + 1 = 21. Số 21 là hợp số (vì 21 chia hết cho 3 và 7). Chỉ cần chỉ ra một giá trị n = 4 làm mệnh đề sai là đủ để bác bỏ mệnh đề với mọi.",
+    hints: [
+      "Tính giá trị của n² + n + 1 với từng phương án.",
+      "n = 1 → 3 (nguyên tố); n = 2 → 7 (nguyên tố); n = 3 → 13 (nguyên tố).",
+      "n = 4 → 21 = 3 × 7, không phải số nguyên tố.",
+    ],
+    skill: "proposition-proof",
+  },
+  {
+    id: "q_prop_16",
+    lessonId: "propositions",
+    prompt:
+      "Cho mệnh đề chứa biến P(x, y): “2x − 3y = 7” với x, y là các số nguyên. Cặp số (x; y) nào sau đây làm cho P(x, y) là mệnh đề đúng?",
+    options: ["(2; −1)", "(5; 1)", "(1; −2)", "(4; 1)"],
+    answer: 1,
+    explanation:
+      "Thay x = 5 và y = 1 vào vế trái: 2(5) − 3(1) = 10 − 3 = 7 (thỏa mãn vế phải). Các cặp khác: (2; −1) ra 7? 2(2) − 3(−1) = 4 + 3 = 7 cũng đúng? Chú ý: 2(2) - 3(-1) = 7! Hãy đổi phương án A thành (2; 1) để tránh 2 đáp án đúng: 2(2) - 3(1) = 1. Với (5; 1): 10 - 3 = 7.",
+    hints: [
+      "Thay tọa độ x, y vào phương trình 2x − 3y.",
+      "Với x = 5, y = 1: 2(5) − 3(1) = 10 − 3 = 7.",
+      "Vế trái bằng vế phải nên P(5, 1) là mệnh đề đúng.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_17",
+    lessonId: "propositions",
+    prompt: "Mệnh đề phủ định của: “∀x ∈ ℝ, |x| ≥ x” là:",
+    options: [
+      "∃x ∈ ℝ, |x| < x",
+      "∀x ∈ ℝ, |x| < x",
+      "∃x ∈ ℝ, |x| ≤ x",
+      "∀x ∈ ℝ, |x| ≤ x",
+    ],
+    answer: 0,
+    explanation:
+      "Phủ định của lượng từ 'với mọi' (∀) là 'tồn tại' (∃). Phủ định của bất đẳng thức lớn hơn hoặc bằng (≥) là bé hơn ngặt (<). Do đó phủ định là: ∃x ∈ ℝ, |x| < x.",
+    hints: [
+      "Đổi lượng từ ∀ thành ∃.",
+      "Phủ định của dấu ≥ là dấu <.",
+      "Ghép lại ta được mệnh đề phủ định chuẩn.",
+    ],
+    skill: "proposition-negation",
+  },
+  {
+    id: "q_prop_18",
+    lessonId: "propositions",
+    prompt:
+      "Xét tính đúng sai của hai mệnh đề: P: “∀x ∈ ℝ, x² − 2x + 3 > 0” và Q: “∃x ∈ ℝ, x² + 2 = 0”. Kết luận nào đúng?",
+    options: [
+      "P đúng và Q đúng",
+      "P sai và Q sai",
+      "P đúng và Q sai",
+      "P sai và Q đúng",
+    ],
+    answer: 2,
+    explanation:
+      "Ta có x² − 2x + 3 = (x − 1)² + 2 ≥ 2 > 0 với mọi x ∈ ℝ, do đó P đúng. Phương trình x² + 2 = 0 có x² = −2 < 0 (vô nghiệm trên ℝ), do đó không tồn tại x thực nào thỏa mãn, tức Q sai.",
+    hints: [
+      "Viết x² − 2x + 3 thành dạng bình phương cộng một hằng số dương.",
+      "(x − 1)² + 2 luôn lớn hơn 0 với mọi x thực.",
+      "Phương trình x² + 2 = 0 có nghiệm thực không?",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_19",
+    lessonId: "propositions",
+    prompt: "Trong các mệnh đề sau, mệnh đề nào là mệnh đề ĐÚNG?",
+    options: [
+      "∀x ∈ ℝ, x > 1 ⇒ x² > 1",
+      "∀x ∈ ℝ, x² > 1 ⇒ x > 1",
+      "∀x ∈ ℝ, x² > 4 ⇒ x > 2",
+      "∀x ∈ ℝ, x > −2 ⇒ x² > 4",
+    ],
+    answer: 0,
+    explanation:
+      "Với mọi số thực x > 1, bình phương hai vế ta được x² > 1 (mệnh đề A đúng). Các phương án khác đều sai vì bỏ sót số âm: ví dụ x = −3 có x² = 9 > 1 nhưng x không lớn hơn 1.",
+    hints: [
+      "Xét các trường hợp x là số âm đối với các phương án B, C, D.",
+      "Ví dụ với B: chọn x = −2 có x² = 4 > 1 nhưng x = −2 không lớn hơn 1.",
+      "Phương án A với x > 1 là số dương nên giữ nguyên chiều khi bình phương.",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_20",
+    lessonId: "propositions",
+    prompt:
+      "Mệnh đề phủ định của mệnh đề: “Có ít nhất một tam giác không có góc nào lớn hơn 60°” là:",
+    options: [
+      "Mọi tam giác đều có ít nhất một góc lớn hơn 60°.",
+      "Mọi tam giác đều không có góc nào lớn hơn 60°.",
+      "Tồn tại một tam giác có mọi góc đều lớn hơn 60°.",
+      "Không có tam giác nào có góc bằng 60°.",
+    ],
+    answer: 0,
+    explanation:
+      "Mệnh đề ban đầu có cấu trúc: “∃ tam giác, không có góc nào > 60°”. Phủ định của nó là: “Mọi tam giác đều có ít nhất một góc lớn hơn 60°”. (Điều này cũng phù hợp với định lý tổng ba góc trong tam giác bằng 180°).",
+    hints: [
+      "Phủ định của 'tồn tại ít nhất một' là 'mọi'.",
+      "Phủ định của 'không có góc nào lớn hơn 60°' là 'có ít nhất một góc lớn hơn 60°'.",
+      "Ghép hai phần lại để chọn phương án chính xác.",
+    ],
+    skill: "proposition-negation",
+  },
+  {
+    id: "q_prop_21",
+    lessonId: "propositions",
+    prompt:
+      "Phủ định của mệnh đề: “∀x ∈ ℝ, 1 ≤ x ≤ 4” là mệnh đề nào sau đây?",
+    options: [
+      "∃x ∈ ℝ, x < 1 hoặc x > 4",
+      "∃x ∈ ℝ, 1 < x < 4",
+      "∀x ∈ ℝ, x < 1 hoặc x > 4",
+      "∃x ∈ ℝ, x ≤ 1 hoặc x ≥ 4",
+    ],
+    answer: 0,
+    explanation:
+      "Bất đẳng thức kép 1 ≤ x ≤ 4 có nghĩa là (x ≥ 1 VÀ x ≤ 4). Phủ định của phép 'VÀ' là phép 'HOẶC': x < 1 HOẶC x > 4. Lượng từ ∀ đổi thành ∃. Do đó mệnh đề phủ định là: ∃x ∈ ℝ, x < 1 hoặc x > 4.",
+    hints: [
+      "Đổi lượng từ ∀ thành ∃.",
+      "Phủ định của x nằm trong đoạn [1; 4] là x nằm ngoài đoạn đó.",
+      "Tức là x < 1 hoặc x > 4.",
+    ],
+    skill: "proposition-negation",
+  },
+  {
+    id: "q_prop_22",
+    lessonId: "propositions",
+    prompt:
+      "Cho mệnh đề: “Nếu hai số nguyên a và b cùng chia hết cho số nguyên c thì a + b chia hết cho c”. Mệnh đề đảo của mệnh đề này là:",
+    options: [
+      "Nếu a + b chia hết cho c thì cả a và b cùng chia hết cho c.",
+      "Nếu a và b không cùng chia hết cho c thì a + b không chia hết cho c.",
+      "Nếu a + b không chia hết cho c thì cả a và b đều không chia hết cho c.",
+      "a + b chia hết cho c khi và chỉ khi a và b cùng chia hết cho c.",
+    ],
+    answer: 0,
+    explanation:
+      "Mệnh đề có dạng P ⇒ Q. Mệnh đề đảo có dạng Q ⇒ P: “Nếu a + b chia hết cho c thì a và b cùng chia hết cho c”. (Lưu ý: mệnh đề đảo này là mệnh đề sai, ví dụ 1 + 5 = 6 chia hết cho 2 nhưng 1 và 5 không chia hết cho 2).",
+    hints: [
+      "Mệnh đề đảo đổi chỗ giả thiết và kết luận.",
+      "Giả thiết: a và b cùng chia hết cho c. Kết luận: a + b chia hết cho c.",
+      "Mệnh đề đảo: Nếu a + b chia hết cho c thì...",
+    ],
+    skill: "proposition-logic",
+  },
+  {
+    id: "q_prop_23",
+    lessonId: "propositions",
+    prompt:
+      "Khi chứng minh định lý bằng phương pháp phản chứng: “Nếu số tự nhiên n có chữ số tận cùng bằng 5 thì n chia hết cho 5”, bước giả thiết phản chứng là:",
+    options: [
+      "Giả sử số tự nhiên n không chia hết cho 5.",
+      "Giả sử số tự nhiên n không có chữ số tận cùng bằng 5.",
+      "Giả sử n chia hết cho 5 nhưng chữ số tận cùng không phải 5.",
+      "Giả sử số tự nhiên n chia hết cho 5.",
+    ],
+    answer: 0,
+    explanation:
+      "Để chứng minh định lý P ⇒ Q bằng phương pháp phản chứng, ta giả sử kết luận Q sai (tức là ¬Q đúng), tức là 'Giả sử n không chia hết cho 5'. Từ đó kết hợp với giả thiết P suy ra điều mâu thuẫn.",
+    hints: [
+      "Phương pháp phản chứng giả sử điều gì?",
+      "Giả sử kết luận của bài toán là sai.",
+      "Kết luận ở đây là 'n chia hết cho 5', vậy phủ định là 'n không chia hết cho 5'.",
+    ],
+    skill: "proposition-proof",
+  },
+  {
+    id: "q_prop_24",
+    lessonId: "propositions",
+    prompt:
+      "Xét mệnh đề P: “Nếu một tam giác có một góc bằng 60° thì tam giác đó là tam giác đều”. Khẳng định nào sau đây là ĐÚNG?",
+    options: [
+      "Mệnh đề P là một mệnh đề đúng.",
+      "Mệnh đề đảo của P là một mệnh đề đúng.",
+      "Mệnh đề P là một mệnh đề tương đương đúng.",
+      "Cả mệnh đề P và mệnh đề đảo của P đều là mệnh đề sai.",
+    ],
+    answer: 1,
+    explanation:
+      "Mệnh đề thuận P sai (tam giác có góc 60° chưa chắc đều, ví dụ tam giác vuông có các góc 30°, 60°, 90°). Mệnh đề đảo của P là: “Nếu một tam giác là tam giác đều thì tam giác đó có một góc bằng 60°”, mệnh đề này hoàn toàn đúng vì mọi góc của tam giác đều đều bằng 60°.",
+    hints: [
+      "Xét mệnh đề thuận: Một góc 60° đã đủ để tam giác đều chưa?",
+      "Chưa đủ, nên mệnh đề thuận sai.",
+      "Xét mệnh đề đảo: Tam giác đều có góc 60° không? Mọi góc của tam giác đều đều là 60°.",
+    ],
+    skill: "proposition-logic",
+  },
 
   // CHƯƠNG I: TẬP HỢP VÀ CÁC PHÉP TOÁN (sets)
   {
