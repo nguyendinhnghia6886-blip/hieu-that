@@ -1,5 +1,7 @@
 # Hiểu Thật
 
+Bản sửa 2.5.1: nhập thư viện có kiểm tra trùng ở máy chủ, giữ sửa đổi của giáo viên và tiếp tục sau lỗi mạng. Xem [kết quả kiểm thử và giới hạn](docs/QA-2.5.1.md).
+
 Website hỗ trợ học Toán 10: bài học dạng slide, luyện tập theo căn cứ, soạn và giao bài, chatbot **Bạn Hiểu**. Bản 2.5.0 tích hợp toàn bộ 9 chương Toán 10 theo sách Kết nối tri thức với cuộc sống (15 bài học chuyên sâu, 75 slide, 60 câu hỏi tương tác có gợi ý từng bước và lời giải chi tiết, hỗ trợ lọc theo chương và giao bài linh hoạt), đồng thời kế thừa đầy đủ hai không gian làm việc trực tuyến theo vai trò **Học sinh** và **Giáo viên**.
 
 Vào **Đăng nhập / Tạo tài khoản** để mở không gian học tập (Học sinh) hoặc không gian giảng dạy (Giáo viên) với dữ liệu đồng bộ qua Supabase. Phần tự học và lớp mẫu khi chưa đăng nhập vẫn lưu trên thiết bị. Đăng ký công khai còn cần chủ website cấu hình dịch vụ gửi email; Google/Facebook/SMS chưa được bật. Xem [trạng thái triển khai và việc còn lại](docs/HOAN-THIEN-ONLINE.md).

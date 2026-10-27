@@ -1,12 +1,14 @@
 // Temporary, synthetic auth fixtures. Output stays in git-ignored .vercel/.
 import { randomBytes, randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
-const users = ["teacher", "student", "outsider"].map((role) => ({
-  id: randomUUID(),
-  email: `qa-${role}-${randomBytes(6).toString("hex")}@hieu-that.invalid`,
-  password: randomBytes(24).toString("hex"),
-  role,
-}));
+const users = ["teacher", "student", "outsider", "teacher-other"].map(
+  (role) => ({
+    id: randomUUID(),
+    email: `qa-${role}-${randomBytes(6).toString("hex")}@hieu-that.invalid`,
+    password: randomBytes(24).toString("hex"),
+    role,
+  }),
+);
 writeFileSync(".vercel/qa-users.json", JSON.stringify(users));
 const sql = users
   .map(
@@ -28,4 +30,4 @@ delete from hieu_private.questions where teacher_id in (${ids});
 delete from auth.users where id in (${ids}) and email like 'qa-%@hieu-that.invalid';
 commit;`,
 );
-console.log("Prepared three isolated synthetic users and exact-ID cleanup.");
+console.log("Prepared four isolated synthetic users and exact-ID cleanup.");

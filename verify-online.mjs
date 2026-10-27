@@ -4,6 +4,10 @@ import handler, { allowedOrigin } from "./api/learning.js";
 import { lessons, questionBank } from "./dist/learning.js";
 import { createOnline, resolveScreenForRole } from "./dist/online.js";
 import {
+  questionImportKey,
+  findImportedQuestion,
+} from "./dist/learning/question-import.js";
+import {
   studentOverview,
   studentAssignedView,
   studentTaskView,
@@ -20,6 +24,107 @@ import {
   teacherSubmissionDetailView,
   teacherStudentsView,
 } from "./dist/views/online-teacher.js";
+
+test("import identity keeps same-prompt questions distinct and namespaces local sources", async () => {
+  const a = {
+    id: "source-a",
+    type: "choice",
+    prompt: "Cùng đề",
+    options: ["1", "2", "3", "4"],
+  };
+  const b = { ...a, id: "source-b", options: ["5", "6", "7", "8"] };
+  const key = await questionImportKey("samples", a);
+  assert.notEqual(key, await questionImportKey("samples", b));
+  assert.notEqual(key, await questionImportKey("local", a));
+  const rows = [{ id: "db-a", source_key: key, content: a }];
+  assert.equal(
+    findImportedQuestion(rows, await questionImportKey("samples", b), b),
+    undefined,
+  );
+  assert.equal(
+    findImportedQuestion(rows, key, { ...a, prompt: "Đã sửa" }).id,
+    "db-a",
+  );
+  const noId = { ...a, id: "" };
+  assert.equal(
+    await questionImportKey("local", noId),
+    await questionImportKey("local", { ...noId }),
+  );
+  assert.notEqual(
+    await questionImportKey("local", noId),
+    await questionImportKey("local", { ...noId, options: b.options }),
+  );
+});
+
+test("sample import retries a lost response with the same source key and resumes without duplicates", async () => {
+  const bank = questionBank.slice(0, 3);
+  const stored = new Map();
+  let loseResponse = true;
+  let secondAttempts = 0;
+  const snapshot = {
+    profile: { id: "teacher-import", name: "Giáo viên", role: "teacher" },
+    questions: [],
+    members: [],
+    assignments: [],
+    submissions: [],
+  };
+  const online = createOnline({
+    state: {},
+    render() {},
+    toast() {},
+    questionBank: bank,
+    lessons,
+    fetchImpl: async (_url, opts) => {
+      const { action, payload } = JSON.parse(opts.body);
+      if (action === "load")
+        return {
+          ok: true,
+          json: async () => ({
+            data: structuredClone({
+              ...snapshot,
+              questions: [...stored.values()],
+            }),
+          }),
+        };
+      assert.equal(action, "question");
+      assert.equal(payload.import_key, `samples:${payload.content.id}`);
+      if (payload.content.id === bank[1].id) secondAttempts++;
+      if (!stored.has(payload.import_key))
+        stored.set(payload.import_key, {
+          id: `db-${payload.content.id}`,
+          source_key: payload.import_key,
+          content: payload.content,
+        });
+      if (payload.content.id === bank[1].id && loseResponse) {
+        loseResponse = false;
+        throw new TypeError("Mất phản hồi sau khi máy chủ đã lưu");
+      }
+      return {
+        ok: true,
+        json: async () => ({ data: { id: stored.get(payload.import_key).id } }),
+      };
+    },
+  });
+  const click = {
+    target: {
+      closest: () => ({ dataset: { online: "samples" }, tagName: "BUTTON" }),
+    },
+  };
+  await online.open();
+  await online.handleClick(click);
+  assert.equal(stored.size, 2);
+  assert.match(online.currentMessage(), /Đã xác nhận 1 câu/);
+  await online.handleClick(click);
+  assert.equal(stored.size, 3);
+  assert.equal(
+    secondAttempts,
+    1,
+    "fresh load must recognize the committed request whose response was lost",
+  );
+  await online.handleClick(click);
+  assert.equal(stored.size, 3);
+  assert.match(online.currentMessage(), /không bị trùng lặp/);
+});
 
 test("online API rejects cross-origin requests before accessing auth or data", async () => {
   assert.equal(
@@ -794,17 +899,38 @@ test("detail views restore from hash with ID, latest score sorts by review time,
       {
         id: "a-old",
         title: "Bài tập 1",
-        questions: [{ id: "q1", type: "choice", prompt: "1+1=?", options: ["2", "3", "4", "5"] }],
+        questions: [
+          {
+            id: "q1",
+            type: "choice",
+            prompt: "1+1=?",
+            options: ["2", "3", "4", "5"],
+          },
+        ],
       },
       {
         id: "a-new",
         title: "Bài tập 2",
-        questions: [{ id: "q2", type: "choice", prompt: "2+2=?", options: ["4", "5", "6", "7"] }],
+        questions: [
+          {
+            id: "q2",
+            type: "choice",
+            prompt: "2+2=?",
+            options: ["4", "5", "6", "7"],
+          },
+        ],
       },
       {
         id: "a-todo",
         title: "Bài tập 3 chưa làm",
-        questions: [{ id: "q3", type: "choice", prompt: "3+3=?", options: ["6", "7", "8", "9"] }],
+        questions: [
+          {
+            id: "q3",
+            type: "choice",
+            prompt: "3+3=?",
+            options: ["6", "7", "8", "9"],
+          },
+        ],
       },
     ],
     // Mảng trả về có bài cũ ở đầu (được chấm sau), bài mới ở sau (được chấm trước)
@@ -835,7 +961,12 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   };
 
   let sessionExpired = false;
-  const state = { role: "student", view: "online", mobile: true, presentation: false };
+  const state = {
+    role: "student",
+    view: "online",
+    mobile: true,
+    presentation: false,
+  };
   const online = createOnline({
     state,
     render() {},
@@ -846,14 +977,23 @@ test("detail views restore from hash with ID, latest score sorts by review time,
         return {
           ok: false,
           status: 401,
-          json: async () => ({ error: "Phiên đăng nhập đã hết hạn.", signedOut: true }),
+          json: async () => ({
+            error: "Phiên đăng nhập đã hết hạn.",
+            signedOut: true,
+          }),
         };
       }
       if (action === "load") {
         return { ok: true, json: async () => ({ data: studentSnapshot }) };
       }
       if (action === "login") {
-        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công." }) };
+        return {
+          ok: true,
+          json: async () => ({
+            signedIn: true,
+            message: "Đăng nhập thành công.",
+          }),
+        };
       }
       if (action === "submit") {
         return { ok: true, json: async () => ({ data: { id: "sub-todo" } }) };
@@ -880,7 +1020,10 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   online.navigate("task", { id: "a-todo" });
   online.handleInput({
     target: {
-      closest: (sel) => (sel === '[data-online-form="submit"]' ? { dataset: { onlineForm: "submit" } } : null),
+      closest: (sel) =>
+        sel === '[data-online-form="submit"]'
+          ? { dataset: { onlineForm: "submit" } }
+          : null,
       name: "q3",
       value: "0",
     },
@@ -903,7 +1046,10 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   assert.equal(online.hasProfile(), false);
   const expiredHtml = online.view();
   assert.match(expiredHtml, /Phiên đăng nhập đã hết hạn/);
-  assert.match(expiredHtml, /Bản nháp của bạn vẫn được giữ trong phiên trang này/);
+  assert.match(
+    expiredHtml,
+    /Bản nháp của bạn vẫn được giữ trong phiên trang này/,
+  );
   assert.match(expiredHtml, /Đăng nhập/);
   assert.doesNotMatch(expiredHtml, /Chào Lê Bảo/); // Không lộ dữ liệu tài khoản cũ
 
@@ -959,7 +1105,13 @@ test("detail views restore from hash with ID, latest score sorts by review time,
         return { ok: true, json: async () => ({ data: activeSnapshot }) };
       }
       if (action === "login") {
-        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }) };
+        return {
+          ok: true,
+          json: async () => ({
+            signedIn: true,
+            message: "Đăng nhập thành công",
+          }),
+        };
       }
       return { ok: true, json: async () => ({ ok: true }) };
     },
@@ -969,7 +1121,10 @@ test("detail views restore from hash with ID, latest score sorts by review time,
   await onlineOther.open("task", "a-todo");
   onlineOther.handleInput({
     target: {
-      closest: (sel) => (sel === '[data-online-form="submit"]' ? { dataset: { onlineForm: "submit" } } : null),
+      closest: (sel) =>
+        sel === '[data-online-form="submit"]'
+          ? { dataset: { onlineForm: "submit" } }
+          : null,
       name: "q3",
       value: "0",
     },
@@ -1025,7 +1180,12 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
   };
 
   const teacher2Snapshot = {
-    profile: { id: "tea-2", name: "Thầy Bình", role: "teacher", code: "GV-BINH" },
+    profile: {
+      id: "tea-2",
+      name: "Thầy Bình",
+      role: "teacher",
+      code: "GV-BINH",
+    },
     members: [],
     questions: [],
     assignments: [],
@@ -1052,7 +1212,12 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
 
   let activeSnapshot = teacher1Snapshot;
   let sessionExpired = false;
-  const state = { role: "teacher", view: "online", mobile: false, presentation: false };
+  const state = {
+    role: "teacher",
+    view: "online",
+    mobile: false,
+    presentation: false,
+  };
   const online = createOnline({
     state,
     render() {},
@@ -1063,14 +1228,23 @@ test("teacher mark drafts are preserved for the same teacher but cleared when a 
         return {
           ok: false,
           status: 401,
-          json: async () => ({ error: "Phiên đăng nhập đã hết hạn.", signedOut: true }),
+          json: async () => ({
+            error: "Phiên đăng nhập đã hết hạn.",
+            signedOut: true,
+          }),
         };
       }
       if (action === "load") {
         return { ok: true, json: async () => ({ data: activeSnapshot }) };
       }
       if (action === "login") {
-        return { ok: true, json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }) };
+        return {
+          ok: true,
+          json: async () => ({
+            signedIn: true,
+            message: "Đăng nhập thành công",
+          }),
+        };
       }
       return { ok: true, json: async () => ({ ok: true }) };
     },
@@ -1191,7 +1365,10 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
       if (body.action === "login") {
         return {
           ok: true,
-          json: async () => ({ signedIn: true, message: "Đăng nhập thành công" }),
+          json: async () => ({
+            signedIn: true,
+            message: "Đăng nhập thành công",
+          }),
         };
       }
       if (body.action === "load") {
@@ -1267,7 +1444,9 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
   }));
 
   // Bấm lại lần thứ 2: Chống nhập trùng, không gửi thêm bất kỳ yêu cầu tạo câu hỏi nào
-  const reqCountBefore = requests.filter((r) => r.body.action === "question").length;
+  const reqCountBefore = requests.filter(
+    (r) => r.body.action === "question",
+  ).length;
   await online.handleClick({
     target: {
       closest: (sel) =>
@@ -1277,8 +1456,14 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
     },
     preventDefault() {},
   });
-  const reqCountAfter = requests.filter((r) => r.body.action === "question").length;
-  assert.equal(reqCountAfter, reqCountBefore, "Không gửi thêm request nào khi 60 câu đã có trong kho");
+  const reqCountAfter = requests.filter(
+    (r) => r.body.action === "question",
+  ).length;
+  assert.equal(
+    reqCountAfter,
+    reqCountBefore,
+    "Không gửi thêm request nào khi 60 câu đã có trong kho",
+  );
   assert.match(online.currentMessage(), /không bị trùng lặp/);
 
   // Giả lập trường hợp mạng đứt giữa chừng: chỉ có 39 câu trong kho
@@ -1292,7 +1477,13 @@ test("teacher sample import imports all 60 questions across all 9 chapters witho
     },
     preventDefault() {},
   });
-  const reqCountResume = requests.filter((r) => r.body.action === "question").length;
-  assert.equal(reqCountResume - reqCountAfter, 21, "Chỉ gửi đúng 21 câu còn thiếu để hoàn tất 60 câu");
+  const reqCountResume = requests.filter(
+    (r) => r.body.action === "question",
+  ).length;
+  assert.equal(
+    reqCountResume - reqCountAfter,
+    21,
+    "Chỉ gửi đúng 21 câu còn thiếu để hoàn tất 60 câu",
+  );
   assert.match(online.currentMessage(), /Đã bổ sung 21 câu còn thiếu/);
 });

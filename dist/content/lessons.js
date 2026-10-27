@@ -195,8 +195,8 @@ export const lessons = [
       {
         eyebrow: "BÀI TOÁN TỐI ƯU",
         title: "Định lý giá trị lớn nhất và nhỏ nhất",
-        body: "Biểu thức lợi nhuận hoặc chi phí F(x; y) = ax + by đạt giá trị lớn nhất (GTLN) và giá trị nhỏ nhất (GTNN) tại một trong các đỉnh của miền đa giác nghiệm.",
-        formula: "Max / Min F(x; y) luôn đạt tại một trong các đỉnh của miền đa giác",
+        body: "Nếu miền nghiệm là một đa giác lồi kín, bị chặn và khác rỗng, biểu thức F(x; y) = ax + by đạt giá trị lớn nhất và nhỏ nhất tại các đỉnh của miền đó. Với miền không bị chặn hoặc không chứa biên, cần kiểm tra sự tồn tại của cực trị trước.",
+        formula: "Miền đa giác lồi kín, bị chặn, khác rỗng → Tính F tại các đỉnh để tìm max/min",
         tip: "Chỉ cần tính giá trị của F(x; y) tại từng đỉnh, sau đó so sánh các kết quả để chọn giá trị lớn nhất và nhỏ nhất.",
         visual: "halfplane",
       },

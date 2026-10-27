@@ -16,6 +16,7 @@ async function request(index, action, payload = {}, expected = 200) {
       "x-vercel-trusted-oidc-idp-token": process.env.VERCEL_OIDC_TOKEN,
     },
     body: JSON.stringify({ action, payload }),
+    signal: AbortSignal.timeout(30000),
   });
   const cookies = r.headers.getSetCookie();
   if (cookies.length) {
@@ -35,14 +36,14 @@ async function request(index, action, payload = {}, expected = 200) {
   return data.data ?? data;
 }
 await request(0, "load", {}, 401);
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < users.length; i++) {
   await request(i, "login", {
     email: users[i].email,
     password: users[i].password,
   });
   await request(i, "profile", {
     name: `QA ${users[i].role}`,
-    role: i === 0 ? "teacher" : "student",
+    role: users[i].role.startsWith("teacher") ? "teacher" : "student",
   });
 }
 const teacher = await request(0, "load");
@@ -57,6 +58,40 @@ const content = {
   status: "approved",
 };
 const q = await request(0, "question", { content });
+// Several tabs importing the same source must receive the same row.
+const imported = await Promise.all(
+  Array.from({ length: 8 }, () =>
+    request(0, "question", {
+      content: { ...content, id: "qa-source" },
+      import_key: "samples:qa-source",
+    }),
+  ),
+);
+assert.equal(new Set(imported.map((x) => x.id)).size, 1);
+await request(0, "question", {
+  id: imported[0].id,
+  content: { ...content, prompt: "Đã sửa riêng" },
+});
+const retried = await request(0, "question", {
+  content,
+  import_key: "samples:qa-source",
+});
+assert.equal(retried.id, imported[0].id);
+assert.equal(retried.created, false);
+assert.equal(
+  (await request(0, "load")).questions.find((x) => x.id === retried.id).content
+    .prompt,
+  "Đã sửa riêng",
+);
+await request(1, "question", { content, import_key: "samples:qa-source" }, 403);
+if (users[3]) {
+  const other = await request(3, "question", {
+    content,
+    import_key: "samples:qa-source",
+  });
+  assert.notEqual(other.id, retried.id);
+  await request(3, "question", { id: retried.id, content }, 403);
+}
 const w = await request(0, "question", {
   content: {
     prompt: "Giải thích cách cộng.",
@@ -128,5 +163,5 @@ assert.equal(
 await request(2, "logout");
 await request(2, "load", {}, 401);
 console.log(
-  "PASS: real auth, secure cookies, profiles, joining, assignment snapshots, hidden answers, isolation, submission, pending written marks, 7.5/10 grading, duplicate protection, logout.",
+  "PASS: 8 concurrent imports share one ID; retries preserve edits; teacher ownership; real auth, secure cookies, profiles, joining, assignment snapshots, hidden answers, isolation, submission, pending written marks, 7.5/10 grading, duplicate protection, logout.",
 );

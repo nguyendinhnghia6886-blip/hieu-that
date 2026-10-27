@@ -7,6 +7,10 @@ import {
 } from "./authoring.js";
 import { parseWrittenMarks } from "./learning/grading.js";
 import {
+  questionImportKey,
+  findImportedQuestion,
+} from "./learning/question-import.js";
+import {
   studentOverview,
   studentAssignedView,
   studentTaskView,
@@ -286,9 +290,10 @@ export function createOnline({
       .json()
       .catch(() => ({ error: "Máy chủ chưa sẵn sàng. Hãy thử lại sau." }));
     if (!response.ok) {
-      const errMsg = body.signedOut
-        ? `${body.error || "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."} (Bản nháp của bạn vẫn được giữ trong phiên trang này).`
-        : body.error || "Kết nối chưa thành công.";
+      const errMsg =
+        body.signedOut && (drafts.size > 0 || markDrafts.size > 0)
+          ? `${body.error || "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."} (Bản nháp của bạn vẫn được giữ trong phiên trang này).`
+          : body.error || "Kết nối chưa thành công.";
       if (body.signedOut) {
         clearSessionState({ keepDrafts: true });
         state.view = "online";
@@ -1126,20 +1131,13 @@ export function createOnline({
           if (!source.length)
             throw new Error("Chưa có câu hỏi đã soạn trên thiết bị này.");
 
-          const existingIds = new Set(
-            (snapshot?.questions || [])
-              .map((item) => item.content?.id)
-              .filter(Boolean),
-          );
-          const existingPrompts = new Set(
-            (snapshot?.questions || [])
-              .map((item) => item.content?.prompt?.trim())
-              .filter(Boolean),
-          );
-          const toImport = source.filter(
-            (q) =>
-              !existingIds.has(q.id) && !existingPrompts.has(q.prompt?.trim()),
-          );
+          await load();
+          const toImport = [];
+          for (const q of source) {
+            const key = await questionImportKey(action, q);
+            if (!findImportedQuestion(snapshot.questions, key, q))
+              toImport.push({ q, key });
+          }
 
           if (!toImport.length) {
             applyRoleNavigation("questions");
@@ -1148,9 +1146,38 @@ export function createOnline({
           }
 
           let importedCount = 0;
-          for (const q of toImport) {
-            await request("question", { content: q });
-            importedCount++;
+          const showImportProgress = () => {
+            message = `Đang nhập câu hỏi: ${importedCount}/${toImport.length}. Các câu đã lưu được giữ lại nếu kết nối gián đoạn.`;
+            const status =
+              typeof document !== "undefined"
+                ? document.getElementById?.("online-message")
+                : null;
+            if (status) {
+              status.textContent = message;
+              status.hidden = false;
+              status.className = "tip-box online-status-banner";
+            }
+          };
+          showImportProgress();
+          try {
+            for (const { q, key } of toImport) {
+              const result = await request("question", {
+                content: q,
+                import_key: key,
+              });
+              // Retain confirmed progress if the following request loses its response.
+              snapshot.questions.push({
+                id: result.data.id,
+                content: q,
+                source_key: key,
+              });
+              importedCount++;
+              if (importedCount % 10 === 0) showImportProgress();
+            }
+          } catch (error) {
+            if (signedIn)
+              error.message += ` Đã xác nhận ${importedCount} câu trong lượt này. Bấm nhập lại để tiếp tục; câu đã lưu sẽ không bị tạo trùng.`;
+            throw error;
           }
           await load();
           applyRoleNavigation("questions");

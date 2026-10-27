@@ -20,6 +20,8 @@ create table if not exists hieu_private.questions (
  content jsonb not null, updated_at timestamptz default now()
 );
 create index if not exists question_teacher on hieu_private.questions(teacher_id);
+alter table hieu_private.questions add column if not exists source_key text;
+create unique index if not exists question_source_teacher on hieu_private.questions(teacher_id,source_key);
 create table if not exists hieu_private.assignments (
  id uuid primary key default gen_random_uuid(), teacher_id uuid not null references hieu_private.profiles(id),
  title text not null, instructions text not null default '', due timestamptz,
@@ -47,7 +49,7 @@ declare
  uid uuid := auth.uid(); me hieu_private.profiles; a hieu_private.assignments;
  s hieu_private.submissions; q jsonb; qs jsonb := '[]'; answers jsonb := '[]';
  item jsonb; response jsonb; n integer; points numeric := 0; pending_count integer := 0;
- ident uuid; teacher uuid; mark numeric; result jsonb; ids jsonb;
+ ident uuid; teacher uuid; mark numeric; result jsonb; ids jsonb; import_key text;
 begin
  if uid is null then raise exception 'Bạn cần đăng nhập.' using errcode='42501'; end if;
  if payload is null or jsonb_typeof(payload) <> 'object' or length(payload::text)>200000 then raise exception 'Dữ liệu không hợp lệ.'; end if;
@@ -62,7 +64,7 @@ begin
  if me.id is null then raise exception 'Hãy hoàn tất hồ sơ trước.'; end if;
  if action='load' then
    select jsonb_build_object('profile',to_jsonb(me),
-    'questions',coalesce((select jsonb_agg(jsonb_build_object('id',x.id,'content',x.content) order by x.updated_at desc) from hieu_private.questions x where x.teacher_id=uid),'[]'::jsonb),
+    'questions',coalesce((select jsonb_agg(jsonb_build_object('id',x.id,'content',x.content,'source_key',x.source_key) order by x.updated_at desc) from hieu_private.questions x where x.teacher_id=uid),'[]'::jsonb),
     'members',coalesce((select jsonb_agg(jsonb_build_object('name',p.name,'id',p.id,'code',p.code)) from hieu_private.memberships m join hieu_private.profiles p on p.id=case when me.role='teacher' then m.student_id else m.teacher_id end where (me.role='teacher' and m.teacher_id=uid) or (me.role='student' and m.student_id=uid)),'[]'::jsonb),
     'assignments',coalesce((select jsonb_agg(jsonb_build_object('id',x.id,'teacher_id',x.teacher_id,'title',x.title,'instructions',x.instructions,'due',x.due,'created_at',x.created_at,'questions',case when x.teacher_id=uid then x.questions else (select jsonb_agg(v - 'answer' - 'explanation' order by ord) from jsonb_array_elements(x.questions) with ordinality as j(v,ord)) end) order by x.created_at desc) from hieu_private.assignments x where x.teacher_id=uid or exists(select 1 from hieu_private.memberships m where m.teacher_id=x.teacher_id and m.student_id=uid)),'[]'::jsonb),
     'submissions',coalesce((select jsonb_agg(to_jsonb(x)||jsonb_build_object('student_name',p.name,'title',y.title) order by x.created_at desc) from hieu_private.submissions x join hieu_private.assignments y on y.id=x.assignment_id join hieu_private.profiles p on p.id=x.student_id where x.student_id=uid or y.teacher_id=uid),'[]'::jsonb)
@@ -88,8 +90,22 @@ begin
      end if;
    end if;
    if nullif(payload->>'id','') is null then
+     import_key:=nullif(payload->>'import_key','');
+     if import_key is not null and import_key !~ '^(samples|local):[A-Za-z0-9_.:%-]{1,180}$' then raise exception 'Mã nguồn câu hỏi không hợp lệ.'; end if;
+     -- Serialize creation per teacher, including retries and requests from other tabs.
+     perform 1 from hieu_private.profiles where id=uid for update;
+     if import_key is not null then
+       select id into ident from hieu_private.questions where teacher_id=uid and source_key=import_key;
+       if ident is not null then return jsonb_build_object('id',ident,'created',false); end if;
+       -- Adopt an exact legacy import without overwriting its edits or approval.
+       select id into ident from hieu_private.questions where teacher_id=uid and source_key is null and nullif(q->>'id','') is not null and content->>'id'=q->>'id' and content->>'type'=q->>'type' and content->>'prompt'=q->>'prompt' and coalesce(content->'options','[]'::jsonb)=coalesce(q->'options','[]'::jsonb) order by updated_at,id limit 1;
+       if ident is not null then
+         update hieu_private.questions set source_key=import_key where id=ident;
+         return jsonb_build_object('id',ident,'created',false);
+       end if;
+     end if;
      if (select count(*) from hieu_private.questions where teacher_id=uid)>=500 then raise exception 'Kho câu hỏi đã đạt 500 câu.'; end if;
-     insert into hieu_private.questions(teacher_id,content) values(uid,q) returning id into ident;
+     insert into hieu_private.questions(teacher_id,content,source_key) values(uid,q,import_key) returning id into ident;
    else
      update hieu_private.questions set content=q,updated_at=now() where id=(payload->>'id')::uuid and teacher_id=uid returning id into ident;
      if ident is null then raise exception 'Không tìm thấy câu hỏi của bạn.' using errcode='42501'; end if;

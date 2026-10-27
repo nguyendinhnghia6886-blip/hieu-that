@@ -463,7 +463,7 @@ export const questionBank = [
   {
     id: "q_sys_4",
     lessonId: "system-inequalities",
-    prompt: "Trong bài toán quy hoạch tuyến tính tối ưu, giá trị lớn nhất và nhỏ nhất của hàm mục tiêu F(x; y) = ax + by luôn đạt được tại vị trí nào?",
+    prompt: "Miền nghiệm là một đa giác lồi kín, bị chặn và khác rỗng. Giá trị lớn nhất và nhỏ nhất của hàm mục tiêu F(x; y) = ax + by đạt được tại vị trí nào?",
     options: [
       "Tại một trong các đỉnh của miền đa giác nghiệm",
       "Tại tâm đối xứng của miền đa giác nghiệm",

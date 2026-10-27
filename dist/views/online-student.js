@@ -177,7 +177,9 @@ export function studentOverview(ctx) {
                 ${icon("check")}
                 <h3>${
                   assignments.length
-                    ? "Bạn đã xử lý hết các bài được giao"
+                    ? expiredUnsubmitted.length
+                      ? "Không còn bài trong hạn · Có bài quá hạn chưa nộp"
+                      : "Bạn đã xử lý hết các bài được giao"
                     : "Chưa có bài được giao mới"
                 }</h3>
                 <p>${
