@@ -351,20 +351,26 @@ export function createOnline({
 
   function authView() {
     const signup = authMode === "signup",
-      recover = authMode === "recover";
+      recover = authMode === "recover",
+      resend = authMode === "resend",
+      emailOnly = recover || resend;
     return `<section class="card online-auth">
       <span class="eyebrow">TÀI KHOẢN HIỂU THẬT</span>
       <h2>${
-        recover
-          ? "Lấy lại mật khẩu"
-          : signup
-            ? "Tạo tài khoản mới"
-            : "Đăng nhập vào không gian của bạn"
+        resend
+          ? "Gửi lại email xác nhận"
+          : recover
+            ? "Lấy lại mật khẩu"
+            : signup
+              ? "Tạo tài khoản mới"
+              : "Đăng nhập vào không gian của bạn"
       }</h2>
       <p class="muted">${
-        recover
-          ? "Nhập địa chỉ email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu."
-          : "Sau khi đăng nhập, hệ thống tự động mở đúng giao diện Học sinh hoặc Giáo viên theo hồ sơ của bạn."
+        resend
+          ? "Nhập email đã đăng ký nhưng chưa xác nhận. Nếu đã xác nhận mà quên mật khẩu, hãy chọn Quên mật khẩu."
+          : recover
+            ? "Nhập địa chỉ email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu."
+            : "Sau khi đăng nhập, hệ thống tự động mở đúng giao diện Học sinh hoặc Giáo viên theo hồ sơ của bạn."
       }</p>
       <form data-online-form="${authMode}">
         ${field(
@@ -372,7 +378,7 @@ export function createOnline({
           `<input name="email" data-online-auth="email" type="email" autocomplete="email" maxlength="254" value="${esc(authEmailDraft)}" required placeholder="ten@email.com">`,
         )}
         ${
-          recover
+          emailOnly
             ? ""
             : field(
                 "Mật khẩu",
@@ -381,24 +387,29 @@ export function createOnline({
                 }" minlength="8" maxlength="128" required placeholder="Từ 8 ký tự trở lên"><small class="muted">Mật khẩu cần từ 8 đến 128 ký tự.</small>`,
               )
         }
+        ${signup ? field("Nhập lại mật khẩu", '<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Nhập lại cùng mật khẩu">') : ""}
+        ${emailOnly ? "" : '<label class="assignment-pick"><input type="checkbox" data-online-auth="show-password"><span>Hiện mật khẩu</span></label>'}
         <button type="submit" class="button primary" ${busy ? "disabled" : ""}>${
           busy
             ? "Đang xử lý…"
-            : recover
-              ? "Gửi hướng dẫn đặt lại mật khẩu"
-              : signup
-                ? "Đăng ký tài khoản"
-                : "Đăng nhập"
+            : resend
+              ? "Gửi lại thư xác nhận"
+              : recover
+                ? "Gửi hướng dẫn đặt lại mật khẩu"
+                : signup
+                  ? "Đăng ký tài khoản"
+                  : "Đăng nhập"
         }</button>
       </form>
       <div class="online-actions">
         ${button(
-          signup || recover
+          signup || emailOnly
             ? "Đã có tài khoản? Đăng nhập"
             : "Chưa có tài khoản? Tạo tài khoản mới",
-          signup || recover ? "login-mode" : "signup-mode",
+          signup || emailOnly ? "login-mode" : "signup-mode",
         )}
         ${recover ? "" : button("Quên mật khẩu", "recover-mode", "", "ghost")}
+        ${resend ? "" : button("Gửi lại email xác nhận", "resend-mode", "", "ghost")}
       </div>
       <div class="online-auth-footer">
         <p class="small-text muted">Tài khoản mới chỉ cần chọn vai trò Học sinh hoặc Giáo viên ở lần đăng nhập đầu tiên. Đăng nhập Google, Facebook và SMS hiện chưa được kết nối.</p>
@@ -777,6 +788,17 @@ export function createOnline({
   function handleChange(e) {
     const target = e.target;
     if (!target) return;
+    if (target.dataset?.onlineAuth === "show-password") {
+      target
+        .closest?.("form")
+        ?.querySelectorAll(
+          'input[name="password"], input[name="confirmPassword"]',
+        )
+        .forEach((input) => {
+          input.type = target.checked ? "text" : "password";
+        });
+      return;
+    }
     if (target.id === "online-ocr-file" || target.id === "online-ocr-camera") {
       readOCRFile(target.files?.[0]);
       target.value = "";
@@ -809,8 +831,10 @@ export function createOnline({
       action = form.dataset.onlineForm;
 
     return perform(async () => {
-      if (["login", "signup", "recover"].includes(action)) {
+      if (["login", "signup", "recover", "resend"].includes(action)) {
         authEmailDraft = String(values.email || "").trim();
+        if (action === "signup" && values.password !== values.confirmPassword)
+          throw new Error("Hai lần nhập mật khẩu chưa khớp.");
         if (action === "login" || action === "signup") {
           clearSessionState({ keepDrafts: action === "login" });
           authEmailDraft = String(values.email || "").trim();

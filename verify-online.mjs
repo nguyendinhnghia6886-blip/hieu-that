@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import handler, { allowedOrigin } from "./api/learning.js";
+import handler, {
+  allowedOrigin,
+  createLearningHandler,
+} from "./api/learning.js";
+import { authFailure } from "./server/auth-errors.js";
 import { lessons, questionBank } from "./dist/learning.js";
 import { createOnline, resolveScreenForRole } from "./dist/online.js";
 import {
@@ -24,6 +28,176 @@ import {
   teacherSubmissionDetailView,
   teacherStudentsView,
 } from "./dist/views/online-teacher.js";
+
+test("auth errors distinguish wrong credentials, email confirmation, delivery and signup failures without leaking internals", () => {
+  assert.equal(
+    authFailure({ code: "invalid_credentials" }, "login").status,
+    401,
+  );
+  assert.match(
+    authFailure({ code: "email_not_confirmed" }, "login").error,
+    /Gửi lại email xác nhận/,
+  );
+  assert.match(
+    authFailure({ code: "user_already_exists" }, "signup").error,
+    /không thay đổi mật khẩu/,
+  );
+  assert.equal(
+    authFailure({ code: "over_email_send_rate_limit" }, "recover").status,
+    429,
+  );
+  assert.equal(
+    authFailure(
+      { message: "Error sending confirmation email: private SMTP details" },
+      "signup",
+    ).code,
+    "email_delivery_failed",
+  );
+  const unknown = authFailure(
+    { code: "internal_failure", message: "private SMTP password" },
+    "signup",
+  );
+  assert.match(unknown.error, /tạo tài khoản/);
+  assert.doesNotMatch(unknown.error, /private|password|đăng nhập/);
+});
+
+test("auth API uses the correct SDK flow, normalized email, confirmation validation and safe recovery messages", async (t) => {
+  const previous = {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
+  };
+  process.env.SUPABASE_URL = "https://test.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "test-key";
+  t.after(() => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  const calls = [];
+  const route = createLearningHandler(() => ({
+    auth: {
+      signInWithPassword: async (args) => {
+        calls.push(["login", args]);
+        return {
+          error: { code: "invalid_credentials", message: "do not leak" },
+        };
+      },
+      signUp: async (args) => {
+        calls.push(["signup", args]);
+        return { data: { session: null } };
+      },
+      resend: async (args) => {
+        calls.push(["resend", args]);
+        return {};
+      },
+      resetPasswordForEmail: async (...args) => {
+        calls.push(["recover", ...args]);
+        return {};
+      },
+    },
+  }));
+  async function request(action, payload) {
+    const response = {
+      headers: {},
+      setHeader(k, v) {
+        this.headers[k] = v;
+      },
+      end(body) {
+        this.body = JSON.parse(body);
+      },
+    };
+    await route(
+      {
+        method: "POST",
+        headers: {
+          host: "hieu-that.vercel.app",
+          origin: "https://hieu-that.vercel.app",
+          "content-type": "application/json",
+        },
+        body: { action, payload },
+      },
+      response,
+    );
+    return response;
+  }
+  const login = await request("login", {
+    email: "  TEST@example.com  ",
+    password: " a password ",
+  });
+  assert.equal(login.statusCode, 401);
+  assert.equal(calls[0][1].email, "test@example.com");
+  assert.equal(
+    calls[0][1].password,
+    " a password ",
+    "password must not be trimmed",
+  );
+  assert.equal(login.body.code, "invalid_credentials");
+  assert.equal(login.headers["Set-Cookie"], undefined);
+  assert.doesNotMatch(
+    JSON.stringify(login.body),
+    /do not leak|TEST@example|a password/,
+  );
+  const mismatch = await request("signup", {
+    email: "test@example.com",
+    password: "password-a",
+    confirmPassword: "password-b",
+  });
+  assert.equal(mismatch.body.code, "password_mismatch");
+  assert.equal(calls.length, 1);
+  const signup = await request("signup", {
+    email: "test@example.com",
+    password: "password-a",
+    confirmPassword: "password-a",
+  });
+  assert.equal(signup.body.signedIn, false);
+  assert.match(signup.body.message, /không đổi mật khẩu cũ/);
+  await request("resend", { email: "test@example.com" });
+  assert.deepEqual(calls.at(-1), [
+    "resend",
+    {
+      type: "signup",
+      email: "test@example.com",
+      options: { emailRedirectTo: "https://hieu-that.vercel.app/?online=1" },
+    },
+  ]);
+  const recover = await request("recover", { email: "test@example.com" });
+  assert.equal(calls.at(-1)[0], "recover");
+  assert.match(recover.body.message, /Nếu email có tài khoản/);
+});
+
+test("signup checks repeated password before sending, and confirmation resend needs email only", async () => {
+  const sent = [];
+  const online = createOnline({
+    state: {},
+    render() {},
+    toast() {},
+    fetchImpl: async (_url, opts) => {
+      sent.push(JSON.parse(opts.body));
+      return {
+        ok: true,
+        json: async () => ({
+          message: "Nếu tài khoản đang chờ xác nhận, thư sẽ được gửi.",
+        }),
+      };
+    },
+  });
+  const submit = (mode, values) =>
+    online.handleSubmit({
+      target: { closest: () => ({ dataset: { onlineForm: mode }, values }) },
+      preventDefault() {},
+    });
+  await submit("signup", {
+    email: "test@example.com",
+    password: "password-a",
+    confirmPassword: "password-b",
+  });
+  assert.equal(sent.length, 0);
+  assert.match(online.currentMessage(), /chưa khớp/);
+  await submit("resend", { email: "test@example.com" });
+  assert.equal(sent[0].action, "resend");
+  assert.deepEqual(sent[0].payload, { email: "test@example.com" });
+});
 
 test("signed-out session probing keeps public self-study open, while explicit online entry shows login", async (t) => {
   const previous = Object.getOwnPropertyDescriptor(globalThis, "location");
