@@ -1,5 +1,10 @@
+import {
+  sectionQuestion,
+  createReaderController,
+} from "./dist/ui/lesson-reader.js";
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { readFile } from "node:fs/promises";
 import { lessons, questionBank } from "./dist/learning.js";
 import { createStudentViews } from "./dist/views/student.js";
 import { createPracticeViews } from "./dist/views/practice.js";
@@ -16,6 +21,28 @@ import {
   renderLab,
 } from "./dist/ui/lesson-labs.js";
 
+test("application removes the chatbot entry point and keeps ordinary practice hints", async () => {
+  const html = await readFile(
+    new URL("./dist/index.html", import.meta.url),
+    "utf8",
+  );
+  const app = await readFile(new URL("./dist/app.js", import.meta.url), "utf8");
+  assert.doesNotMatch(html, /companion-root|companion\.css/);
+  assert.doesNotMatch(app, /createCompanion|createOllamaClient/);
+  const ctx = context();
+  ctx.state.support = "hints";
+  ctx.practice = {
+    lessonId: "values",
+    phase: "base",
+    selected: null,
+    submitted: false,
+    reflection: "",
+  };
+  const view = createPracticeViews(() => ctx).practiceView();
+  assert.match(view, /data-hint="0"/);
+  assert.doesNotMatch(view, /chat-form|chat-message|Hỏi đáp|Bạn Hiểu/);
+});
+
 test("every slide has its own explanation path and safe interactive example", () => {
   for (const lesson of lessons) {
     assert.equal(slideGuides[lesson.id].length, lesson.slides.length);
@@ -27,8 +54,7 @@ test("every slide has its own explanation path and safe interactive example", ()
       const html = lessonLab(lesson, i);
       assert.match(html, /Sơ đồ giải thích slide/);
       assert.doesNotMatch(html, /undefined|NaN/);
-      if (lesson.id === "propositions")
-        assert.doesNotMatch(html, /Venn|A ∩ B/);
+      if (lesson.id === "propositions") assert.doesNotMatch(html, /Venn|A ∩ B/);
     }
   }
 });
@@ -150,24 +176,38 @@ function context() {
   };
 }
 
-test("student views render every slide with current angle after switching lessons", () => {
+test("lesson reader renders all sections together without slide navigation or duplicate IDs", () => {
   const ctx = context(),
     views = createStudentViews(() => ctx);
   assert.match(views.home(), /Lộ trình học tập/);
   assert.match(
     views.lessonView(),
-    new RegExp(`${lessons.flatMap((l) => l.slides).length} slide`),
+    new RegExp(`${lessons.flatMap((l) => l.slides).length} phần`),
   );
   ctx.state.activeLesson = true;
   for (const lesson of lessons) {
     ctx.state.lesson = lesson.id;
-    for (let slide = 0; slide < lesson.slides.length; slide++) {
-      ctx.state.slide = slide;
-      const html = views.lessonView();
-      assert.ok(html.includes(lesson.slides[slide].title));
-      if (["values", "signs"].includes(lesson.id))
-        assert.match(html, /góc 30 độ/);
-    }
+    const html = views.lessonView();
+    assert.equal(
+      (html.match(/data-reader-section=/g) || []).length,
+      lesson.slides.length,
+    );
+    assert.equal(
+      (html.match(/data-reader-target=/g) || []).length,
+      lesson.slides.length,
+    );
+    for (const section of lesson.slides)
+      assert.ok(html.includes(section.title));
+    const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+    assert.equal(ids.length, new Set(ids).size, lesson.id);
+    assert.doesNotMatch(
+      html,
+      /data-action="(?:goto-slide|prev-slide|next-slide|presentation)"/,
+    );
+    assert.match(html, /Luyện tập &amp; xác minh|Luyện tập & xác minh/);
+    assert.match(html, /data-section-quiz/);
+    for (const label of html.matchAll(/for="([^"]+)"/g))
+      assert.ok(ids.includes(label[1]));
   }
 });
 
@@ -286,4 +326,75 @@ test("student views and practice views filter accurately by chapter and render t
       );
     }
   }
+});
+
+test("section checks stay within the lesson and have supported answer data", () => {
+  assert.equal(sectionQuestion("propositions", 3).id, "q_prop_14");
+  assert.equal(sectionQuestion("propositions", 6).id, "q_prop_23");
+  for (const lesson of lessons)
+    for (let i = 0; i < lesson.slides.length; i++) {
+      const q = sectionQuestion(lesson.id, i);
+      assert.ok(q, `${lesson.id} section ${i}`);
+      assert.equal(q.lessonId, lesson.id);
+      assert.ok(
+        Number.isInteger(q.answer) &&
+          q.answer >= 0 &&
+          q.answer < q.options.length,
+      );
+      assert.ok(q.explanation);
+    }
+});
+
+test("reader navigation preserves prior progress and only explicit marks complete sections", () => {
+  const ctx = context();
+  ctx.state.lesson = "values";
+  ctx.data.slideProgress = {};
+  ctx.data.visited = { values: [2] };
+  const handlers = {},
+    badge = { textContent: "" },
+    btn = { textContent: "", setAttribute() {} },
+    check = { textContent: "" };
+  const doc = {
+    addEventListener: (name, fn) => (handlers[name] = fn),
+    querySelectorAll: () => [],
+    querySelector: (s) =>
+      s === "[data-reader-progress]"
+        ? badge
+        : s.startsWith("[data-reader-mark")
+          ? btn
+          : s.startsWith("[data-reader-check")
+            ? check
+            : null,
+  };
+  createReaderController({
+    ...ctx,
+    lessonFor: ctx.lessonFor,
+    persist: () => {},
+    doc,
+  });
+  assert.deepEqual(ctx.data.visited.values, [2]);
+  for (
+    let i = 0;
+    i < lessons.find((l) => l.id === "values").slides.length;
+    i++
+  ) {
+    handlers.click({
+      target: {
+        closest: (s) =>
+          s === "[data-reader-mark]"
+            ? { dataset: { readerMark: String(i) } }
+            : null,
+      },
+    });
+    if (i === 0) assert.deepEqual(ctx.data.visited.values, [2, 0]);
+  }
+  assert.deepEqual(ctx.data.completed, ["values"]);
+  assert.match(badge.textContent, /8\/8/);
+  handlers.click({
+    target: {
+      closest: (s) =>
+        s === "[data-reader-mark]" ? { dataset: { readerMark: "0" } } : null,
+    },
+  });
+  assert.equal(ctx.data.visited.values.length, 8);
 });

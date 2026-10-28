@@ -83,7 +83,7 @@ export function companionReply(context, message, turn = 0) {
           true,
         )
       : answer(
-          "Em mở một bài trong “Bài học dạng slide” hoặc bắt đầu luyện tập nhé. Mình sẽ gợi ý theo chủ đề đang xem. Khi chuyển trang, đoạn chat này vẫn được giữ lại.",
+          "Em mở một bài trong “Bài học” hoặc bắt đầu luyện tập nhé. Mình sẽ gợi ý theo chủ đề đang xem. Khi chuyển trang, đoạn chat này vẫn được giữ lại.",
         );
   }
   if (context.question) {
@@ -99,7 +99,7 @@ export function companionReply(context, message, turn = 0) {
       );
     if (context.lesson) return answer(context.lesson.slides[0].tip, true);
     return answer(
-      "Bắt đầu từ “Bài học dạng slide” để xem kiến thức, hoặc “Luyện tập & xác minh” để thử một câu. Khi mở câu hỏi, mình có thể đưa gợi ý từng bước theo bài đó.",
+      "Bắt đầu từ “Bài học” để xem kiến thức, hoặc “Luyện tập & xác minh” để thử một câu. Khi mở câu hỏi, mình có thể đưa gợi ý từng bước theo bài đó.",
     );
   }
   if (/ma giao vien|tham gia|ket noi lop/.test(text))

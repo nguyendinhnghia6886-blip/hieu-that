@@ -102,7 +102,7 @@ export function studentOverview(ctx) {
       <p class="muted">Theo dõi bài tập giáo viên giao, xem điểm số và tiếp tục lộ trình tự học Toán 10 của bạn.</p>
     </div>
     <div class="online-actions">
-      ${onlineBtn(`${icon("book")} Học bài dạng slide`, "lessons", "", "primary")}
+      ${onlineBtn(`${icon("book")} Học bài`, "lessons", "", "primary")}
       ${onlineBtn(`${icon("pen")} Luyện tập`, "practice", "", "secondary")}
     </div>
   </div>
@@ -166,10 +166,10 @@ export function studentOverview(ctx) {
           ? `<div class="empty-state">
               ${icon("users")}
               <h3>Bạn chưa kết nối với giáo viên</h3>
-              <p>Nhập mã giáo viên (dạng GV-…) để nhận bài tập, hoặc bắt đầu tự học ngay với các bài giảng slide.</p>
+              <p>Nhập mã giáo viên (dạng GV-…) để nhận bài tập, hoặc bắt đầu tự học ngay với các bài học theo từng phần.</p>
               <div class="online-actions">
                 ${onlineBtn("Nhập mã giáo viên", "teachers", "", "primary")}
-                ${onlineBtn("Học bài dạng slide", "lessons", "", "secondary")}
+                ${onlineBtn("Học bài", "lessons", "", "secondary")}
               </div>
             </div>`
           : !todoAssignments.length
@@ -313,7 +313,7 @@ export function studentAssignedView(ctx) {
           <div class="online-actions">
             ${
               snapshot.members?.length
-                ? onlineBtn("Tự học bài dạng slide", "lessons", "", "primary")
+                ? onlineBtn("Tự học bài", "lessons", "", "primary")
                 : onlineBtn("Kết nối giáo viên", "teachers", "", "primary")
             }
           </div>
@@ -556,18 +556,18 @@ export function studentGradesView(ctx) {
         <p class="muted">Lưu cục bộ trên trình duyệt hiện tại · Chưa đồng bộ giữa các thiết bị</p>
       </div>
       <div class="online-actions">
-        ${onlineBtn("Học bài slide", "lessons", "", "secondary small")}
+        ${onlineBtn("Học bài", "lessons", "", "secondary small")}
         ${onlineBtn("Tự luyện tập", "practice", "", "primary small")}
       </div>
     </div>
     <div class="tip-box">
       ${icon("shield")}
-      <p>Tiến độ xem slide và các phiên tự luyện tập dưới đây được lưu riêng trên trình duyệt của thiết bị này, tách biệt với điểm bài giao trực tuyến ở trên.</p>
+      <p>Tiến độ đọc các phần bài học và các phiên tự luyện tập dưới đây được lưu riêng trên trình duyệt của thiết bị này, tách biệt với điểm bài giao trực tuyến ở trên.</p>
     </div>
     <div class="metric-grid online-metrics">
       <div class="metric-card card">
         <span class="metric-value">${localProgress.completedCount}/${localProgress.totalLessons}</span>
-        <span>Chủ đề đã xem hết slide trên máy này</span>
+        <span>Chủ đề đã học hết các phần trên máy này</span>
       </div>
       <div class="metric-card card">
         <span class="metric-value">${localProgress.sessionCount}</span>
@@ -705,7 +705,7 @@ export function studentTeachersView(ctx) {
           ? `<div class="empty-state">
               ${icon("users")}
               <h3>Chưa kết nối giáo viên nào</h3>
-              <p>Khi chưa có mã giáo viên, bạn vẫn tự học các bài giảng slide và luyện tập bình thường. Bạn có thể bổ sung mã bất cứ lúc nào.</p>
+              <p>Khi chưa có mã giáo viên, bạn vẫn tự học các bài học theo từng phần và luyện tập bình thường. Bạn có thể bổ sung mã bất cứ lúc nào.</p>
             </div>`
           : `<div class="online-list">${members
               .map((m) => {

@@ -88,7 +88,7 @@ test("slide hints use the selected slide while the home page asks the student to
     "Gợi ý bước đầu",
   );
   assert.equal(home.learningHelp, false);
-  assert.match(home.text, /Bài học dạng slide/);
+  assert.match(home.text, /Bắt đầu từ “Bài học”/);
 });
 
 test("question hints advance to the final available hint without exposing an unrelated explanation", () => {

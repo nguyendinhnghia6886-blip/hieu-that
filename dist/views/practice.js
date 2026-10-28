@@ -1,5 +1,10 @@
 import { knowledgeMap } from "../ui/knowledge-map.js";
-import { lessons, questionBank, evaluateTrueFalse, checkShortAnswer } from "../learning.js";
+import {
+  lessons,
+  questionBank,
+  evaluateTrueFalse,
+  checkShortAnswer,
+} from "../learning.js";
 import { icon } from "../ui/icons.js";
 import { button, pageHeading, dateLabel } from "../ui/helpers.js";
 import { triangleVisual, interactiveCircle, visual } from "../ui/visuals.js";
@@ -8,14 +13,8 @@ import { letters } from "../content/labels.js";
 
 export function createPracticeViews(readContext) {
   function practiceView() {
-    const {
-      state,
-      practice,
-      workspace,
-      lessonFor,
-      lessonIcon,
-      activeQuestion,
-    } = readContext();
+    const { state, practice, lessonFor, lessonIcon, activeQuestion } =
+      readContext();
 
     if (!practice) {
       const chapters = [
@@ -44,10 +43,14 @@ export function createPracticeViews(readContext) {
         )
         .join(
           "",
-        )}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons.map((l, i) => {
+        )}</select><span class="muted">${displayLessons.length} chủ đề luyện tập</span></div><div class="lesson-grid">${displayLessons
+        .map((l, i) => {
           const qCount = questionBank.filter((q) => q.lessonId === l.id).length;
           return `<article class="card practice-picker"><div class="lesson-icon tone-${i % 8}">${icon(lessonIcon(l.id))}</div><div class="lesson-meta">${esc(l.lessonNumber || `CHỦ ĐỀ ${String(i + 1).padStart(2, "0")}`)}</div><h2>${esc(l.shortTitle)}</h2><p class="muted">${esc(l.description)}</p><div class="practice-picker-meta"><span>${icon("clock")} Khoảng 20–25 phút</span><span><strong>${qCount} câu hỏi</strong> (Trắc nghiệm, Đúng/Sai, Điền số)</span></div>${button(`Bắt đầu luyện ${icon("arrow")}`, "start-practice", "primary", `data-lesson="${l.id}"`)}</article>`;
-        }).join("")}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
+        })
+        .join(
+          "",
+        )}</div><div class="learning-tip">${icon("shield")}<p>Kết quả chỉ phản ánh những câu đã kiểm tra. Nếu câu trả lời chưa nhất quán, Hiểu Thật sẽ ghi <strong>“Chưa đủ bằng chứng”</strong>.</p></div>`;
     }
 
     state.lesson = practice.lessonId;
@@ -86,7 +89,9 @@ export function createPracticeViews(readContext) {
           selected &&
           typeof selected === "object" &&
           (q.subQuestions || []).length > 0 &&
-          (q.subQuestions || []).every((sq) => typeof selected[sq.id] === "boolean")
+          (q.subQuestions || []).every(
+            (sq) => typeof selected[sq.id] === "boolean",
+          ),
         );
       }
       if (isSA) {
@@ -113,7 +118,8 @@ export function createPracticeViews(readContext) {
           .map((sq) => {
             const chosen = sel[sq.id];
             const isSubSubmitted = practice.submitted;
-            const isSubCorrect = isSubSubmitted && chosen === Boolean(sq.answer);
+            const isSubCorrect =
+              isSubSubmitted && chosen === Boolean(sq.answer);
             return `<div class="tf-item ${isSubSubmitted ? (isSubCorrect ? "tf-correct" : "tf-incorrect") : ""}">
             <div class="tf-row">
               <div class="tf-content">
@@ -177,7 +183,7 @@ export function createPracticeViews(readContext) {
     ${phase === "base" ? `<label class="reflection"><span>Cách bạn suy nghĩ <small>Không bắt buộc</small></span><textarea id="reflection" rows="2" placeholder="Mình chọn đáp án này vì…" ${practice.submitted ? "disabled" : ""}>${esc(practice.reflection)}</textarea></label>` : ""}
     ${practice.submitted ? `<div class="feedback-box ${correct ? "success" : "warning"}" role="status">${icon(correct ? "check" : "bulb")}<div><strong>${correct ? (phase === "base" && practice.confidence === "unsure" ? "Bạn đã chọn đúng dù còn phân vân — hãy xem kỹ công thức bên dưới để củng cố niềm tin nhé!" : isTF ? `Hoàn thành xuất sắc: Đạt ${tfScore?.score}/1.0 điểm!` : "Bạn đã chọn đúng.") : isTF ? `Cần xem lại một số ý: Đạt ${tfScore?.score || 0}/1.0 điểm (đúng ${tfScore?.numCorrect || 0}/4 ý)` : "Có một điểm mình cùng xem lại nhé."}</strong><p>${esc(phase === "base" && !correct && !isTF ? "Câu trả lời này chưa khớp. Mình sẽ kiểm tra thêm một bước trước khi kết luận." : q.explanation)}</p>${phase === "base" ? `<small>${correct && practice.confidence === "unsure" ? "Đừng lo nếu bước đầu còn ngập ngừng. Nắm chắc công thức gốc sẽ giúp bạn tự tin ở câu vận dụng tiếp theo." : "Một câu trả lời chưa đủ để kết luận. Cùng kiểm tra thêm ở bước tiếp theo."}</small>` : ""}</div></div>` : ""}
     <div class="practice-actions"><span>${icon("shield")} Căn cứ được lưu khi hoàn thành phiên</span>${practice.submitted ? button(`${isTransfer ? "Xem căn cứ & kết quả" : isProbe ? "Làm câu vận dụng" : isLastBase ? "Tổng hợp & Bước tiếp theo" : "Câu tiếp theo"} ${icon("arrow")}`, "next-question", "primary") : button(`Kiểm tra đáp án ${icon("arrow")}`, "submit-answer", "primary", !canSubmit ? "disabled" : "")}</div></section>
-    <aside class="support-card card"><div class="support-tabs"><button class="${state.support === "formula" ? "active" : ""}" data-action="support" data-tab="formula">${icon("book")} Sổ tay</button><button class="${state.support === "hints" ? "active" : ""}" data-action="support" data-tab="hints">${icon("sparkle")} Hỏi đáp</button></div><div class="support-content">${state.support === "formula" ? `<span class="eyebrow">NHẮC NHỚ KIẾN THỨC</span><h3>${esc(activeLessonObj.shortTitle)}</h3>${state.lesson === "cosine" ? triangleVisual() : state.lesson === "values" || state.lesson === "signs" ? interactiveCircle(state.interactiveAngle, false) : visual(activeLessonObj.slides[0].visual)}<div class="formula-block small-formula">${esc(slideFormula)}</div><p class="muted">${esc(slideTip)}</p><div class="support-note">${icon("leaf")} Hiểu từng bước, vững từng chút.</div>` : workspace.chat(q, practice)}</div></aside></div>`;
+    <aside class="support-card card"><div class="support-tabs"><button class="${state.support === "formula" ? "active" : ""}" data-action="support" data-tab="formula">${icon("book")} Sổ tay</button><button class="${state.support === "hints" ? "active" : ""}" data-action="support" data-tab="hints">${icon("bulb")} Gợi ý</button></div><div class="support-content">${state.support === "formula" ? `<span class="eyebrow">NHẮC NHỚ KIẾN THỨC</span><h3>${esc(activeLessonObj.shortTitle)}</h3>${state.lesson === "cosine" ? triangleVisual() : state.lesson === "values" || state.lesson === "signs" ? interactiveCircle(state.interactiveAngle, false) : visual(activeLessonObj.slides[0].visual)}<div class="formula-block small-formula">${esc(slideFormula)}</div><p class="muted">${esc(slideTip)}</p><div class="support-note">${icon("leaf")} Hiểu từng bước, vững từng chút.</div>` : `<span class="eyebrow">GỢI Ý THEO CÂU HỎI</span><h3>Thử từng bước nhỏ</h3><p class="muted">Mở gợi ý khi cần. Mỗi lượt mở được ghi cùng kết quả luyện tập.</p>${q.hints?.length ? q.hints.map((hint, i) => `<details class="practice-hint" data-hint="${i}"><summary>Gợi ý ${i + 1}</summary><p>${esc(hint)}</p></details>`).join("") : '<p class="muted">Câu này chưa có gợi ý riêng. Bạn có thể xem kiến thức ở tab Sổ tay.</p>'}`}</div></aside></div>`;
   }
 
   function resultView() {
@@ -194,7 +200,7 @@ export function createPracticeViews(readContext) {
     const { state, data, lessonFor } = readContext();
     const sessions = data.sessions,
       supported = sessions.filter((s) => s.status === "supported").length;
-    return `${pageHeading("NHÌN LẠI ĐỂ ĐI XA HƠN", state.role === "student" ? "Tiến bộ có căn cứ." : "Căn cứ học tập trên thiết bị.", "Mỗi nhận xét đi cùng câu trả lời, thời điểm và mức hỗ trợ đã sử dụng.", button(`${icon("download")} Xuất kết quả`, "export", "secondary small", sessions.length ? "" : "disabled"))}<div class="metric-grid"><div class="metric-card card"><span class="metric-icon">${icon("pen")}</span><span class="metric-value">${sessions.length}</span><span>Phiên học đã hoàn thành</span></div><div class="metric-card card"><span class="metric-icon">${icon("check")}</span><span class="metric-value">${supported}</span><span>Phiên có bằng chứng làm đúng</span></div><div class="metric-card card"><span class="metric-icon">${icon("book")}</span><span class="metric-value">${data.completed.length}<small> / ${lessons.length}</small></span><span>Chủ đề đã xem hết slide</span></div></div><div class="progress-layout"><section><div class="section-heading"><h2>Hành trình học tập</h2><span class="tag gray">${sessions.length ? "Dữ liệu của bạn" : "Chưa có dữ liệu"}</span></div>${
+    return `${pageHeading("NHÌN LẠI ĐỂ ĐI XA HƠN", state.role === "student" ? "Tiến bộ có căn cứ." : "Căn cứ học tập trên thiết bị.", "Mỗi nhận xét đi cùng câu trả lời, thời điểm và mức hỗ trợ đã sử dụng.", button(`${icon("download")} Xuất kết quả`, "export", "secondary small", sessions.length ? "" : "disabled"))}<div class="metric-grid"><div class="metric-card card"><span class="metric-icon">${icon("pen")}</span><span class="metric-value">${sessions.length}</span><span>Phiên học đã hoàn thành</span></div><div class="metric-card card"><span class="metric-icon">${icon("check")}</span><span class="metric-value">${supported}</span><span>Phiên có bằng chứng làm đúng</span></div><div class="metric-card card"><span class="metric-icon">${icon("book")}</span><span class="metric-value">${data.completed.length}<small> / ${lessons.length}</small></span><span>Chủ đề đã học hết các phần</span></div></div><div class="progress-layout"><section><div class="section-heading"><h2>Hành trình học tập</h2><span class="tag gray">${sessions.length ? "Dữ liệu của bạn" : "Chưa có dữ liệu"}</span></div>${
       sessions.length
         ? `<div class="evidence-list">${[...sessions]
             .reverse()

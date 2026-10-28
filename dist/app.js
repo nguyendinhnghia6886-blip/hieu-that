@@ -1,3 +1,4 @@
+import { createReaderController, namespaceVisual } from "./ui/lesson-reader.js";
 import { installLessonLabs } from "./ui/lesson-labs.js";
 import {
   lessons,
@@ -13,8 +14,6 @@ import {
   checkShortAnswer,
 } from "./learning.js";
 import { createWorkspace } from "./workspace.js";
-import { createCompanion } from "./companion.js";
-import { createOllamaClient } from "./ollama-client.js";
 import { createOnline } from "./online.js";
 import { esc } from "./ui/dom.js";
 import { icon } from "./ui/icons.js";
@@ -66,6 +65,7 @@ const data = {
   goal: [2, 3, 5, 7].includes(saved.goal) ? saved.goal : 3,
   teacherDraft: saved.teacherDraft || "",
   reducedMotion: Boolean(saved.reducedMotion),
+  companion: saved.companion, // Preserve prior data without loading the removed chatbot.
 };
 const state = {
   role: "student",
@@ -81,8 +81,8 @@ const state = {
 let practice = null;
 let toastTimer;
 let lastModalFocus;
-let companion;
 let online;
+let reader;
 function persist() {
   try {
     localStorage.setItem(storageKey, JSON.stringify(data));
@@ -96,22 +96,34 @@ function persist() {
 const lessonFor = (id) => lessons.find((l) => l.id === id) || lessons[0];
 const lessonIcon = (id) => {
   switch (id) {
-    case "propositions": return "sparkle";
-    case "sets": return "grid";
+    case "propositions":
+      return "sparkle";
+    case "sets":
+      return "grid";
     case "inequalities-2var":
-    case "system-inequalities": return "target";
+    case "system-inequalities":
+      return "target";
     case "values":
-    case "signs": return "circle";
+    case "signs":
+      return "circle";
     case "cosine":
-    case "sine-law": return "triangle";
+    case "sine-law":
+      return "triangle";
     case "vectors-intro":
-    case "scalar-product": return "arrow";
-    case "statistics": return "chart";
-    case "quadratic-functions": return "target";
-    case "analytic-geometry": return "target";
-    case "combinatorics": return "grid";
-    case "probability": return "sparkle";
-    default: return "book";
+    case "scalar-product":
+      return "arrow";
+    case "statistics":
+      return "chart";
+    case "quadratic-functions":
+      return "target";
+    case "analytic-geometry":
+      return "target";
+    case "combinatorics":
+      return "grid";
+    case "probability":
+      return "sparkle";
+    default:
+      return "book";
   }
 };
 const thisWeekSessions = () =>
@@ -157,7 +169,7 @@ function navItems() {
     ];
   return [
     ["home", "grid", "Tổng quan"],
-    ["lessons", "book", "Bài học dạng slide"],
+    ["lessons", "book", "Bài học"],
     ["practice", "pen", "Luyện tập & xác minh"],
     ["progress", "chart", "Tiến bộ của tôi"],
     ["class", "users", "Lớp học của tôi"],
@@ -184,6 +196,9 @@ function postRenderAnimations() {
   if (window.RoughNotation && !isReduced) {
     const marks = document.querySelectorAll(".notebook-pen-mark");
     marks.forEach((el) => {
+      // A long reader changes height as examples open. Inline underlines flow
+      // with text there, rather than absolute SVG annotations drifting below it.
+      if (el.closest(".lesson-reader")) return;
       try {
         const penType = el.dataset.pen || "underline";
         const ann = window.RoughNotation.annotate(el, {
@@ -206,7 +221,13 @@ function postRenderAnimations() {
       window.gsap.fromTo(
         slideContent,
         { opacity: 0.65, y: 6 },
-        { opacity: 1, y: 0, duration: 0.2, overwrite: "auto", ease: "power2.out" },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.2,
+          overwrite: "auto",
+          ease: "power2.out",
+        },
       );
     }
   }
@@ -246,7 +267,9 @@ function updateExampleStep(box, targetIdx) {
     }
   }
 
-  const activeCard = box.querySelector(`.step-card[data-step-index="${nextIdx}"]`);
+  const activeCard = box.querySelector(
+    `.step-card[data-step-index="${nextIdx}"]`,
+  );
   if (activeCard && typeof window !== "undefined" && window.gsap) {
     const isReduced =
       Boolean(data.reducedMotion) ||
@@ -384,8 +407,8 @@ function render() {
     <main id="main-content" class="page-content" tabindex="-1">${viewContent()}</main>
     <footer class="footer-note"><span>Hiểu Thật © 2026</span><span>Học theo bằng chứng. Tiến bộ theo cách của bạn.</span>${button("Về Hiểu Thật", "help", "ghost small")}</footer></div></div>`;
   document.title = `${title} · Hiểu Thật`;
-  companion?.sync();
   postRenderAnimations();
+  reader?.sync();
 }
 function viewContent() {
   if (online?.hasProfile?.()) {
@@ -425,7 +448,9 @@ function newPractice(lessonId) {
   state.presentation = false;
   state.support = "formula";
   const pool = questionBank.filter((q) => q.lessonId === state.lesson);
-  const sessionCount = data.sessions.filter((s) => s.lessonId === state.lesson).length;
+  const sessionCount = data.sessions.filter(
+    (s) => s.lessonId === state.lesson,
+  ).length;
   const queue = selectPracticeQueue(pool, sessionCount);
   practice = {
     lessonId: state.lesson,
@@ -456,7 +481,9 @@ function activeQuestion() {
   if (!practice) return null;
   if (practice.phase === "probe") return probes[practice.probeKey];
   if (practice.phase === "transfer") return practice.transfer;
-  return (practice.queue && practice.queue[practice.queueIndex]) || practice.base;
+  return (
+    (practice.queue && practice.queue[practice.queueIndex]) || practice.base
+  );
 }
 function submitAnswer() {
   if (!practice || practice.submitted || practice.selected === null) return;
@@ -482,7 +509,9 @@ function submitAnswer() {
       : String(q.answer ?? "");
   } else {
     correct = practice.selected === q.answer;
-    formattedAnswer = q.options ? q.options[practice.selected] : String(practice.selected);
+    formattedAnswer = q.options
+      ? q.options[practice.selected]
+      : String(practice.selected);
     formattedExpected = q.options ? q.options[q.answer] : String(q.answer);
   }
 
@@ -509,7 +538,8 @@ function submitAnswer() {
     practice.probeCorrect = correct;
     if (!correct) {
       const wrongBase =
-        practice.baseResults?.find((r) => !r.correct)?.question || practice.base;
+        practice.baseResults?.find((r) => !r.correct)?.question ||
+        practice.base;
       const studentName = online?.hasProfile?.()
         ? online.currentProfile?.()?.name || "Học sinh"
         : data.studentProfile?.name || "Học sinh";
@@ -553,15 +583,22 @@ function nextQuestion() {
       return;
     }
     const allResults = practice.baseResults || [];
-    const allCorrect = allResults.length > 0 && allResults.every((r) => r.correct);
+    const allCorrect =
+      allResults.length > 0 && allResults.every((r) => r.correct);
     practice.baseCorrect = allCorrect;
     const wrongEntry = allResults.find((r) => !r.correct);
     if (wrongEntry) {
-      practice.probeKey = getVerificationProbe(wrongEntry.question, wrongEntry.selected);
+      practice.probeKey = getVerificationProbe(
+        wrongEntry.question,
+        wrongEntry.selected,
+      );
     } else {
       const lastEntry = allResults[allResults.length - 1];
       if (lastEntry) {
-        practice.probeKey = getVerificationProbe(lastEntry.question, lastEntry.selected);
+        practice.probeKey = getVerificationProbe(
+          lastEntry.question,
+          lastEntry.selected,
+        );
       }
     }
     if (!probes[practice.probeKey]) practice.probeKey = null;
@@ -632,25 +669,14 @@ function openModal(title, body, footer = "") {
   $("#modal-root").innerHTML =
     `<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close-modal" aria-label="Đóng">${icon("close")}</button></div><div class="modal-body">${body}</div>${footer ? `<div class="modal-footer">${footer}</div>` : ""}</section></div>`;
   document.body.classList.add("modal-open");
-  companion?.sync();
   $(".modal button, .modal input, .modal textarea")?.focus();
 }
 function closeModal() {
   $("#modal-root").innerHTML = "";
   document.body.classList.remove("modal-open");
-  companion?.sync();
   if (lastModalFocus?.isConnected) lastModalFocus.focus();
 }
-function markSlideVisited() {
-  const id = state.lesson;
-  data.visited[id] = [...new Set([...(data.visited[id] || []), state.slide])];
-  if (
-    data.visited[id].length === lessonFor(id).slides.length &&
-    !data.completed.includes(id)
-  )
-    data.completed.push(id);
-  persist();
-}
+
 function openLesson(id) {
   state.lesson = id;
   state.view = "lessons";
@@ -661,24 +687,21 @@ function openLesson(id) {
   );
   state.interactiveAngle = defaultSlideAngle(state.lesson, state.slide);
   state.mobile = false;
-  markSlideVisited();
   if (online?.hasProfile?.() && online.role() === "student") {
     online.navigate("lessons");
   } else {
     render();
   }
   window.scrollTo({ top: 0 });
+  const resume = state.slide;
+  if (resume > 0) requestAnimationFrame(() => reader?.jump(resume));
 }
 function moveSlide(n) {
-  state.slide = Math.max(
-    0,
-    Math.min(n, lessonFor(state.lesson).slides.length - 1),
+  reader?.jump(
+    Math.max(0, Math.min(n, lessonFor(state.lesson).slides.length - 1)),
   );
-  state.interactiveAngle = defaultSlideAngle(state.lesson, state.slide);
-  data.slideProgress[state.lesson] = state.slide;
-  markSlideVisited();
-  render();
 }
+
 function exportData() {
   const blob = new Blob(
     [
@@ -786,53 +809,13 @@ const workspace = createWorkspace({
   getPractice: () => practice,
   activeQuestion,
 });
-companion = createCompanion({
-  data,
-  saved,
-  persist,
-  esc,
-  ai: createOllamaClient(),
-  getPractice: () => practice,
-  getContext: () => {
-    const hasOnline = online?.hasProfile?.() || false;
-    const activeRole = hasOnline ? online.role() : state.role;
-    const currentView =
-      hasOnline && online.role() === "student"
-        ? online.currentScreen() === "task"
-          ? "task"
-          : online.currentScreen()
-        : state.view;
-    const learning = currentView === "lessons" && state.activeLesson;
-    const practicing =
-      currentView === "practice" && practice && practice.phase !== "result";
-    const lesson = learning || practicing ? lessonFor(state.lesson) : null;
-    const page = hasOnline
-      ? online.screenTitle()
-      : navItems().find((i) => i[0] === state.view)?.[2] ||
-        {
-          editor: "Soạn câu hỏi",
-          import: "Nhập đề bài",
-          assign: "Giao bài",
-          task: "Bài được giao",
-          account: "Tài khoản",
-          connections: "Kết nối dịch vụ",
-          settings: "Cài đặt",
-        }[state.view] ||
-        "Hiểu Thật";
-    return {
-      role: activeRole,
-      view: currentView,
-      lesson,
-      slide: learning ? lesson.slides[state.slide] : null,
-      question: practicing ? activeQuestion() : null,
-      label: lesson
-        ? `${lesson.shortTitle}${learning ? " · Slide " + (state.slide + 1) : " · " + { base: "Làm bài", probe: "Xác minh", transfer: "Vận dụng" }[practice.phase]}`
-        : page,
-      obscured: state.mobile || document.body.classList.contains("modal-open"),
-    };
-  },
-});
 
+reader = createReaderController({
+  state,
+  data,
+  lessonFor,
+  persist,
+});
 installLessonLabs();
 
 document.addEventListener("click", async (event) => {
@@ -936,7 +919,6 @@ document.addEventListener("click", async (event) => {
     state.presentation = !state.presentation;
     render();
   } else if (action === "finish-lesson") {
-    markSlideVisited();
     newPractice(state.lesson);
     if (online?.hasProfile?.() && online.role() === "student") {
       online.navigate("practice");
@@ -991,7 +973,7 @@ document.addEventListener("click", async (event) => {
   } else if (action === "help")
     openModal(
       "Hiểu Thật — Học để hiểu",
-      `<div class="about-logo">${icon("book")}</div><p><strong>Hiểu Thật</strong> giúp bạn tìm ra điều mình đang hiểu và điều cần luyện thêm, qua bài học trực quan và những câu hỏi xác minh ngắn.</p><ol class="about-steps"><li>Khám phá 3 chủ đề Toán 10 qua 15 slide.</li><li>Làm bài, giải thích cách nghĩ và trả lời câu xác minh.</li><li>Vận dụng vào câu khác rồi xem căn cứ học tập.</li></ol><div class="demo-notice">Đây là bản trải nghiệm hoạt động trên trình duyệt. Nội dung và phản hồi dùng quy tắc soạn sẵn, chưa kết nối AI. Có thể soạn câu hỏi, đọc chữ từ ảnh, giao bài và nhận xét bài nộp trên thiết bị. Vai trò, hồ sơ và lớp học là mô phỏng; đăng nhập trực tuyến và đồng bộ nhiều thiết bị chưa được kết nối. Giáo viên cần rà soát nội dung trước khi sử dụng chính thức.</div>`,
+      `<div class="about-logo">${icon("book")}</div><p><strong>Hiểu Thật</strong> giúp bạn tìm ra điều mình đang hiểu và điều cần luyện thêm, qua bài học trực quan và những câu hỏi xác minh ngắn.</p><ol class="about-steps"><li>Khám phá các chủ đề Toán 10 theo từng phần bài học.</li><li>Làm bài, giải thích cách nghĩ và trả lời câu xác minh.</li><li>Vận dụng vào câu khác rồi xem căn cứ học tập.</li></ol><div class="demo-notice">Đây là bản trải nghiệm hoạt động trên trình duyệt. Nội dung và phản hồi dùng quy tắc soạn sẵn, chưa kết nối AI. Có thể soạn câu hỏi, đọc chữ từ ảnh, giao bài và nhận xét bài nộp trên thiết bị. Vai trò, hồ sơ và lớp học là mô phỏng; đăng nhập trực tuyến và đồng bộ nhiều thiết bị chưa được kết nối. Giáo viên cần rà soát nội dung trước khi sử dụng chính thức.</div>`,
     );
   else if (action === "notifications")
     openModal(
@@ -1061,7 +1043,7 @@ document.addEventListener("click", async (event) => {
   else if (action === "reset-confirm")
     openModal(
       "Xóa dữ liệu trải nghiệm?",
-      `<p>Thao tác này xóa ${data.sessions.length} phiên học, tiến độ slide, hồ sơ, câu hỏi, bản nháp, ảnh đang chọn, nhận xét, bài giao và cuộc trò chuyện với Bạn Hiểu đang lưu trên trình duyệt này. Bạn có thể xuất kết quả trước khi xóa.</p>`,
+      `<p>Thao tác này xóa ${data.sessions.length} phiên học, tiến độ các phần bài học, hồ sơ, câu hỏi, bản nháp, ảnh đang chọn, nhận xét, bài giao đang lưu trên trình duyệt này. Bạn có thể xuất kết quả trước khi xóa.</p>`,
       `${button("Giữ lại dữ liệu", "close-modal", "secondary")}${button("Xóa dữ liệu", "reset", "danger-button")}`,
     );
   else if (action === "reset") {
@@ -1081,7 +1063,7 @@ document.addEventListener("click", async (event) => {
       teacherDraft: "",
     });
     practice = null;
-    companion.reset();
+    delete data.companion;
     persist();
     closeModal();
     render();
@@ -1091,25 +1073,28 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("input", (e) => {
   if (e.target.id === "short-answer-input" && practice) {
     practice.selected = e.target.value;
-    const submitBtn = document.querySelector('button[data-action="submit-answer"]');
+    const submitBtn = document.querySelector(
+      'button[data-action="submit-answer"]',
+    );
     if (submitBtn) {
       submitBtn.disabled = !e.target.value.trim();
     }
   }
   if (e.target.id === "reflection" && practice)
     practice.reflection = e.target.value;
-  if (e.target.id === "angle-slider") {
+  if (e.target.id === "angle-slider" || e.target.id.endsWith("-angle-slider")) {
     const angle = Number(e.target.value);
     state.interactiveAngle = angle;
-    const root = $("#interactive-circle-root");
+    const root = e.target.closest(".interactive-circle-wrap, .signs-visual");
     if (root) {
       const slot = $(".circle-svg-slot", root);
-      if (slot) slot.innerHTML = circleVisual(angle);
-      const lbl = $('label[for="angle-slider"]', root);
+      if (slot)
+        slot.innerHTML = namespaceVisual(circleVisual(angle), e.target.id);
+      const lbl = $("label", root);
       if (lbl) lbl.innerHTML = `Kéo để thử góc α: <strong>${angle}°</strong>`;
       const ro = $(".angle-readout", root);
       if (ro) ro.innerHTML = angleReadoutHTML(angle);
-      const cap = $("#signs-caption", root);
+      const cap = $("[id$=signs-caption]", root);
       if (cap)
         cap.textContent =
           angle > 0 && angle < 90
@@ -1168,27 +1153,17 @@ document.addEventListener("keydown", (e) => {
     }
     return;
   }
-  if (e.key === "Escape") {
+  if (e.key === "Escape" && (state.presentation || state.mobile)) {
     state.presentation = false;
     state.mobile = false;
     render();
     return;
   }
   if (
-    e.target.closest("[data-lesson-lab], .knowledge-map, #companion-root") ||
+    e.target.closest("[data-lesson-lab], .knowledge-map") ||
     ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)
   )
     return;
-  if (state.view === "lessons" && state.activeLesson) {
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      moveSlide(state.slide + 1);
-    }
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      moveSlide(state.slide - 1);
-    }
-  }
 });
 online = createOnline({
   state,

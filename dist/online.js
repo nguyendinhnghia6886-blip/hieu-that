@@ -65,7 +65,7 @@ export const TEACHER_SCREENS = [
 const SCREEN_TITLES = {
   student: {
     overview: "Tổng quan học tập",
-    lessons: "Bài học dạng slide",
+    lessons: "Bài học",
     practice: "Luyện tập & xác minh",
     assigned: "Bài được giao",
     task: "Làm bài được giao",
